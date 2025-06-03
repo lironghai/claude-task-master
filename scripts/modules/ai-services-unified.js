@@ -41,6 +41,7 @@ import {
 	AzureProvider,
 	VertexAIProvider
 } from '../../src/ai-providers/index.js';
+import * as difyagent from '../../src/ai-providers/difyAgent.js';
 
 // Create provider instances
 const PROVIDERS = {
@@ -172,7 +173,8 @@ function _resolveApiKey(providerName, session, projectRoot = null) {
 		xai: 'XAI_API_KEY',
 		ollama: 'OLLAMA_API_KEY',
 		bedrock: 'AWS_ACCESS_KEY_ID',
-		vertex: 'GOOGLE_API_KEY'
+		vertex: 'GOOGLE_API_KEY',
+        difyagent: 'DIFY_AGENT_API_KEY'
 	};
 
 	const envVarName = keyMap[providerName];

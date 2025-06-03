@@ -87,6 +87,8 @@ import {
 	TASK_STATUS_OPTIONS
 } from '../../src/constants/task-status.js';
 import { getTaskMasterVersion } from '../../src/utils/getVersion.js';
+import { generateProjectOutline } from './task-manager/project-outline.js';
+import { generateProjectCodeInit } from './task-manager/project-code-init.js';
 
 /**
  * Runs the interactive setup process for model configuration.
@@ -704,7 +706,7 @@ function registerCommands(programInstance) {
 						if (!(await confirmOverwriteIfNeeded())) return;
 
 						console.log(chalk.blue(`Generating ${numTasks} tasks...`));
-						spinner = ora('Parsing PRD and generating tasks...\n').start();
+						spinner = ora('Parsing PRD and generating tasks...  549\n').start();
 						await parsePRD(defaultPrdPath, outputPath, numTasks, {
 							append: useAppend, // Changed key from useAppend to append
 							force: useForce, // Changed key from useForce to force
@@ -750,7 +752,7 @@ function registerCommands(programInstance) {
 					);
 				}
 
-				spinner = ora('Parsing PRD and generating tasks...\n').start();
+				spinner = ora('Parsing PRD and generating tasks... 611\n').start();
 				await parsePRD(inputFile, outputPath, numTasks, {
 					append: useAppend,
 					force: useForce,
@@ -2756,6 +2758,42 @@ Examples:
 				process.exit(1);
 			}
 		});
+
+    programInstance
+        .command('project-outline')
+        .description('生成项目大纲，输出标准 markdown 文档')
+        .option('--output <file>', '输出文件路径，默认 docs/class-doc/project-outline.md')
+        .action(async (options) => {
+            try {
+                const projectRoot = process.cwd();
+                const result = await generateProjectOutline({
+                    projectRoot,
+                    output: options.output
+                });
+                console.log(`✅ 项目大纲已生成: ${result.outlinePath}`);
+            } catch (error) {
+                console.error('❌ 生成项目大纲失败:', error.message);
+                process.exit(1);
+            }
+        });
+
+    programInstance
+        .command('project_code_init')
+        .description('生成项目代码任务清单')
+        .option('--output <file>', '输出文件路径，默认 src')
+        .action(async (options) => {
+            try {
+                const projectRoot = process.cwd();
+                const result = await generateProjectCodeInit({
+                    projectRoot,
+                    output: options.output
+                });
+                console.log(`✅ 项目任务清单已生成: ${result.outlinePath}`);
+            } catch (error) {
+                console.error('❌ 生成项目任务清单失败:', error.message);
+                process.exit(1);
+            }
+        });
 
 	return programInstance;
 }
