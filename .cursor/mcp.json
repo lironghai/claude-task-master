@@ -1,4 +1,5 @@
 {
+	"timeout": 300000,
 	"mcpServers": {
 		"task-master-ai": {
 			"command": "node",

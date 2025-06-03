@@ -328,6 +328,8 @@ async function updateTasks(
 You will be given a set of tasks and a prompt describing changes or new implementation details.
 Your job is to update the tasks to reflect these changes, while preserving their basic structure.
 
+Language: Chinese
+
 Guidelines:
 1. Maintain the same IDs, statuses, and dependencies unless specifically mentioned in the prompt
 2. Update titles, descriptions, details, and test strategies to reflect the new information
@@ -339,6 +341,7 @@ Guidelines:
 8. If an existing completed subtask needs to be changed/undone based on the new context, DO NOT modify it directly
 9. Instead, add a new subtask that clearly indicates what needs to be changed or replaced
 10. Use the existence of completed subtasks as an opportunity to make new subtasks more specific and targeted
+11. Reply in the prescribed language.
 
 The changes described in the prompt should be applied to ALL tasks in the list.`;
 

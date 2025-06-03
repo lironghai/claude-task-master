@@ -30,6 +30,7 @@ import * as openai from '../../src/ai-providers/openai.js';
 import * as xai from '../../src/ai-providers/xai.js';
 import * as openrouter from '../../src/ai-providers/openrouter.js';
 import * as ollama from '../../src/ai-providers/ollama.js';
+import * as difyagent from '../../src/ai-providers/difyAgent.js';
 // TODO: Import other provider modules when implemented (ollama, etc.)
 
 // Helper function to get cost for a specific model
@@ -103,7 +104,12 @@ const PROVIDER_FUNCTIONS = {
 		generateText: ollama.generateOllamaText,
 		streamText: ollama.streamOllamaText,
 		generateObject: ollama.generateOllamaObject
-	}
+	},
+	difyagent: {
+		generateText: difyagent.generateDifyAgentText,
+		streamText: difyagent.streamDifyAgentText,
+		generateObject: difyagent.generateDifyAgentObject
+	},
 	// TODO: Add entries for ollama, etc. when implemented
 };
 
@@ -191,7 +197,8 @@ function _resolveApiKey(providerName, session, projectRoot = null) {
 		azure: 'AZURE_OPENAI_API_KEY',
 		openrouter: 'OPENROUTER_API_KEY',
 		xai: 'XAI_API_KEY',
-		ollama: 'OLLAMA_API_KEY'
+		ollama: 'OLLAMA_API_KEY',
+		difyagent: 'DIFY_AGENT_API_KEY'
 	};
 
 	const envVarName = keyMap[providerName];

@@ -880,14 +880,15 @@ async function addTask(
 			// System Prompt - Enhanced for dependency awareness
 			const systemPrompt =
 				"You are a helpful assistant that creates well-structured tasks for a software development project. Generate a single new task based on the user's description, adhering strictly to the provided JSON schema. Pay special attention to dependencies between tasks, ensuring the new task correctly references any tasks it depends on.\n\n" +
-				'When determining dependencies for a new task, follow these principles:\n' +
+				'Language: Chinese \n When determining dependencies for a new task, follow these principles:\n' +
 				'1. Select dependencies based on logical requirements - what must be completed before this task can begin.\n' +
 				'2. Prioritize task dependencies that are semantically related to the functionality being built.\n' +
 				'3. Consider both direct dependencies (immediately prerequisite) and indirect dependencies.\n' +
 				'4. Avoid adding unnecessary dependencies - only include tasks that are genuinely prerequisite.\n' +
 				'5. Consider the current status of tasks - prefer completed tasks as dependencies when possible.\n' +
 				"6. Pay special attention to foundation tasks (1-5) but don't automatically include them without reason.\n" +
-				'7. Recent tasks (higher ID numbers) may be more relevant for newer functionality.\n\n' +
+				'7. Recent tasks (higher ID numbers) may be more relevant for newer functionality.\n' +
+				'8. Reply in the prescribed language.\n\n' +
 				'The dependencies array should contain task IDs (numbers) of prerequisite tasks.\n';
 
 			// Task Structure Description (for user prompt)

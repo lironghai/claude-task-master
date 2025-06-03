@@ -52,7 +52,7 @@ function displayBanner() {
 	if (isSilentMode()) return;
 
 	console.clear();
-	const bannerText = figlet.textSync('Task Master AI', {
+	const bannerText = figlet.textSync('YX Task Master AI', {
 		font: 'Standard',
 		horizontalLayout: 'default',
 		verticalLayout: 'default'
@@ -61,9 +61,9 @@ function displayBanner() {
 	console.log(coolGradient(bannerText));
 
 	// Add creator credit line below the banner
-	console.log(
-		chalk.dim('by ') + chalk.cyan.underline('https://x.com/eyaltoledano')
-	);
+	// console.log(
+	// 	chalk.dim('by ') + chalk.cyan.underline('https://x.com/eyaltoledano')
+	// );
 
 	console.log(
 		boxen(chalk.white(`${chalk.bold('Initializing')} your new project`), {
@@ -488,6 +488,7 @@ function createProjectStructure(addAliases, dryRun) {
 
 	ensureDirectoryExists(path.join(targetDir, 'scripts'));
 	ensureDirectoryExists(path.join(targetDir, 'tasks'));
+	ensureDirectoryExists(path.join(targetDir, 'temp'));
 
 	// Setup MCP configuration for integration with Cursor
 	setupMCPConfiguration(targetDir);

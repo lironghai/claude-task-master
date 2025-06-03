@@ -58,6 +58,7 @@ function generateMainSystemPrompt(subtaskCount) {
 	return `You are an AI assistant helping with task breakdown for software development.
 You need to break down a high-level task into ${subtaskCount} specific subtasks that can be implemented one by one.
 
+Language: Chinese
 Subtasks should:
 1. Be specific and actionable implementation steps
 2. Follow a logical sequence
@@ -65,6 +66,7 @@ Subtasks should:
 4. Include clear guidance on implementation approach
 5. Have appropriate dependency chains between subtasks (using the new sequential IDs)
 6. Collectively cover all aspects of the parent task
+7. Reply in the prescribed language
 
 For each subtask, provide:
 - id: Sequential integer starting from the provided nextSubtaskId
@@ -531,7 +533,7 @@ async function expandTask(
 			promptContent += `${complexityReasoningContext}`.trim();
 
 			// --- Use Simplified System Prompt for Report Prompts ---
-			systemPrompt = `You are an AI assistant helping with task breakdown. Generate exactly ${finalSubtaskCount} subtasks based on the provided prompt and context. Respond ONLY with a valid JSON object containing a single key "subtasks" whose value is an array of the generated subtask objects. Each subtask object in the array must have keys: "id", "title", "description", "dependencies", "details", "status". Ensure the 'id' starts from ${nextSubtaskId} and is sequential. Ensure 'dependencies' only reference valid prior subtask IDs generated in this response (starting from ${nextSubtaskId}). Ensure 'status' is 'pending'. Do not include any other text or explanation.`;
+			systemPrompt = `You are an AI assistant helping with task breakdown. Generate exactly ${finalSubtaskCount} subtasks based on the provided prompt and context. Language: Chinese. Respond ONLY with a valid JSON object containing a single key "subtasks" whose value is an array of the generated subtask objects. Each subtask object in the array must have keys: "id", "title", "description", "dependencies", "details", "status". Ensure the 'id' starts from ${nextSubtaskId} and is sequential. Ensure 'dependencies' only reference valid prior subtask IDs generated in this response (starting from ${nextSubtaskId}). Ensure 'status' is 'pending'. Do not include any other text or explanation.`;
 			logger.info(
 				`Using expansion prompt from complexity report and simplified system prompt for task ${task.id}.`
 			);
@@ -548,7 +550,7 @@ async function expandTask(
 					nextSubtaskId
 				);
 				// Use the specific research system prompt if needed, or a standard one
-				systemPrompt = `You are an AI assistant that responds ONLY with valid JSON objects as requested. The object should contain a 'subtasks' array.`; // Or keep generateResearchSystemPrompt if it exists
+				systemPrompt = `You are an AI assistant that responds ONLY with valid JSON objects as requested. The object should contain a 'subtasks' array. Language: Chinese`; // Or keep generateResearchSystemPrompt if it exists
 			} else {
 				promptContent = generateMainUserPrompt(
 					task,
