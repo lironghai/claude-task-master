@@ -423,5 +423,39 @@
 			"allowed_roles": ["main", "fallback"],
 			"max_tokens": 32768
 		}
+	],
+	"difyagent": [
+		{
+			"id": "default-agent",
+			"name": "Dify Agent Default",
+			"swe_score": 0,
+			"cost_per_1m_tokens": { "input": 1, "output": 1 },
+			"allowed_roles": ["main", "fallback"],
+			"max_tokens": 128000
+		},
+		{
+			"id": "chat-workflow",
+			"name": "chat-workflow",
+			"swe_score": 0,
+			"cost_per_1m_tokens": { "input": 1, "output": 1 },
+			"allowed_roles": ["main", "fallback"],
+			"max_tokens": 128000
+		},
+		{
+			"id": "workflow",
+			"name": "workflow",
+			"swe_score": 0,
+			"cost_per_1m_tokens": { "input": 1, "output": 1 },
+			"allowed_roles": ["main", "fallback"],
+			"max_tokens": 128000
+		},
+		{
+			"id": "agent",
+			"name": "agent",
+			"swe_score": 0,
+			"cost_per_1m_tokens": { "input": 1, "output": 1 },
+			"allowed_roles": ["main", "fallback"],
+			"max_tokens": 128000
+		}
 	]
 }

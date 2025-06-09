@@ -1,0 +1,42 @@
+sequenceDiagram
+    participant User as 用户
+    participant Cursor as Cursor IDE
+    participant MCP as MCP 服务
+    participant LLM as 大语言模型
+    participant FS as 文件系统
+
+    User->>Cursor: 请求生成项目文档
+    Cursor->>MCP: 调用 startDocGeneration(projectPath, config)
+    
+    MCP->>FS: 扫描项目结构
+    FS-->>MCP: 返回文件列表
+    
+    MCP->>MCP: 分析文件依赖关系
+    MCP->>MCP: 制定处理计划
+    MCP-->>Cursor: 返回任务ID和处理计划
+    
+    Cursor-->>User: 显示任务启动成功
+    
+    loop 并行处理文件批次
+        MCP->>FS: 读取文件内容
+        FS-->>MCP: 返回源代码
+        
+        MCP->>LLM: 分析代码并生成文档
+        LLM-->>MCP: 返回生成的文档
+        
+        MCP->>FS: 保存文档文件
+        MCP->>MCP: 更新任务进度
+    end
+    
+    loop 进度查询
+        Cursor->>MCP: 调用 getProgress(taskId)
+        MCP-->>Cursor: 返回当前进度
+        Cursor-->>User: 显示进度更新
+    end
+    
+    MCP->>MCP: 生成完成，整理结果
+    MCP->>FS: 生成索引文件
+    
+    Cursor->>MCP: 调用 getResults(taskId)
+    MCP-->>Cursor: 返回完整结果
+    Cursor-->>User: 显示完成通知

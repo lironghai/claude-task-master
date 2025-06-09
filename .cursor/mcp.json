@@ -1,4 +1,5 @@
 {
+	"timeout": 300000,
 	"mcpServers": {
 		"task-master-ai": {
 			"command": "node",
@@ -13,7 +14,38 @@
 				"MISTRAL_API_KEY": "MISTRAL_API_KEY_HERE",
 				"AZURE_OPENAI_API_KEY": "AZURE_OPENAI_API_KEY_HERE",
 				"OLLAMA_API_KEY": "OLLAMA_API_KEY_HERE"
-			}
+			},
+			"tools": [
+				{
+					"name": "generate_documentation_from_code",
+					"description": "Generates documentation from specified code files using an AI model and saves them to corresponding paths.",
+					"parameters": [
+						{
+							"name": "projectRoot",
+							"type": "string",
+							"optional": true,
+							"description": "The absolute root directory of the project. If not provided, it's derived from the session."
+						},
+						{
+							"name": "documentationMap",
+							"type": "object",
+							"description": "A map where keys are source code file paths (relative to projectRoot) and values are output documentation file paths (relative to projectRoot).",
+							"properties": {
+								"additionalProperties": {
+									"type": "string"
+								}
+							}
+						},
+						{
+							"name": "overwrite",
+							"type": "boolean",
+							"optional": true,
+							"default": false,
+							"description": "Whether to overwrite existing documentation files."
+						}
+					]
+				}
+			]
 		}
 	}
 }

@@ -1,0 +1,24 @@
+通过分析项目，我得到了以下信息：
+
+### 目录结构
+项目的目录结构如下所示：
+- `.cursor`：可能是IDE或编辑器的配置文件夹。
+- `.env`, `.env.example`：环境变量配置文件。
+- `.git`：Git版本控制系统的数据文件夹。
+- `.gitignore`：指定Git忽略的文件和文件夹。
+- `.idea`：JetBrains IDE（如IntelliJ IDEA）的配置文件夹。
+- `config`：可能存放配置文件的文件夹。
+- `docs`：文档文件夹。
+- `pom.xml`：Maven构建文件，表明这是一个Java项目。
+- `scripts`：可能存放脚本文件的文件夹。
+- `src`：源代码文件夹。
+- `target`：编译后的输出文件夹。
+- `tasks`：可能与任务调度相关的文件夹。
+
+### 使用的语言和框架
+根据`pom.xml`的内容，可以确定该项目使用**Java**语言，并且基于**Spring Framework**框架。此外，它还依赖于其他库，例如用于数据库连接池的Druid、日志记录的Log4j、JSON处理的Fastjson等。
+
+### 程序启动入口
+在搜索结果中，我们找到了一个名为`src/main`的路径，这通常是Maven项目的标准目录结构，其中包含应用程序的主代码。对于Java应用程序，启动入口通常是带有`public static void main(String[] args)`方法的类。这个类一般位于`src/main/java`下的某个包内。
+
+为了准确找到启动类，我们需要进一步检查`src/main/java`目录中的内容。通常情况下，Spring Boot应用会有一个标注了`@SpringBootApplication`注解的类作为启动类。如果您能提供更多的具体信息或者允许我深入查找，我可以更精确地定位到启动类的位置。

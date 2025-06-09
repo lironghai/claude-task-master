@@ -432,7 +432,7 @@ export function findConfigPath(explicitPath = null, args = null, log = null) {
 			// Issue deprecation warning for legacy paths
 			if (configPath?.endsWith(LEGACY_CONFIG_FILE)) {
 				logger.warn?.(
-					`⚠️  DEPRECATION WARNING: Found configuration in legacy location '${configPath}'. Please migrate to .taskmaster/config.json. Run 'task-master migrate' to automatically migrate your project.`
+					`⚠️ 2 DEPRECATION WARNING: Found configuration in legacy location '${configPath}'. Please migrate to .taskmaster/config.json. Run 'task-master migrate' to automatically migrate your project.`
 				);
 			}
 

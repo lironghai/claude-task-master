@@ -39,7 +39,8 @@ import {
 	OllamaAIProvider,
 	BedrockAIProvider,
 	AzureProvider,
-	VertexAIProvider
+	VertexAIProvider,
+	DifyAgentProvider
 } from '../../src/ai-providers/index.js';
 
 // Create provider instances
@@ -53,7 +54,8 @@ const PROVIDERS = {
 	ollama: new OllamaAIProvider(),
 	bedrock: new BedrockAIProvider(),
 	azure: new AzureProvider(),
-	vertex: new VertexAIProvider()
+	vertex: new VertexAIProvider(),
+	difyagent: new DifyAgentProvider()
 };
 
 // Helper function to get cost for a specific model
@@ -172,7 +174,8 @@ function _resolveApiKey(providerName, session, projectRoot = null) {
 		xai: 'XAI_API_KEY',
 		ollama: 'OLLAMA_API_KEY',
 		bedrock: 'AWS_ACCESS_KEY_ID',
-		vertex: 'GOOGLE_API_KEY'
+		vertex: 'GOOGLE_API_KEY',
+        difyagent: 'DIFY_AGENT_API_KEY'
 	};
 
 	const envVarName = keyMap[providerName];
@@ -371,6 +374,7 @@ async function _unifiedServiceRunner(serviceType, params) {
 				continue;
 			}
 
+			log('info', `New AI service call with providerName: ${providerName} ,modelId: ${modelId}`);
 			// Get provider instance
 			provider = PROVIDERS[providerName?.toLowerCase()];
 			if (!provider) {
@@ -500,6 +504,8 @@ async function _unifiedServiceRunner(serviceType, params) {
 			const callParams = {
 				apiKey,
 				modelId,
+				commandName,
+				outputType,
 				maxTokens: roleParams.maxTokens,
 				temperature: roleParams.temperature,
 				messages,

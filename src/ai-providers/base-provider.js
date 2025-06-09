@@ -1,10 +1,12 @@
-import { generateText, streamText, generateObject } from 'ai';
-import { log } from '../../scripts/modules/index.js';
+import {experimental_createMCPClient as createMCPClient, generateObject, generateText, streamText} from 'ai';
+import {log} from '../../scripts/modules/index.js';
+import {Experimental_StdioMCPTransport as StdioMCPTransport} from 'ai/mcp-stdio';
 
 /**
  * Base class for all AI providers
  */
 export class BaseAIProvider {
+
 	constructor() {
 		if (this.constructor === BaseAIProvider) {
 			throw new Error('BaseAIProvider cannot be instantiated directly');
@@ -12,6 +14,59 @@ export class BaseAIProvider {
 
 		// Each provider must set their name
 		this.name = this.constructor.name;
+
+		this.terminalClient = null;
+		this.filesystemClient = null;
+		this.fetchClient = null;
+	}
+
+	async initMcpClient() {
+		if (!this.terminalClient) {
+			this.terminalClient = await createMCPClient({
+				transport: new StdioMCPTransport({
+					command: 'uvx',
+					args: ['terminal_controller'],
+				}),
+			});
+		}
+
+		if (!this.filesystemClient) {
+			this.filesystemClient = await createMCPClient({
+				transport: new StdioMCPTransport({
+					command: 'cmd',
+					args: [
+						"/c",
+						"npx",
+						"-y",
+						"@modelcontextprotocol/server-filesystem@latest",
+						"D:\\project\\java\\temp-reverse-project"
+					],
+				}),
+			});
+		}
+
+		if (!this.fetchClient) {
+			this.fetchClient = await createMCPClient({
+				transport: new StdioMCPTransport({
+					command: 'uvx',
+					args: ['mcp-server-fetch'],
+				}),
+			});
+		}
+	}
+
+	async closeMcpClient() {
+		if (this.terminalClient) {
+			await this.terminalClient?.close();
+		}
+
+		if (this.filesystemClient) {
+			await this.filesystemClient?.close();
+		}
+
+		if (this.fetchClient) {
+			await this.fetchClient?.close();
+		}
 	}
 
 	/**
@@ -95,6 +150,17 @@ export class BaseAIProvider {
 	getClient(params) {
 		throw new Error('getClient must be implemented by provider');
 	}
+	async getTools(params) {
+		await this.initMcpClient();
+		const toolSetOne = await this.terminalClient?.tools();
+		const toolSetTwo = await this.filesystemClient?.tools();
+		const toolSetThree = await this.fetchClient?.tools();
+		return {
+			...toolSetOne,
+			...toolSetTwo,
+			...toolSetThree, // note: this approach causes subsequent tool sets to override tools with the same name
+		};
+	}
 
 	/**
 	 * Generates text using the provider's model
@@ -110,9 +176,13 @@ export class BaseAIProvider {
 			);
 
 			const client = this.getClient(params);
+			const tools = await this.getTools(params);
 			const result = await generateText({
 				model: client(params.modelId),
+				tools: tools,
+				toolChoice: 'auto',
 				messages: params.messages,
+				maxSteps: 1000,
 				maxTokens: params.maxTokens,
 				temperature: params.temperature
 			});
@@ -132,6 +202,8 @@ export class BaseAIProvider {
 			};
 		} catch (error) {
 			this.handleError('text generation', error);
+		}finally {
+			await this.closeMcpClient();
 		}
 	}
 
