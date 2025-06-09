@@ -392,6 +392,50 @@ This document provides a detailed reference for interacting with Taskmaster, cov
 
 ---
 
+## Code Generation
+
+### 25. Generate Documentation From Code (`generate_documentation_from_code`)
+
+*   **MCP Tool:** `generate_documentation_from_code`
+*   **CLI Command:** `task-master generate-docs-from-code [options]` (Assumed CLI command name)
+*   **Description:** `Generates Markdown documentation files from source code files using an AI model. Processes a map of code file paths to output documentation file paths.`
+*   **Key MCP Parameters/Options:**
+    *   `projectRoot`: `Required. The absolute root directory of the project.`
+    *   `documentationMap`: `Required. A map where keys are source code file paths (relative to projectRoot) and values are the corresponding output documentation file paths (relative to projectRoot). Example: {"src/module.js": "docs/module.md"}`
+    *   `overwrite`: `Optional, boolean. Whether to overwrite existing documentation files. Defaults to false.`
+    *   `reportProgress`: `Optional. Callback function provided by MCP client to report progress updates.`
+*   **Key CLI Options:**
+    *   `-p, --project-root <path>`: `The root directory of the project. Defaults to auto-detection.`
+    *   `-m, --map <jsonStringOrFilePath>`: `Required. A JSON string or a path to a JSON file mapping code file paths to documentation file paths. E.g., '{"src/utils.js":"docs/utils.md"}' or ./docmap.json`
+    *   `-o, --overwrite`: `Overwrite existing documentation files if they exist.`
+*   **Usage:** Use this tool/command to automate the creation and updating of documentation for your codebase.
+*   **Important:** This tool/command makes AI calls for each code-to-documentation mapping. The quality of the generated documentation depends on the AI model's capabilities and the clarity of the source code. A default system prompt is used, but can be overridden by placing a custom prompt at `.taskmaster/prompts/gen_doc_from_code.md` (Note: this path might differ, check source `generate-documentation-from-code-direct.js` for the exact PROMPT_FILE_PATH).
+
+### 26. Generate Code From Documentation (`generate_code_from_documentation`)
+
+*   **MCP Tool:** `generate_code_from_documentation`
+*   **CLI Command:** `task-master generate-code-from-docs [options]`
+*   **Description:** `Generates code files from documentation files using an AI model. Processes a map of document paths to output code file paths.`
+*   **Key MCP Parameters/Options:**
+    *   `projectRoot`: `Optional. The absolute root directory of the project. If not provided, it will be derived from the session.`
+    *   `codeGenerationMap`: `Required. A map where keys are document file paths (relative to projectRoot) and values are the corresponding output code file paths (relative to projectRoot). Example: {"docs/spec.md": "src/implementation.js"}`
+    *   `overwrite`: `Optional, boolean. Whether to overwrite existing code files. Defaults to false.`
+    *   `targetLanguage`: `Optional, string. The target programming language for code generation (e.g., 'JavaScript', 'Python').`
+    *   `targetFramework`: `Optional, string. The target framework, if applicable (e.g., 'React', 'Express').`
+    *   `projectOutlinePath`: `Optional, string. Path to a project outline document to provide broader context for code generation.`
+    *   `reportProgress`: `Optional. Callback function provided by MCP client to report progress updates.`
+*   **Key CLI Options:**
+    *   `-p, --project-root <path>`: `The root directory of the project. Defaults to auto-detection.`
+    *   `-m, --map <jsonStringOrFilePath>`: `Required. A JSON string or a path to a JSON file mapping document paths to code file paths. E.g., '{"docs/spec.md":"src/impl.js"}' or ./map.json`
+    *   `-o, --overwrite`: `Overwrite existing code files if they exist.`
+    *   `-l, --lang <language>`: `Target programming language for code generation.`
+    *   `-f, --framework <framework>`: `Target framework for code generation.`
+    *   `--outline <path>`: `Path to a project outline document to provide broader context for code generation.`
+*   **Usage:** Use this tool/command to automate the creation of boilerplate or initial code structures based on provided documentation or specification files.
+*   **Important:** This tool/command makes AI calls for each document-to-code mapping and can take time to complete, especially for multiple files. The quality of the generated code depends heavily on the clarity and detail of the input documentation and the capabilities of the selected AI model.
+
+---
+
 ## Environment Variables Configuration (Updated)
 
 Taskmaster primarily uses the **`.taskmaster/config.json`** file (in project root) for configuration (models, parameters, logging level, etc.), managed via `task-master models --setup`.

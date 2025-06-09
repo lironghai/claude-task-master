@@ -33,6 +33,8 @@ import { modelsDirect } from './direct-functions/models.js';
 import { moveTaskDirect } from './direct-functions/move-task.js';
 import { projectOutlineDirect } from './direct-functions/project-outline.js';
 import { projectCodeInitDirect } from './direct-functions/project-code-init.js';
+import { generateDocumentationFromCodeDirect } from './direct-functions/generate-documentation-from-code-direct.js';
+import { generateCodeFromDocumentationDirect } from './direct-functions/generate-code-from-documentation-direct.js';
 
 // Re-export utility functions
 export { findTasksPath } from './utils/path-utils.js';
@@ -66,7 +68,9 @@ export const directFunctions = new Map([
 	['modelsDirect', modelsDirect],
 	['moveTaskDirect', moveTaskDirect],
 	['projectOutlineDirect', projectOutlineDirect],
-	['projectCodeInitDirect', projectCodeInitDirect]
+	['projectCodeInitDirect', projectCodeInitDirect],
+	['generateDocumentationFromCodeDirect', generateDocumentationFromCodeDirect],
+	['generateCodeFromDocumentationDirect', generateCodeFromDocumentationDirect]
 ]);
 
 // Re-export all direct function implementations
@@ -98,5 +102,7 @@ export {
 	modelsDirect,
 	moveTaskDirect,
 	projectOutlineDirect,
-	projectCodeInitDirect
+	projectCodeInitDirect,
+	generateDocumentationFromCodeDirect,
+	generateCodeFromDocumentationDirect
 };

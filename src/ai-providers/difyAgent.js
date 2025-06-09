@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { log } from '../../scripts/modules/utils.js';
 import readline from 'readline';
+import { BaseAIProvider } from './base-provider.js';
 
 /**
  * Helper: Extract prompt from messages array (OpenAI风格)
@@ -39,13 +40,9 @@ function extractQuery(messages) {
   return null;
 }
 
-/**
- * Generates text using Dify /chat-messages API. 适配主流程OpenAI风格参数
- * @param {object} params - 包含 apiKey, messages, inputs, responseMode, user, conversationId, files, baseUrl
- * @returns {Promise<object>} The generated text content and usage.
- * @throws {Error} If API call fails.
- */
-export async function generateDifyAgentText(params) {
+// --- Internal Dify Agent Core Functions (Original logic preserved) ---
+
+async function _internalGenerateDifyAgentText(params) {
   const {
     apiKey,
     messages,
@@ -53,28 +50,30 @@ export async function generateDifyAgentText(params) {
     user = 'taskmaster',
     conversationId = '',
     files,
+    commandName,
+    outputType,
     baseUrl
   } = params;
 
-  log('debug', `generateDifyAgentText called (dify /chat-messages, streaming)`);
+  log('debug', `_internalGenerateDifyAgentText called (dify /chat-messages, streaming)`);
 
   if (!apiKey) throw new Error('Dify Agent API key is required.');
   const prompt = extractPrompt(messages);
   const query = extractQuery(messages);
   if (!query) throw new Error('Dify Agent: query (from messages) is required.');
 
-  const endpoint = baseUrl || 'https://api.dify.ai/v1/chat-messages';
+  log('info', '[_internalDifyAgent] commandName: ', commandName);
+  const endpoint = baseUrl || 'http://dify-new.huaweik1-bdc.yingxiong.com/v1/chat-messages';
   const data = {
-    inputs: { ...inputs, prompt },
+    inputs: { ...inputs, prompt, tool_name: commandName, output_type: outputType },
     query,
-    response_mode: 'streaming',
+    response_mode: 'streaming', // Dify's chat-messages is inherently streaming for completions
     conversation_id: conversationId,
     user,
   };
   if (files) data.files = files;
 
-  // 新增详细入参日志
-  log('info', '[DifyAgent] generateDifyAgentText 调用参数', {
+  log('debug', '[_internalDifyAgent] _internalGenerateDifyAgentText 调用参数', {
     url: endpoint,
     headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
     data
@@ -87,9 +86,9 @@ export async function generateDifyAgentText(params) {
         'Content-Type': 'application/json'
       },
       responseType: 'stream',
-      timeout: 60000
+      timeout: params.timeout || 60000 // Use timeout from params or default
     });
-    // 消费流式响应
+
     let content = '';
     let usage = null;
     let conversation_id = null;
@@ -100,7 +99,7 @@ export async function generateDifyAgentText(params) {
       if (!jsonStr || jsonStr === '[DONE]') continue;
       try {
         const chunk = JSON.parse(jsonStr);
-        console.log('Dify Agent 流块:', chunk); // 打印每个块
+        // console.log('Dify Agent 流块:', chunk); // Verbose logging
         if (chunk.event === 'message' || chunk.event === 'agent_message') {
           content += chunk.answer || '';
         }
@@ -109,65 +108,69 @@ export async function generateDifyAgentText(params) {
           conversation_id = chunk.conversation_id;
         }
       } catch (e) {
-        log('warn', 'Dify Agent 流块解析失败', { line });
+        log('warn', 'Dify Agent text stream chunk parsing failed', { line });
       }
     }
     return {
-      id: null,
+      id: null, // Dify doesn't provide a top-level ID in this response structure
       object: 'text_completion',
       created: Date.now(),
-      model: 'dify-agent',
+      model: params.modelId || 'dify-agent', // Use modelId from params if available
       choices: [{
         message: { role: 'assistant', content },
         finish_reason: 'stop',
         index: 0
       }],
-      usage,
+      usage, // { prompt_tokens, completion_tokens, total_tokens }
       conversation_id
     };
   } catch (err) {
-    log('error', `Dify Agent API error: ${err?.response?.data?.message || err.message}`);
+    log('error', `Dify Agent API error in _internalGenerateDifyAgentText: ${err}`);
+    // log('error', `Dify Agent API error in _internalGenerateDifyAgentText: ${err?.response?.data?.message || err.message}`);
+    log('error', '[_internalDifyAgent] _internalGenerateDifyAgentText 调用参数: \n', JSON.stringify({
+      url: endpoint,
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      data
+    }), "\n\n");
     throw new Error('Dify Agent API error: ' + (err?.response?.data?.message || err.message));
   }
 }
 
-/**
- * Streams text using Dify Agent API. 支持OpenAI风格参数
- * @param {object} params - 包含 apiKey, modelId, messages, prompt, maxTokens, temperature, baseUrl 等
- * @returns {Promise<ReadableStream>} A readable stream of text deltas.
- * @throws {Error} If API call fails.
- */
-export async function streamDifyAgentText(params) {
+async function _internalStreamDifyAgentText(params) {
   const {
     apiKey,
-    modelId,
+    modelId, // Dify modelId is the Agent ID for chat-messages endpoint
     messages,
-    prompt: promptRaw,
-    inputs = {},
+    prompt: promptRaw, // This might be passed directly to inputs
+    inputs = {}, // Custom inputs for Dify Agent
     user = 'taskmaster',
-    responseMode = 'streaming',
+    // responseMode = 'streaming', // This is fixed for streaming endpoint in Dify
     baseUrl,
-    maxTokens,
-    temperature
+    // maxTokens, // Dify agent configuration handles this
+    // temperature // Dify agent configuration handles this
+    timeout
   } = params;
-  const prompt = promptRaw || extractPrompt(messages);
+
+  const effectivePrompt = promptRaw || extractPrompt(messages);
   const query = extractQuery(messages);
-  log('debug', `streamDifyAgentText called with modelId: ${modelId}, prompt: ${prompt}`);
+
+  log('debug', `_internalStreamDifyAgentText called with Dify Agent ID: ${modelId}, effectivePrompt: ${effectivePrompt}`);
 
   if (!apiKey) throw new Error('Dify Agent API key is required.');
-  if (!modelId) throw new Error('Dify Agent ID (modelId) is required.');
-  if (!prompt) throw new Error('Prompt is required for Dify Agent.');
+  // modelId for Dify is the Agent ID, used in logs but not directly in /chat-messages URL for this implementation
+  // The endpoint itself implicitly uses the agent configured for the API key or a default one.
+  // If Dify had different endpoints per agent ID, it would be used here.
+  if (!query) throw new Error('Query (from messages) is required for Dify Agent.');
 
   const endpoint = baseUrl || 'http://dify-new.huaweik1-bdc.yingxiong.com/v1/chat-messages';
   const data = {
-    inputs: { ...inputs, prompt },
+    inputs: { ...inputs, prompt: effectivePrompt, tool_name: commandName, output_type: outputType }, // Ensure prompt is part of inputs
     query,
     user,
-    response_mode: responseMode
+    response_mode: 'streaming' // Fixed for this function
   };
 
-  // 新增详细入参日志
-  log('info', '[DifyAgent] streamDifyAgentText 调用参数', {
+  log('info', '[_internalDifyAgent] _internalStreamDifyAgentText 调用参数', {
     url: endpoint,
     headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
     data
@@ -180,157 +183,213 @@ export async function streamDifyAgentText(params) {
         'Content-Type': 'application/json'
       },
       responseType: 'stream',
-      timeout: 60000
+      timeout: timeout || 60000
     });
-    log('debug', `Dify Agent streamText initiated successfully for agent: ${modelId}`);
+    log('debug', `Dify Agent _internalStreamDifyAgentText initiated successfully for Dify Agent ID: ${modelId}`);
     return response.data; // ReadableStream
   } catch (error) {
-    log('error', `Error initiating Dify Agent stream (Agent: ${modelId}): ${error.message}`, { error });
+    log('error', `Error initiating Dify Agent stream (Agent ID: ${modelId}): ${error.message}`, { error });
     throw new Error(`Dify Agent API error during streaming initiation: ${error.message}`);
   }
 }
 
-/**
- * Generates structured objects using Dify Agent API. 支持OpenAI风格参数
- * @param {object} params - 包含 apiKey, modelId, messages, prompt, schema, maxTokens, temperature, baseUrl 等
- * @returns {Promise<object>} The generated object and usage.
- * @throws {Error} If API call fails or object generation fails.
- */
-export async function generateDifyAgentObject(params) {
+async function _internalGenerateDifyAgentObject(params) {
   const {
     apiKey,
-    modelId,
+    modelId, // Dify Agent ID
     messages,
     prompt: promptRaw,
-    schema,
+    schema, // This schema is for the expected output object, Dify might need different handling
     inputs = {},
     user = 'taskmaster',
-    responseMode = 'streaming',
+    // responseMode = 'streaming', // Let's use blocking for object generation for simplicity, or parse stream
     baseUrl,
-    maxTokens,
-    temperature
+    // maxTokens, // Dify agent config
+    // temperature, // Dify agent config
+    timeout
   } = params;
-  const prompt = promptRaw || extractPrompt(messages);
+
+  const effectivePrompt = promptRaw || extractPrompt(messages);
   const query = extractQuery(messages);
-  log('debug', `generateDifyAgentObject called with modelId: ${modelId}, prompt: ${prompt}`);
+  log('debug', `_internalGenerateDifyAgentObject called with Dify Agent ID: ${modelId}, effectivePrompt: ${effectivePrompt}`);
 
   if (!apiKey) throw new Error('Dify Agent API key is required.');
-  if (!modelId) throw new Error('Dify Agent ID (modelId) is required.');
-  if (!prompt) throw new Error('Prompt is required for Dify Agent.');
+  if (!query) throw new Error('Query (from messages) is required for Dify Agent.');
+  // Dify's /chat-messages doesn't directly take a JSON schema for output in the same way OpenAI tools do.
+  // The expectation is that the agent is configured on Dify to produce structured output,
+  // or the prompt itself guides the LLM to produce JSON which is then parsed from the `answer`.
+  // We will attempt to parse JSON from the `answer` field if response_mode is blocking.
 
   const endpoint = baseUrl || 'https://api.dify.ai/v1/chat-messages';
+  // For object generation, we'll use blocking mode and parse the result.
   const data = {
-    inputs: { ...inputs, prompt },
+    inputs: { ...inputs, prompt: effectivePrompt }, 
     query,
     user,
-    response_mode: responseMode,
-    schema // 假设Dify Agent支持schema参数
+    response_mode: 'blocking' // Use blocking for simpler object extraction
   };
-
-  // 新增详细入参日志
-  log('info', '[DifyAgent] generateDifyAgentObject 调用参数', {
+  
+  log('info', '[_internalDifyAgent] _internalGenerateDifyAgentObject 调用参数', {
     url: endpoint,
     headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
     data
   });
 
-  if (responseMode === 'streaming') {
-    // 流式响应解析
-    try {
-      const res = await axios.post(endpoint, data, {
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json'
-        },
-        responseType: 'stream',
-        timeout: 60000
-      });
-      let object = {};
-      let usage = null;
-      let files = [];
-      let conversation_id = null;
-      let answer = '';
-      let agent_thoughts = [];
-      let agent_messages = '';
-      const rl = readline.createInterface({ input: res.data });
-      for await (const line of rl) {
-        if (!line.trim().startsWith('data:')) continue;
-        const jsonStr = line.trim().replace(/^data:\s*/, '');
-        if (!jsonStr || jsonStr === '[DONE]') continue;
-        try {
-          log('info', '[DifyAgent][stream] 原始分块:', { line });
-          const chunk = JSON.parse(jsonStr);
-          log('info', '[DifyAgent][stream] 解析后分块:', { chunk });
-          // 事件分流
-          if (chunk.event === 'message' || chunk.event === 'agent_message') {
-            answer += chunk.answer || '';
-            agent_messages += chunk.answer || '';
-          }
-          if (chunk.event === 'agent_thought') {
-            agent_thoughts.push({
-              thought: chunk.thought,
-              observation: chunk.observation,
-              tool: chunk.tool,
-              tool_input: chunk.tool_input,
-              message_files: chunk.message_files,
-              created_at: chunk.created_at
-            });
-          }
-          if (chunk.event === 'message_file') {
-            files.push({
-              id: chunk.id,
-              type: chunk.type,
-              url: chunk.url,
-              belongs_to: chunk.belongs_to
-            });
-          }
-          if (chunk.event === 'message_end') {
-            usage = chunk.metadata?.usage || null;
-            conversation_id = chunk.conversation_id;
-          }
-        } catch (e) {
-          log('warn', 'Dify Agent object流块解析失败', { line });
-        }
-      }
-      // 聚合结构化对象
-      object = {
-        answer,
-        agent_messages,
-        agent_thoughts,
-        files,
-        conversation_id
-      };
-      return {
-        object,
-        usage: usage || {}
-      };
-    } catch (error) {
-      log('error', `Dify Agent API error during object streaming: ${error.message}`);
-      throw new Error(`Dify Agent API error during object streaming: ${error.message}`);
+  try {
+    const response = await axios.post(endpoint, data, {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      timeout: timeout || 60000
+    });
+
+    const result = response.data;
+    // console.log('Dify Agent Object Raw Result:', result); // Verbose
+
+    if (!result || !result.answer) {
+      log('warn', 'Dify Agent object response did not contain expected answer field.', { result });
+      throw new Error('Failed to extract answer from Dify Agent response for object generation.');
     }
-  } else {
-    // 非流式阻塞模式
+
+    let parsedObject;
     try {
-      const response = await axios.post(endpoint, data, {
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json'
-        },
-        timeout: 60000
-      });
-      const result = response.data;
-      if (!result || (!result.data && !result.object)) {
-        log('warn', 'Dify Agent object response did not contain expected object.', { result });
-        throw new Error('Failed to extract object from Dify Agent response.');
-      }
-      log('debug', `Dify Agent generateObject completed successfully for agent: ${modelId}`);
+      parsedObject = JSON.parse(result.answer);
+    } catch (parseError) {
+      log('error', 'Failed to parse JSON from Dify Agent answer:', { answer: result.answer, parseError });
+      throw new Error('Failed to parse JSON object from Dify Agent response. Ensure the Dify Agent is configured to return valid JSON in the answer field.');
+    }
+    
+    log('debug', `Dify Agent _internalGenerateDifyAgentObject completed successfully for Dify Agent ID: ${modelId}`);
+    return {
+      object: parsedObject,
+      usage: result.metadata?.usage || {}, // { prompt_tokens, completion_tokens, total_tokens }
+      conversation_id: result.conversation_id,
+      raw_answer: result.answer // Include raw answer for debugging if needed
+    };
+  } catch (error) {
+    log('error', `Error in _internalGenerateDifyAgentObject (Agent ID: ${modelId}): ${error.message}`, { error });
+    throw new Error(`Dify Agent API error during object generation: ${error.message}`);
+  }
+}
+
+// --- DifyAgentProvider Class ---
+export class DifyAgentProvider extends BaseAIProvider {
+  constructor() {
+    super();
+    this.name = 'DifyAgent';
+  }
+
+  /**
+   * Returns a configuration object for Dify Agent.
+   * Dify doesn't use a traditional client instance like OpenAI SDK.
+   * @param {object} params - Parameters for client initialization.
+   * @param {string} params.apiKey - Dify API key.
+   * @param {string} [params.baseUrl] - Optional custom API endpoint for Dify.
+   * @returns {object} Configuration object for Dify.
+   */
+  getClient(params) {
+    try {
+      this.validateAuth(params); // BaseAIProvider will check for apiKey
       return {
-        object: result.data || result.object || {},
-        usage: result.usage || {}
+        apiKey: params.apiKey,
+        baseUrl: params.baseUrl, // Optional, will default in internal functions if not set
+        // modelId is also passed in params to generateText/Object/streamText for logging/potential use
       };
     } catch (error) {
-      log('error', `Error in generateDifyAgentObject (Agent: ${modelId}): ${error.message}`, { error });
-      throw new Error(`Dify Agent API error during object generation: ${error.message}`);
+      this.handleError('client configuration retrieval', error);
+    }
+  }
+
+  async generateText(params) {
+    try {
+      this.validateParams(params); // Validates apiKey, modelId, temp, maxTokens
+      this.validateMessages(params.messages);
+
+      log('debug', `Generating ${this.name} text with Dify Agent ID: ${params.modelId}`);
+      
+      // clientConfig will hold apiKey and baseUrl from getClient
+      const clientConfig = this.getClient(params); 
+
+      const result = await _internalGenerateDifyAgentText({
+        ...params, // Pass all original params like messages, inputs, user, conversationId, files
+        apiKey: clientConfig.apiKey,
+        baseUrl: clientConfig.baseUrl,
+        // modelId is already in params, used by _internalGenerateDifyAgentText for logging
+        // timeout can be passed in params.timeout
+      });
+
+      log('debug', `${this.name} generateText completed successfully for Dify Agent ID: ${params.modelId}`);
+      return {
+        text: result.choices[0].message.content,
+        usage: result.usage, // Already in { inputTokens, outputTokens, totalTokens } format from Dify
+        conversationId: result.conversation_id,
+        rawResponse: result // For potential further inspection
+      };
+    } catch (error) {
+      this.handleError('text generation', error);
+    }
+  }
+
+  async streamText(params) {
+    try {
+      this.validateParams(params);
+      this.validateMessages(params.messages);
+      log('debug', `Streaming ${this.name} text with Dify Agent ID: ${params.modelId}`);
+      
+      const clientConfig = this.getClient(params);
+
+      // _internalStreamDifyAgentText expects parameters like apiKey, modelId, messages, inputs, baseUrl, etc.
+      const stream = await _internalStreamDifyAgentText({
+        ...params, // Pass through all relevant params like messages, inputs, user
+        apiKey: clientConfig.apiKey,
+        baseUrl: clientConfig.baseUrl,
+        modelId: params.modelId // Ensure modelId (Dify Agent ID) is passed
+        // timeout can be passed in params.timeout
+      });
+
+      log('debug', `${this.name} streamText initiated successfully for Dify Agent ID: ${params.modelId}`);
+      return stream; // Returns the raw stream from axios
+    } catch (error) {
+      this.handleError('text streaming', error);
+    }
+  }
+
+  async generateObject(params) {
+    try {
+      this.validateParams(params); // Validates apiKey, modelId, temp, maxTokens
+      this.validateMessages(params.messages);
+      // BaseAIProvider's generateObject also validates schema and objectName, but we call it here
+      // to ensure it happens before our Dify specific logic if BaseAIProvider changes.
+      if (!params.schema) {
+        throw new Error('Schema is required for object generation');
+      }
+      // Dify doesn't use objectName in the same way as Vercel AI SDK
+      // if (!params.objectName) {
+      //   throw new Error('Object name is required for object generation');
+      // }
+
+      log('debug', `Generating ${this.name} object with Dify Agent ID: ${params.modelId}`);
+      
+      const clientConfig = this.getClient(params);
+
+      const result = await _internalGenerateDifyAgentObject({
+        ...params, // Pass through messages, inputs, user, schema (though Dify handles schema differently)
+        apiKey: clientConfig.apiKey,
+        baseUrl: clientConfig.baseUrl,
+        modelId: params.modelId
+        // timeout can be passed in params.timeout
+      });
+
+      log('debug', `${this.name} generateObject completed successfully for Dify Agent ID: ${params.modelId}`);
+      return {
+        object: result.object,
+        usage: result.usage, // Already in { inputTokens, outputTokens, totalTokens } format from Dify
+        conversationId: result.conversation_id,
+        rawResponse: result // For potential further inspection
+      };
+    } catch (error) {
+      this.handleError('object generation', error);
     }
   }
 } 

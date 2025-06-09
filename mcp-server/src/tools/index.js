@@ -31,6 +31,8 @@ import { registerModelsTool } from './models.js';
 import { registerMoveTaskTool } from './move-task.js';
 import { registerProjectOutlineTool } from './project-outline.js';
 import { registerProjectCodeInitTool } from './project-code-init.js';
+import { registerGenerateDocumentationFromCodeTool } from './generate-documentation-from-code.js';
+import { registerGenerateCodeFromDocumentationTool } from './generate-code-from-documentation.js';
 
 /**
  * Register all Task Master tools with the MCP server
@@ -78,6 +80,10 @@ export function registerTaskMasterTools(server) {
 		registerRemoveDependencyTool(server);
 		registerValidateDependenciesTool(server);
 		registerFixDependenciesTool(server);
+
+		// Group 7: Code/Documentation Generation (Updated Group Name)
+		registerGenerateDocumentationFromCodeTool(server);
+		registerGenerateCodeFromDocumentationTool(server);
 	} catch (error) {
 		logger.error(`Error registering Task Master tools: ${error.message}`);
 		throw error;

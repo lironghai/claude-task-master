@@ -63,18 +63,13 @@ function displayBanner() {
 	if (isSilentMode()) return;
 
 	console.clear();
-	const bannerText = figlet.textSync('YX Task Master AI', {
+	const bannerText = figlet.textSync('Hero Task Master AI', {
 		font: 'Standard',
 		horizontalLayout: 'default',
 		verticalLayout: 'default'
 	});
 
 	console.log(coolGradient(bannerText));
-
-	// Add creator credit line below the banner
-	// console.log(
-	// 	chalk.dim('by ') + chalk.cyan.underline('https://x.com/eyaltoledano')
-	// );
 
 	console.log(
 		boxen(chalk.white(`${chalk.bold('Initializing')} your new project`), {

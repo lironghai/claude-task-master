@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="351b5983-564b-4977-8b4f-fe128623f413" name="更改" comment="">
+      <change afterPath="$PROJECT_DIR$/docs/prompts/gen_code_from_doc.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.cursor/mcp.json" beforeDir="false" afterPath="$PROJECT_DIR$/.cursor/mcp.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.cursor/rules/taskmaster.mdc" beforeDir="false" afterPath="$PROJECT_DIR$/.cursor/rules/taskmaster.mdc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.env.example" beforeDir="false" afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/claude-task-master.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/claude-task-master.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/codeStyles/codeStyleConfig.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/prettier.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.taskmaster/config.json" beforeDir="false" afterPath="$PROJECT_DIR$/.taskmaster/config.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README-task-master.md" beforeDir="false" afterPath="$PROJECT_DIR$/README-task-master.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jest.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/jest.config.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mcp-server/src/core/task-master-core.js" beforeDir="false" afterPath="$PROJECT_DIR$/mcp-server/src/core/task-master-core.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mcp-server/src/tools/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/mcp-server/src/tools/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/init.js" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/init.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/modules/ai-services-unified.js" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/modules/ai-services-unified.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/modules/commands.js" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/modules/commands.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/modules/config-manager.js" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/modules/config-manager.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/modules/supported-models.json" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/modules/supported-models.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/modules/task-manager.js" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/modules/task-manager.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/modules/task-manager/models.js" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/modules/task-manager/models.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/modules/ui.js" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/modules/ui.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ai-providers/base-provider.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/ai-providers/base-provider.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ai-providers/difyAgent.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/ai-providers/difyAgent.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ai-providers/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/ai-providers/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils/path-utils.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/path-utils.js" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="KubernetesApiPersistence">{}</component>
+  <component name="KubernetesApiProvider">{
+  &quot;isMigrated&quot;: true
+}</component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="localRepository" value="D:\tools\maven\maven-repository" />
+        <option name="userSettingsFile" value="D:\tools\maven\apache-maven-3.9.9-bin\apache-maven-3.9.9\conf\settings.xml" />
+      </MavenGeneralSettings>
+    </option>
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 5
+}</component>
+  <component name="ProjectId" id="2y1X58WLzQ1UtiXssLwoOZauNHC" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Node.js.Debug Task Master CLI.executor": "Debug",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.go.formatter.settings.were.checked": "true",
+    "RunOnceActivity.go.migrated.go.modules.settings": "true",
+    "git-widget-placeholder": "dev/dify-1.1",
+    "go.import.settings.migrated": "true",
+    "ignore.virus.scanning.warn.message": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "D:/project/node/claude-task-master/scripts/dev.js",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs.jest.jest_package": "D:/project/node/claude-task-master/node_modules/jest",
+    "nodejs_package_manager_path": "npm",
+    "npm.test.executor": "Debug",
+    "npm.test:watch.executor": "Debug",
+    "npm.test_old.executor": "Debug",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "ts.external.directory.path": "C:\\Program Files\\JetBrains\\IntelliJ IDEA 2024.3.5\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external",
+    "two.files.diff.last.used.file": "D:/project/temp/claude-task-master-main/scripts/modules/supported-models.json",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\project\node\claude-task-master\docs\prompts" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Node.js.Debug Task Master CLI">
+    <configuration name="Debug Jest Tests" type="JavaScriptTestRunnerJest">
+      <node-interpreter value="project" />
+      <jest-package value="$PROJECT_DIR$/node_modules/jest" />
+      <working-dir value="$PROJECT_DIR$" />
+      <jest-options value="--runInBand" />
+      <envs />
+      <scope-kind value="ALL" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Debug MCP Server" type="NodeJSConfigurationType" path-to-js-file="mcp-server/server.js" working-dir="$PROJECT_DIR$">
+      <method v="2" />
+    </configuration>
+    <configuration name="Debug Task Master CLI" type="NodeJSConfigurationType" application-parameters="gen-doc-from-code -p D:\project\java\temp-reverse-project -o true -m {\&quot;src/main/java/com/flow/aspect/LogAspect.java\&quot;:\&quot;1111\&quot;}" path-to-js-file="scripts/dev.js" working-dir="$PROJECT_DIR$">
+      <method v="2" />
+    </configuration>
+    <configuration name="run" type="js.build_tools.npm" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/package.json" />
+      <command value="run" />
+      <scripts />
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <configuration name="test" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="test" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <configuration name="test_old" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="test_old" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <configuration name="test:watch" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="test:watch" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Jest.Debug Jest Tests" />
+      <item itemvalue="Node.js.Debug Task Master CLI" />
+      <item itemvalue="Node.js.Debug MCP Server" />
+      <item itemvalue="npm.test" />
+      <item itemvalue="npm.test:watch" />
+      <item itemvalue="npm.test_old" />
+      <item itemvalue="npm.run" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="npm.test_old" />
+        <item itemvalue="npm.test:watch" />
+        <item itemvalue="npm.test" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-a94e463ab2e7-intellij.indexing.shared.core-IU-243.26053.27" />
+        <option value="bundled-js-predefined-d6986cc7102b-1632447f56bf-JavaScript-IU-243.26053.27" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="应用程序级" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="默认任务">
+      <changelist id="351b5983-564b-4977-8b4f-fe128623f413" name="更改" comment="" />
+      <created>1744183509719</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1744183509719</updated>
+      <workItem from="1744183597889" duration="1769000" />
+      <workItem from="1749002869291" duration="969000" />
+      <workItem from="1749006255366" duration="96485000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+    <option name="includedJSSourcePackages">
+      <set>
+        <option value="ai" />
+      </set>
+    </option>
+  </component>
+  <component name="VgoProject">
+    <settings-migrated>true</settings-migrated>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/scripts/modules/task-manager/list-tasks.js</url>
+          <line>39</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/src/ai-providers/base-provider.js</url>
+          <line>178</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="7" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/src/ai-providers/base-provider.js</url>
+          <line>189</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="10" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/node_modules/ai/dist/index.mjs</url>
+          <line>4301</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="14" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>

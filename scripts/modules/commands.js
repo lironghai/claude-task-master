@@ -89,6 +89,15 @@ import {
 import { getTaskMasterVersion } from '../../src/utils/getVersion.js';
 import { generateProjectOutline } from './task-manager/project-outline.js';
 import { generateProjectCodeInit } from './task-manager/project-code-init.js';
+// Import the direct function
+// import { generateCodeDocumentationDirect } from '../../mcp-server/src/core/direct-functions/generate-code-documentation-direct.js';
+// Import the new command handler function
+// import { handleGenerateDocsCommand } from './task-manager/generate-docs-command.js';
+import { handleGenerateDocumentationFromCodeCommand } from './task-manager/generate-documentation-from-code-command.js';
+// Blueprint for new import:
+// import { handleGenerateCodeFromDocumentationCommand } from './task-manager/generate-code-from-documentation-command.js'; 
+// We will create this ^ file and function later. For now, let's import the core logic directly.
+import { generateCodeFromDocumentation } from './task-manager/generate-code-from-documentation.js';
 
 /**
  * Runs the interactive setup process for model configuration.
@@ -562,15 +571,16 @@ async function runInteractiveSetup(projectRoot) {
 				}
 			} else if (role === 'fallback') {
 				// Disable fallback model
-				const currentCfg = getConfig(projectRoot);
-				if (currentCfg?.models?.fallback?.modelId) {
+
+				const { effectiveConfig } = getConfig(projectRoot);
+				if (effectiveConfig?.models?.fallback?.modelId) {
 					// Check if it was actually set before clearing
-					currentCfg.models.fallback = {
-						...currentCfg.models.fallback,
+					effectiveConfig.models.fallback = {
+						...effectiveConfig.models.fallback,
 						provider: undefined,
 						modelId: undefined
 					};
-					if (writeConfig(currentCfg, projectRoot)) {
+					if (writeConfig(effectiveConfig, projectRoot)) {
 						console.log(chalk.blue('Fallback model disabled.'));
 						setupConfigModified = true;
 					} else {
@@ -2795,6 +2805,129 @@ Examples:
             }
         });
 
+	// New Generate Documentation From Code command
+	programInstance
+		.command('gen-doc-from-code')
+		.alias('gendocsfc')
+		.description('Generates documentation from specified code files using an AI model.')
+		.option('-p, --project-root <path>', 'The root directory of the project. Auto-detected if not provided.')
+		.option('-m, --documentation-map <jsonString>', 'A JSON string mapping source file paths (relative to projectRoot) to output documentation file paths (relative to projectRoot).')
+		.option('-o, --overwrite', 'Overwrite existing documentation files if they exist.')
+		// .option('-s, --system-prompt <prompt>', 'The system prompt for the AI model.') // Removed
+		.action(async (options) => {
+			await handleGenerateDocumentationFromCodeCommand(options);
+		}); // Ensure this semicolon is present for the gen-doc-from-code command
+
+    programInstance
+        .command('generate-code-from-docs')
+        .description('Generate code files from documentation using an AI model.')
+        .option('-p, --project-root <path>', 'The root directory of the project. Defaults to auto-detected project root.')
+        .option('-m, --map <jsonStringOrFilePath>', 'A JSON string or a path to a JSON file mapping document paths to code file paths. E.g., \'{"docs/spec.md":"src/impl.js"}\' or ./map.json')
+        .option('-o, --overwrite', 'Overwrite existing code files if they exist.', false)
+        .option('-l, --lang <language>', 'Optional: The target programming language for the generated code (e.g., "JavaScript", "Python").')
+        .option('-f, --framework <framework>', 'Optional: The target framework, if applicable (e.g., "React", "Express.js").')
+        .option('--outline <path>', 'Path to a project outline document to provide broader context for code generation.')
+        .action(async (options) => {
+            const spinner = ora('Processing documentation to generate code...').start();
+            try {
+                const projectRoot = options.projectRoot || findProjectRoot();
+                if (!projectRoot) {
+                    spinner.fail(chalk.red('Error: Could not determine project root. Please specify with --project-root or run from within a Task Master project.'));
+                    process.exit(1);
+                }
+
+                if (!options.map) {
+                    spinner.fail(chalk.red('Error: The --map option providing the documentation-to-code mapping is required.'));
+                    process.exit(1);
+                }
+
+                let codeGenerationMap;
+                try {
+                    if (fs.existsSync(options.map)) {
+                        const mapFilePath = path.resolve(options.map);
+                        spinner.text = `Reading code generation map from file: ${mapFilePath}`;
+                        const fileContent = fs.readFileSync(mapFilePath, 'utf-8');
+                        codeGenerationMap = JSON.parse(fileContent);
+                    } else {
+                        spinner.text = 'Parsing code generation map from direct JSON string...';
+						console.log('Parsing code generation map from direct JSON string...', options.map);
+                        codeGenerationMap = JSON.parse(options.map);
+                    }
+                } catch (e) {
+                    spinner.fail(chalk.red('Error: Invalid format for --map option. It must be a valid JSON string or a path to a JSON file. Details: ' + e.message));
+                    process.exit(1);
+                }
+
+                if (typeof codeGenerationMap !== 'object' || codeGenerationMap === null || Object.keys(codeGenerationMap).length === 0) {
+                    spinner.fail(chalk.red('Error: Code generation map is empty or not a valid object.'));
+                    process.exit(1);
+                }
+                
+                spinner.text = 'Generating code... This may take a few moments.';
+
+                const coreArgs = {
+                    projectRoot,
+                    codeGenerationMap,
+                    overwrite: !!options.overwrite,
+                    targetLanguage: options.lang,
+                    targetFramework: options.framework,
+                    projectOutlinePath: options.outline, // Add the new option here
+                };
+
+                const coreContext = {
+                    session: null, 
+                    reportProgress: (progress) => { 
+                        if (progress.currentFile && progress.stage) {
+                            spinner.text = `Processed ${progress.processedCount}/${progress.totalCount}: ${progress.currentFile} - ${progress.stage} (${progress.status})`;
+                        } else if (progress.currentFile) {
+                             spinner.text = `Processed ${progress.processedCount}/${progress.totalCount}: ${progress.currentFile} (${progress.status})`;
+                        } else {
+                            spinner.text = `Processed ${progress.processedCount}/${progress.totalCount} files... (${progress.status})`;
+                        }
+                    },
+                    log: { 
+                        info: (msg) => console.log(chalk.blue('INFO:'), msg),
+                        warn: (msg) => console.warn(chalk.yellow('WARN:'), msg),
+                        error: (msg, stack) => {
+                            console.error(chalk.red('ERROR:'), msg);
+                            if (stack && getDebugFlag({ projectRoot })) { 
+                                console.error(stack);
+                            }
+                        }
+                    },
+                    commandNameFromContext: 'cli_generate_code_from_docs'
+                };
+                
+                // outputFormat 'text' will trigger displayAiUsageSummary in the core logic
+                const result = await generateCodeFromDocumentation(coreArgs, coreContext, 'text'); 
+                
+                spinner.succeed(chalk.green('Code generation process completed!'));
+                
+                console.log(chalk.bold('\nProcessing Summary:'));
+                result.results.forEach(res => {
+                    let statusChalk = chalk.yellow;
+                    if (res.status === 'success') statusChalk = chalk.green;
+                    else if (res.status.startsWith('error')) statusChalk = chalk.red;
+                    else if (res.status.startsWith('skipped')) statusChalk = chalk.gray;
+                    
+                    console.log(`- Document: ${chalk.cyan(res.document)} -> Code File: ${chalk.cyan(res.codeFile)}`);
+                    console.log(`  Status: ${statusChalk(res.status)}`);
+                    if (res.message && res.status !== 'success') {
+                        console.log(`  Message: ${res.message}`);
+                    }
+                });
+
+                // Overall telemetry is displayed by the core function when outputFormat is 'text'
+
+            } catch (error) {
+                spinner.fail(chalk.red('An unexpected error occurred: ' + error.message));
+                if (getDebugFlag({ projectRoot: options.projectRoot || findProjectRoot() })) {
+                    console.error(error.stack);
+                }
+                process.exit(1);
+            }
+        });
+
 	return programInstance;
 }
 
@@ -2975,22 +3108,23 @@ async function runCLI(argv = process.argv) {
 		}
 
 		// Start the update check in the background - don't await yet
-		const updateCheckPromise = checkForUpdate();
+		// const updateCheckPromise = checkForUpdate();
 
 		// Setup and parse
 		// NOTE: getConfig() might be called during setupCLI->registerCommands if commands need config
 		// This means the ConfigurationError might be thrown here if configuration file is missing.
 		const programInstance = setupCLI();
 		await programInstance.parseAsync(argv);
+		console.log('Done -------------------------');
 
 		// After command execution, check if an update is available
-		const updateInfo = await updateCheckPromise;
-		if (updateInfo.needsUpdate) {
-			displayUpgradeNotification(
-				updateInfo.currentVersion,
-				updateInfo.latestVersion
-			);
-		}
+		// const updateInfo = await updateCheckPromise;
+		// if (updateInfo.needsUpdate) {
+		// 	displayUpgradeNotification(
+		// 		updateInfo.currentVersion,
+		// 		updateInfo.latestVersion
+		// 	);
+		// }
 	} catch (error) {
 		// ** Specific catch block for missing configuration file **
 		if (error instanceof ConfigurationError) {
