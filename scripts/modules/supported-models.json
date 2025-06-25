@@ -35,80 +35,93 @@
 			"swe_score": 0.332,
 			"cost_per_1m_tokens": { "input": 2.5, "output": 10.0 },
 			"allowed_roles": ["main", "fallback"],
-			"max_tokens": 16384
+			"max_tokens": 16384,
+			"context_window": 128000
 		},
 		{
 			"id": "o1",
 			"swe_score": 0.489,
 			"cost_per_1m_tokens": { "input": 15.0, "output": 60.0 },
-			"allowed_roles": ["main"]
+			"allowed_roles": ["main"],
+			"context_window": 128000
 		},
 		{
 			"id": "o3",
 			"swe_score": 0.5,
 			"cost_per_1m_tokens": { "input": 10.0, "output": 40.0 },
-			"allowed_roles": ["main", "fallback"]
+			"allowed_roles": ["main", "fallback"],
+			"context_window": 128000
 		},
 		{
 			"id": "o3-mini",
 			"swe_score": 0.493,
 			"cost_per_1m_tokens": { "input": 1.1, "output": 4.4 },
 			"allowed_roles": ["main"],
-			"max_tokens": 100000
+			"max_tokens": 100000,
+			"context_window": 128000
 		},
 		{
 			"id": "o4-mini",
 			"swe_score": 0.45,
 			"cost_per_1m_tokens": { "input": 1.1, "output": 4.4 },
-			"allowed_roles": ["main", "fallback"]
+			"allowed_roles": ["main", "fallback"],
+			"context_window": 128000
 		},
 		{
 			"id": "o1-mini",
 			"swe_score": 0.4,
 			"cost_per_1m_tokens": { "input": 1.1, "output": 4.4 },
-			"allowed_roles": ["main"]
+			"allowed_roles": ["main"],
+			"context_window": 128000
 		},
 		{
 			"id": "o1-pro",
 			"swe_score": 0,
 			"cost_per_1m_tokens": { "input": 150.0, "output": 600.0 },
-			"allowed_roles": ["main"]
+			"allowed_roles": ["main"],
+			"context_window": 128000
 		},
 		{
 			"id": "gpt-4-5-preview",
 			"swe_score": 0.38,
 			"cost_per_1m_tokens": { "input": 75.0, "output": 150.0 },
-			"allowed_roles": ["main"]
+			"allowed_roles": ["main"],
+			"context_window": 128000
 		},
 		{
 			"id": "gpt-4-1-mini",
 			"swe_score": 0,
 			"cost_per_1m_tokens": { "input": 0.4, "output": 1.6 },
-			"allowed_roles": ["main"]
+			"allowed_roles": ["main"],
+			"context_window": 128000
 		},
 		{
 			"id": "gpt-4-1-nano",
 			"swe_score": 0,
 			"cost_per_1m_tokens": { "input": 0.1, "output": 0.4 },
-			"allowed_roles": ["main"]
+			"allowed_roles": ["main"],
+			"context_window": 128000
 		},
 		{
 			"id": "gpt-4o-mini",
 			"swe_score": 0.3,
 			"cost_per_1m_tokens": { "input": 0.15, "output": 0.6 },
-			"allowed_roles": ["main"]
+			"allowed_roles": ["main"],
+			"context_window": 128000
 		},
 		{
 			"id": "gpt-4o-search-preview",
 			"swe_score": 0.33,
 			"cost_per_1m_tokens": { "input": 2.5, "output": 10.0 },
-			"allowed_roles": ["research"]
+			"allowed_roles": ["research"],
+			"context_window": 128000
 		},
 		{
 			"id": "gpt-4o-mini-search-preview",
 			"swe_score": 0.3,
 			"cost_per_1m_tokens": { "input": 0.15, "output": 0.6 },
-			"allowed_roles": ["research"]
+			"allowed_roles": ["research"],
+			"context_window": 128000
 		}
 	],
 	"google": [
@@ -154,35 +167,40 @@
 			"swe_score": 0,
 			"cost_per_1m_tokens": { "input": 3, "output": 15 },
 			"allowed_roles": ["main", "research"],
-			"max_tokens": 8700
+			"max_tokens": 8700,
+			"context_window": 16384
 		},
 		{
 			"id": "sonar",
 			"swe_score": 0,
 			"cost_per_1m_tokens": { "input": 1, "output": 1 },
 			"allowed_roles": ["research"],
-			"max_tokens": 8700
+			"max_tokens": 8700,
+			"context_window": 16384
 		},
 		{
 			"id": "deep-research",
 			"swe_score": 0.211,
 			"cost_per_1m_tokens": { "input": 2, "output": 8 },
 			"allowed_roles": ["research"],
-			"max_tokens": 8700
+			"max_tokens": 8700,
+			"context_window": 16384
 		},
 		{
 			"id": "sonar-reasoning-pro",
 			"swe_score": 0.211,
 			"cost_per_1m_tokens": { "input": 2, "output": 8 },
 			"allowed_roles": ["main", "research", "fallback"],
-			"max_tokens": 8700
+			"max_tokens": 8700,
+			"context_window": 16384
 		},
 		{
 			"id": "sonar-reasoning",
 			"swe_score": 0.211,
 			"cost_per_1m_tokens": { "input": 1, "output": 5 },
 			"allowed_roles": ["main", "research", "fallback"],
-			"max_tokens": 8700
+			"max_tokens": 8700,
+			"context_window": 16384
 		}
 	],
 	"xai": [
@@ -192,7 +210,8 @@
 			"swe_score": null,
 			"cost_per_1m_tokens": { "input": 3, "output": 15 },
 			"allowed_roles": ["main", "fallback", "research"],
-			"max_tokens": 131072
+			"max_tokens": 131072,
+			"context_window": 131072
 		},
 		{
 			"id": "grok-3-fast",
@@ -200,7 +219,8 @@
 			"swe_score": 0,
 			"cost_per_1m_tokens": { "input": 5, "output": 25 },
 			"allowed_roles": ["main", "fallback", "research"],
-			"max_tokens": 131072
+			"max_tokens": 131072,
+			"context_window": 131072
 		}
 	],
 	"ollama": [

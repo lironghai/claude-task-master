@@ -313,6 +313,11 @@ function _loadAndValidateConfig(options = {}) {
 }
 
 function getConfig(explicitRoot = null, forceReload = false) {
+
+	if (loadedConfigState && !explicitRoot) {
+		return loadedConfigState;
+	}
+
 	const currentProjectRoot = explicitRoot || findProjectRoot();
 
 	const needsLoad =

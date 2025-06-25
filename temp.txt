@@ -22,3 +22,17 @@
 在搜索结果中，我们找到了一个名为`src/main`的路径，这通常是Maven项目的标准目录结构，其中包含应用程序的主代码。对于Java应用程序，启动入口通常是带有`public static void main(String[] args)`方法的类。这个类一般位于`src/main/java`下的某个包内。
 
 为了准确找到启动类，我们需要进一步检查`src/main/java`目录中的内容。通常情况下，Spring Boot应用会有一个标注了`@SpringBootApplication`注解的类作为启动类。如果您能提供更多的具体信息或者允许我深入查找，我可以更精确地定位到启动类的位置。
+
+
+
+
+
+
+
+
+	  "browsermcp": {
+      "command": "cmd",
+      "args": ["/c",
+						"npx",
+						"-y","@browsermcp/mcp"]
+    },

@@ -1,6 +1,6 @@
 import { generateCodeFromDocumentation } from '../../../../scripts/modules/task-manager/generate-code-from-documentation.js';
 import { createLogWrapper } from '../../tools/utils.js'; // Assuming this utility exists for wrapping MCP log
-import { normalizeProjectRoot } from '../../core/utils/path-utils.js'; // For normalizing projectRoot
+import { normalizeProjectRoot } from '../../../../src/utils/path-utils.js'; // For normalizing projectRoot
 
 /**
  * Direct function to handle MCP requests for generating code from documentation.
@@ -31,7 +31,7 @@ export async function generateCodeFromDocumentationDirect(args, log, context = {
             return { success: false, error: "Missing required argument: projectRoot." };
         }
         // Normalize projectRoot path
-        const normalizedProjectRoot = normalizeProjectRoot(args.projectRoot, mcpLog);
+        const normalizedProjectRoot = normalizeProjectRoot(args.projectRoot);
         if (!normalizedProjectRoot) {
             return { success: false, error: "Failed to normalize projectRoot." };
         }

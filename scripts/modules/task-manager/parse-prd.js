@@ -210,7 +210,12 @@ Guidelines:
 8. Include detailed implementation guidance in the "details" field${research ? ', with specific libraries and version recommendations based on your research' : ''}
 9. If the PRD contains specific requirements for libraries, database schemas, frameworks, tech stacks, or any other implementation details, STRICTLY ADHERE to these requirements in your task breakdown and do not discard them under any circumstance
 10. Focus on filling in any gaps left by the PRD or areas that aren't fully specified, while preserving all explicit requirements
-11. Always aim to provide the most direct path to implementation, avoiding over-engineering or roundabout approaches${research ? '\n12. For each task, include specific, actionable guidance based on current industry standards and best practices discovered through research' : ''}
+11. Always aim to provide the most direct path to implementation, avoiding over-engineering or roundabout approaches${research ? '12. For each task, include specific, actionable guidance based on current industry standards and best practices discovered through research' : ''}
+13. It is necessary to analyze the existing project functions and whether the PRD requirements can be extended or encapsulated based on the existing functions
+14. Keep as few changes as possible to existing code, only when the existing code architecture or functional design is unreasonable and cannot achieve the required functionality and needs to be extended
+15. Must include steps for generating test cases and executing and fixing code
+16. Before deploying to the testing environment, the GIT push steps for the code must be included
+17. The test cases for this change must all pass before they can be deployed to the testing environment
 
 Project outline: \n` + projectSummContent;
 

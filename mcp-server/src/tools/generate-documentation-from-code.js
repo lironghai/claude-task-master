@@ -3,9 +3,9 @@ import {
     createErrorResponse,
     withNormalizedProjectRoot,
     handleApiResult,
-    asyncOperationManager,
     createContentResponse
 } from './utils.js';
+// import { asyncOperationManager } from '../core/utils/async-manager.js';
 import { generateDocumentationFromCodeDirect } from '../core/direct-functions/generate-documentation-from-code-direct.js';
 
 export function registerGenerateDocumentationFromCodeTool(server) {
@@ -13,7 +13,7 @@ export function registerGenerateDocumentationFromCodeTool(server) {
         name: "generate_documentation_from_code",
         description: "Generates documentation from specified code files using an AI model and saves them to corresponding paths.",
         parameters: z.object({
-            projectRoot: z.string().optional().describe("The absolute root directory of the project. If not provided, it's derived from the session."),
+            projectRoot: z.string().describe("The absolute root directory of the project. If not provided, it's derived from the session."),
             documentationMap: z.record(z.string(), z.string()).describe("A map where keys are source code file paths (relative to projectRoot) and values are output documentation file paths (relative to projectRoot)."),
             overwrite: z.boolean().optional().default(false).describe("Whether to overwrite existing documentation files."),
         }),
@@ -31,23 +31,26 @@ export function registerGenerateDocumentationFromCodeTool(server) {
                     const result = await generateDocumentationFromCodeDirect(args, log, { session });
                     return handleApiResult(result, log);
                 } else {
-                    log.info(`documentationMap has ${docMapSize} entries, executing asynchronously.`);
-                    const operationId = asyncOperationManager.addOperation(
-                        generateDocumentationFromCodeDirect,
-                        args,
-                        {
-                            log,
-                            session,
-                            reportProgress: (progress) => {
-                                log.info(`Operation ${operationId} progress: ${JSON.stringify(progress)}`);
-                            }
-                        }
-                    );
-                    return createContentResponse({
-                        operationId,
-                        status: "pending",
-                        message: `Documentation generation for ${docMapSize} files started in background.`
-                    });
+                    // log.info(`documentationMap has ${docMapSize} entries, executing asynchronously.`);
+                    // const operationId = asyncOperationManager.addOperation(
+                    //     generateDocumentationFromCodeDirect,
+                    //     args,
+                    //     {
+                    //         log,
+                    //         session,
+                    //         reportProgress: (progress) => {
+                    //             log.info(`Operation ${operationId} progress: ${JSON.stringify(progress)}`);
+                    //         }
+                    //     }
+                    // );
+                    // return createContentResponse({
+                    //     operationId,
+                    //     status: "pending",
+                    //     message: `Documentation generation for ${docMapSize} files started in background.`
+                    // });
+
+                    const result = await generateDocumentationFromCodeDirect(args, log, { session });
+                    return handleApiResult(result, log);
                 }
             } catch (error) {
                 log.error(`Error in generate_documentation_from_code tool: ${error.message}`, error.stack);

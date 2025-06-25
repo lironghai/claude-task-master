@@ -8,6 +8,7 @@ import path from 'path';
 import fs from 'fs';
 import { contextManager } from '../core/context-manager.js'; // Import the singleton
 import { fileURLToPath } from 'url';
+import logger from '../logger.js';
 
 // Import path utilities to ensure consistent path resolution
 import {
@@ -627,9 +628,13 @@ function getRawProjectRootFromSession(session, log) {
  */
 function withNormalizedProjectRoot(executeFn) {
 	return async (args, context) => {
-		const { log, session } = context;
+		let { log, session } = context;
 		let normalizedRoot = null;
 		let rootSource = 'unknown';
+
+		if (!log) {
+			log = logger;
+		}
 
 		try {
 			// PRECEDENCE ORDER:

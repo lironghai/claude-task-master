@@ -3,9 +3,14 @@ import chalk from 'chalk';
 import path from 'path'; 
 import fs from 'fs'; 
 
-import { findProjectRoot, log } from '../utils.js';
+import {findProjectRoot, log as uLog, log} from '../utils.js';
 import { getDebugFlag } from '../config-manager.js';
 import { generateDocumentationFromCodeDirect } from '../../../mcp-server/src/core/direct-functions/generate-documentation-from-code-direct.js';
+import { generateTextService, streamTextService, writeToFile, getFullText, initMcpClient } from '../ai-services-unified.js';
+import {tool} from "ai";
+import {z} from "zod";
+import {createErrorResponse, handleApiResult, withNormalizedProjectRoot} from "../../../mcp-server/src/tools/utils.js";
+import {genCodeDepRela} from "./gen-class-dep-rela.js";
 
 /**
  * Handles the core logic for the 'generate-documentation-from-code' CLI command.
@@ -114,4 +119,4 @@ export async function handleGenerateDocumentationFromCodeCommand(options) {
         }
         process.exit(1);
     }
-} 
+}

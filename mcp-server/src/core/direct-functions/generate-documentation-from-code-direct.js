@@ -21,7 +21,7 @@ const PROMPT_FILE_PATH = path.join(__dirname, '../../../../docs/prompts/gen_doc_
  * @param {function} [context.reportProgress] - Optional function to report progress for asynchronous operations.
  * @returns {Promise<object>} - An object containing the results and overall telemetry.
  */
-export async function generateDocumentationFromCodeDirect(args, log, context = {}) {
+export async function generateDocumentationFromCodeDirectV3(args, log, context = {}) {
     const { projectRoot, overwrite } = args;
     const { session, reportProgress = () => {} } = context;
 
@@ -146,8 +146,8 @@ export async function generateDocumentationFromCodeDirect(args, log, context = {
     };
 }
 
-export async function generateDocumentationFromCodeDirectV2(args, log, context = {}) {
-    const { projectRoot, documentationMap, overwrite } = args;
+export async function generateDocumentationFromCodeDirect(args, log, context = {}) {
+    const { projectRoot, documentationMap, overwrite, projectOutlinePath } = args;
     const { session, reportProgress = () => {} } = context;
 
     const promptFilePath = PROMPT_FILE_PATH;
@@ -198,8 +198,8 @@ export async function generateDocumentationFromCodeDirectV2(args, log, context =
     }
 
     for (const [sourceRelativePath, outputRelativePath] of Object.entries(documentationMap)) {
-        const sourceAbsolutePath = path.join(projectRoot, sourceRelativePath);
-        const outputAbsolutePath = path.join(projectRoot, outputRelativePath);
+        const sourceAbsolutePath = path.isAbsolute(sourceRelativePath) ? sourceRelativePath : path.join(projectRoot, sourceRelativePath);
+        const outputAbsolutePath = path.isAbsolute(outputRelativePath) ? outputRelativePath : path.join(projectRoot, outputRelativePath);
         let fileStatus = 'pending';
         let message = '';
         let individualTelemetryData = null;

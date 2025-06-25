@@ -1,5 +1,5 @@
 {
-	"name": "task-master-ai",
+	"name": "hero-task-master-ai",
 	"version": "0.16.2",
 	"description": "A task management system for ambitious AI-driven development that doesn't overwhelm and confuse Cursor.",
 	"main": "index.js",
@@ -37,7 +37,7 @@
 		"mcp",
 		"context"
 	],
-	"author": "Eyal Toledano",
+	"author": "",
 	"license": "MIT WITH Commons-Clause",
 	"dependencies": {
 		"@ai-sdk/amazon-bedrock": "^2.2.9",
@@ -51,8 +51,9 @@
 		"@ai-sdk/xai": "^1.2.15",
 		"@anthropic-ai/sdk": "^0.39.0",
 		"@aws-sdk/credential-providers": "^3.817.0",
+		"@modelcontextprotocol/server-sequential-thinking": "latest",
 		"@openrouter/ai-sdk-provider": "^0.4.5",
-		"ai": "^4.3.10",
+		"ai": "^4.3.16",
 		"axios": "^1.9.0",
 		"boxen": "^8.0.1",
 		"chalk": "^5.4.1",
@@ -72,25 +73,18 @@
 		"ollama-ai-provider": "^1.2.0",
 		"openai": "^4.89.0",
 		"ora": "^8.2.0",
+		"tiktoken": "^1.0.21",
 		"uuid": "^11.1.0",
 		"zod": "^3.23.8"
 	},
 	"engines": {
 		"node": ">=18.0.0"
 	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/eyaltoledano/claude-task-master.git"
-	},
-	"homepage": "https://github.com/eyaltoledano/claude-task-master#readme",
-	"bugs": {
-		"url": "https://github.com/eyaltoledano/claude-task-master/issues"
-	},
+
 	"files": [
 		"scripts/**",
 		"assets/**",
 		".cursor/**",
-		"README-task-master.md",
 		"index.js",
 		"bin/**",
 		"mcp-server/**",

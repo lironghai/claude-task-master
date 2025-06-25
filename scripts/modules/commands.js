@@ -33,7 +33,13 @@ import {
 	findTaskById,
 	taskExists,
 	moveTask,
-	migrateProject
+	migrateProject,
+	genDocFromCodePlan,
+	generateCodeFromDocumentation,
+	handleGenerateDocumentationFromCodeCommand,
+	handleGenDocFromCodePlanCommand,
+	handleGenCodeFromClassPlanCommand,
+	handleGenProjectInitCommand
 } from './task-manager.js';
 
 import {
@@ -91,14 +97,10 @@ import { syncTasksToReadme } from './sync-readme.js';
 import { generateProjectOutline } from './task-manager/project-outline.js';
 import { generateProjectCodeInit } from './task-manager/project-code-init.js';
 // Import the direct function
-// import { generateCodeDocumentationDirect } from '../../mcp-server/src/core/direct-functions/generate-code-documentation-direct.js';
 // Import the new command handler function
 // import { handleGenerateDocsCommand } from './task-manager/generate-docs-command.js';
-import { handleGenerateDocumentationFromCodeCommand } from './task-manager/generate-documentation-from-code-command.js';
 // Blueprint for new import:
-// import { handleGenerateCodeFromDocumentationCommand } from './task-manager/generate-code-from-documentation-command.js';
 // We will create this ^ file and function later. For now, let's import the core logic directly.
-import { generateCodeFromDocumentation } from './task-manager/generate-code-from-documentation.js';
 
 /**
  * Runs the interactive setup process for model configuration.
@@ -2352,6 +2354,10 @@ function registerCommands(programInstance) {
 					'DEBUG: Options received by action:',
 					JSON.stringify(cmdOptions)
 				);
+
+				if(cmdOptions.yes === 'undefind') {
+					cmdOptions.yes = true;
+				}
 				// Directly call the initializeProject function, passing the parsed options
 				await initializeProject(cmdOptions);
 				// initializeProject handles its own flow, including potential process.exit()
@@ -2822,9 +2828,10 @@ Examples:
         .command('project-outline')
         .description('生成项目大纲，输出标准 markdown 文档')
         .option('--output <file>', '输出文件路径，默认 docs/class-doc/project-outline.md')
+		.option('-p, --project-root <path>', 'The root directory of the project. Auto-detected if not provided.')
         .action(async (options) => {
             try {
-                const projectRoot = process.cwd();
+                const projectRoot = options.projectRoot || process.cwd();
                 const result = await generateProjectOutline({
                     projectRoot,
                     output: options.output
@@ -2974,8 +2981,332 @@ Examples:
                     console.error(error.stack);
                 }
                 process.exit(1);
-            }
+            }finally {
+				spinner.stop();
+			}
         });
+
+	programInstance
+		.command('gen-dep-doc-v1')
+		.description('Analyze project code dependencies and generate dependency priority documents.')
+		.option('-p, --project-root <path>', 'The root directory of the project. Defaults to auto-detected project root.')
+		.option('--plan-path <path>', 'Custom document path, defaults to /docs/plain/gen-class.md when empty')
+		.option('-o, --overwrite', 'Overwrite existing file if they exist.', false)
+		.option('--outline <path>', 'Path to a project outline document to provide broader context for code generation.')
+		.action(async (options) => {
+			const spinner = ora('Processing documentation to generate code...').start();
+			try {
+				const projectRoot = options.projectRoot || findProjectRoot();
+				if (!projectRoot) {
+					spinner.fail(chalk.red('Error: Could not determine project root. Please specify with --project-root or run from within a Task Master project.'));
+					process.exit(1);
+				}
+
+				spinner.text = 'gen-code-dep-doc ... This may take a few moments.';
+
+				const coreArgs = {
+					projectRoot,
+					planDocCustomizePath: options.planPath,
+					overwrite: !!options.overwrite,
+					projectOutlinePath: options.outline, // Add the new option here
+				};
+
+				const coreContext = {
+					session: null,
+					reportProgress: (progress) => {
+						if (progress.currentFile && progress.stage) {
+							spinner.text = `Processed ${progress.processedCount}/${progress.totalCount}: ${progress.currentFile} - ${progress.stage} (${progress.status})`;
+						} else if (progress.currentFile) {
+							spinner.text = `Processed ${progress.processedCount}/${progress.totalCount}: ${progress.currentFile} (${progress.status})`;
+						} else {
+							spinner.text = `Processed ${progress.processedCount}/${progress.totalCount} files... (${progress.status})`;
+						}
+					},
+					log: {
+						info: (msg) => console.log(chalk.blue('INFO:'), msg),
+						warn: (msg) => console.warn(chalk.yellow('WARN:'), msg),
+						error: (msg, stack) => {
+							console.error(chalk.red('ERROR:'), msg);
+							if (stack && getDebugFlag( projectRoot )) {
+								console.error(stack);
+							}
+						}
+					},
+					commandNameFromContext: 'cli_gen_code_dep_doc'
+				};
+
+				// outputFormat 'text' will trigger displayAiUsageSummary in the core logic
+				const result = await genDocFromCodePlan(coreArgs, coreContext, 'text');
+
+				spinner.succeed(chalk.green('Code generation process completed!'));
+
+				console.log(chalk.bold('\nProcessing Summary:'));
+				result.results.forEach(res => {
+					let statusChalk = chalk.yellow;
+					if (res.status === 'success') statusChalk = chalk.green;
+					else if (res.status.startsWith('error')) statusChalk = chalk.red;
+					else if (res.status.startsWith('skipped')) statusChalk = chalk.gray;
+
+					console.log(`- Document: ${chalk.cyan(res.document)}`);
+					console.log(`  Status: ${statusChalk(res.status)}`);
+					if (res.message && res.status !== 'success') {
+						console.log(`  Message: ${res.message}`);
+					}
+				});
+
+				// Overall telemetry is displayed by the core function when outputFormat is 'text'
+
+			} catch (error) {
+				spinner.fail(chalk.red('An unexpected error occurred: ' + error.message));
+				if (getDebugFlag( options.projectRoot || findProjectRoot() )) {
+					console.error(error.stack);
+				}
+				process.exit(1);
+			}finally {
+				spinner.stop();
+			}
+		});
+
+	programInstance
+		.command('gen-doc-by-dep-doc-v1')
+		.description('Analyze project code dependencies and generate dependency priority documents.')
+		.option('-p, --project-root <path>', 'The root directory of the project. Defaults to auto-detected project root.')
+		.option('--plan-path <path>', 'Custom document path, defaults to /docs/plain/gen-class.md when empty')
+		.option('-o, --overwrite', 'Overwrite existing file if they exist.', false)
+		.option('--outline <path>', 'Path to a project outline document to provide broader context for code generation.')
+		.action(async (options) => {
+			const spinner = ora('Processing documentation to generate code...').start();
+			try {
+				const projectRoot = options.projectRoot || findProjectRoot();
+				if (!projectRoot) {
+					spinner.fail(chalk.red('Error: Could not determine project root. Please specify with --project-root or run from within a Task Master project.'));
+					process.exit(1);
+				}
+
+				spinner.text = 'gen-doc-by-dep-doc ... This may take a few moments.';
+
+				const coreArgs = {
+					projectRoot,
+					planDocPath: options.planPath,
+					overwrite: !!options.overwrite,
+					projectOutlinePath: options.outline, // Add the new option here
+				};
+
+				const coreContext = {
+					session: null,
+					reportProgress: (progress) => {
+						if (progress.currentFile && progress.stage) {
+							spinner.text = `Processed ${progress.processedCount}/${progress.totalCount}: ${progress.currentFile} - ${progress.stage} (${progress.status})`;
+						} else if (progress.currentFile) {
+							spinner.text = `Processed ${progress.processedCount}/${progress.totalCount}: ${progress.currentFile} (${progress.status})`;
+						} else {
+							spinner.text = `Processed ${progress.processedCount}/${progress.totalCount} files... (${progress.status})`;
+						}
+					},
+					log: {
+						info: (msg) => console.log(chalk.blue('INFO:'), msg),
+						warn: (msg) => console.warn(chalk.yellow('WARN:'), msg),
+						error: (msg, stack) => {
+							console.error(chalk.red('ERROR:'), msg);
+							if (stack && getDebugFlag( projectRoot )) {
+								console.error(stack);
+							}
+						}
+					},
+					commandNameFromContext: 'cli_gen-code-by-dep-doc'
+				};
+
+				// outputFormat 'text' will trigger displayAiUsageSummary in the core logic
+				const result = await handleGenDocFromCodePlanCommand(coreArgs, coreContext, 'text');
+
+				spinner.succeed(chalk.green('Code generation process completed!'));
+
+				console.log(chalk.bold('\nProcessing Summary:'));
+				result.results.forEach(res => {
+					let statusChalk = chalk.yellow;
+					if (res.status === 'success') statusChalk = chalk.green;
+					else if (res.status.startsWith('error')) statusChalk = chalk.red;
+					else if (res.status.startsWith('skipped')) statusChalk = chalk.gray;
+
+					console.log(`- Document: ${chalk.cyan(res.document)}`);
+					console.log(`  Status: ${statusChalk(res.status)}`);
+					if (res.message && res.status !== 'success') {
+						console.log(`  Message: ${res.message}`);
+					}
+				});
+
+				// Overall telemetry is displayed by the core function when outputFormat is 'text'
+
+			} catch (error) {
+				spinner.fail(chalk.red('An unexpected error occurred: ' + error.message));
+				if (getDebugFlag( options.projectRoot || findProjectRoot() )) {
+					console.error(error.stack);
+				}
+				process.exit(1);
+			}finally {
+				spinner.stop();
+			}
+		});
+
+	programInstance
+		.command('gen-code-by-dep-doc-v1')
+		.description('Analyze project code dependencies and generate dependency priority documents.')
+		.option('-p, --project-root <path>', 'The root directory of the project. Defaults to auto-detected project root.')
+		.option('--plan-path <path>', 'Custom document path, defaults to /docs/plain/gen-class.md when empty')
+		.option('-o, --overwrite', 'Overwrite existing file if they exist.', false)
+		.option('--outline <path>', 'Path to a project outline document to provide broader context for code generation.')
+		.action(async (options) => {
+			const spinner = ora('Processing documentation to generate code...').start();
+			try {
+				const projectRoot = options.projectRoot || findProjectRoot();
+				if (!projectRoot) {
+					spinner.fail(chalk.red('Error: Could not determine project root. Please specify with --project-root or run from within a Task Master project.'));
+					process.exit(1);
+				}
+
+				spinner.text = 'gen-code-by-dep-doc ... This may take a few moments.';
+
+				const coreArgs = {
+					projectRoot,
+					planDocPath: options.planPath,
+					overwrite: !!options.overwrite,
+					projectOutlinePath: options.outline, // Add the new option here
+				};
+
+				const coreContext = {
+					session: null,
+					reportProgress: (progress) => {
+						if (progress.currentFile && progress.stage) {
+							spinner.text = `Processed ${progress.processedCount}/${progress.totalCount}: ${progress.currentFile} - ${progress.stage} (${progress.status})`;
+						} else if (progress.currentFile) {
+							spinner.text = `Processed ${progress.processedCount}/${progress.totalCount}: ${progress.currentFile} (${progress.status})`;
+						} else {
+							spinner.text = `Processed ${progress.processedCount}/${progress.totalCount} files... (${progress.status})`;
+						}
+					},
+					log: {
+						info: (msg) => console.log(chalk.blue('INFO:'), msg),
+						warn: (msg) => console.warn(chalk.yellow('WARN:'), msg),
+						error: (msg, stack) => {
+							console.error(chalk.red('ERROR:'), msg);
+							if (stack && getDebugFlag( projectRoot )) {
+								console.error(stack);
+							}
+						}
+					},
+					commandNameFromContext: 'cli_gen-code-by-dep-doc'
+				};
+
+				// outputFormat 'text' will trigger displayAiUsageSummary in the core logic
+				const result = await handleGenCodeFromClassPlanCommand(coreArgs, coreContext, 'text');
+
+				spinner.succeed(chalk.green('Code generation process completed!'));
+
+				console.log(chalk.bold('\nProcessing Summary:'));
+				result.results.forEach(res => {
+					let statusChalk = chalk.yellow;
+					if (res.status === 'success') statusChalk = chalk.green;
+					else if (res.status.startsWith('error')) statusChalk = chalk.red;
+					else if (res.status.startsWith('skipped')) statusChalk = chalk.gray;
+
+					console.log(`- Document: ${chalk.cyan(res.document)}`);
+					console.log(`  Status: ${statusChalk(res.status)}`);
+					if (res.message && res.status !== 'success') {
+						console.log(`  Message: ${res.message}`);
+					}
+				});
+
+				// Overall telemetry is displayed by the core function when outputFormat is 'text'
+
+			} catch (error) {
+				spinner.fail(chalk.red('An unexpected error occurred: ' + error.message));
+				if (getDebugFlag( options.projectRoot || findProjectRoot() )) {
+					console.error(error.stack);
+				}
+				process.exit(1);
+			}finally {
+				spinner.stop();
+			}
+		});
+
+	programInstance
+		.command('gen-project-dir-init-v1')
+		.description('Analyze project code dependencies and generate dependency priority documents.')
+		.option('-p, --project-root <path>', 'The root directory of the project. Defaults to auto-detected project root.')
+		.option('-o, --overwrite', 'Overwrite existing file if they exist.', false)
+		.option('--outline <path>', 'Path to a project outline document to provide broader context for code generation.')
+		.action(async (options) => {
+			const spinner = ora('Processing documentation to generate code...').start();
+			try {
+				const projectRoot = options.projectRoot || findProjectRoot();
+				if (!projectRoot) {
+					spinner.fail(chalk.red('Error: Could not determine project root. Please specify with --project-root or run from within a Task Master project.'));
+					process.exit(1);
+				}
+
+				spinner.text = 'gen-project-dir-init-v1 ... This may take a few moments.';
+
+				const coreArgs = {
+					projectRoot,
+					overwrite: !!options.overwrite,
+					projectOutlinePath: options.outline, // Add the new option here
+				};
+
+				const coreContext = {
+					session: null,
+					reportProgress: (progress) => {
+						if (progress.currentFile && progress.stage) {
+							spinner.text = `Processed ${progress.processedCount}/${progress.totalCount}: ${progress.currentFile} - ${progress.stage} (${progress.status})`;
+						} else if (progress.currentFile) {
+							spinner.text = `Processed ${progress.processedCount}/${progress.totalCount}: ${progress.currentFile} (${progress.status})`;
+						} else {
+							spinner.text = `Processed ${progress.processedCount}/${progress.totalCount} files... (${progress.status})`;
+						}
+					},
+					log: {
+						info: (msg) => console.log(chalk.blue('INFO:'), msg),
+						warn: (msg) => console.warn(chalk.yellow('WARN:'), msg),
+						error: (msg, stack) => {
+							console.error(chalk.red('ERROR:'), msg);
+							if (stack && getDebugFlag( projectRoot )) {
+								console.error(stack);
+							}
+						}
+					},
+					commandNameFromContext: 'cli_gen-project-dir-init-v1'
+				};
+
+				// outputFormat 'text' will trigger displayAiUsageSummary in the core logic
+				const result = await handleGenProjectInitCommand(coreArgs, coreContext, 'text');
+
+				spinner.succeed(chalk.green('Code generation process completed!'));
+
+				console.log(chalk.bold('\nProcessing Summary:'));
+				result.results.forEach(res => {
+					let statusChalk = chalk.yellow;
+					if (res.status === 'success') statusChalk = chalk.green;
+					else if (res.status.startsWith('error')) statusChalk = chalk.red;
+					else if (res.status.startsWith('skipped')) statusChalk = chalk.gray;
+
+					console.log(`- Document: ${chalk.cyan(res.document)}`);
+					console.log(`  Status: ${statusChalk(res.status)}`);
+					if (res.message && res.status !== 'success') {
+						console.log(`  Message: ${res.message}`);
+					}
+				});
+
+				// Overall telemetry is displayed by the core function when outputFormat is 'text'
+
+			} catch (error) {
+				spinner.fail(chalk.red('An unexpected error occurred: ' + error.message));
+				if (getDebugFlag( options.projectRoot || findProjectRoot() )) {
+					console.error(error.stack);
+				}
+				process.exit(1);
+			}finally {
+				spinner.stop();
+			}
+		});
 
 	return programInstance;
 }
@@ -3035,7 +3366,7 @@ async function checkForUpdate() {
 		// Get the latest version from npm registry
 		const options = {
 			hostname: 'registry.npmjs.org',
-			path: '/task-master-ai',
+			path: '/hero-task-master-ai',
 			method: 'GET',
 			headers: {
 				Accept: 'application/vnd.npm.install-v1+json' // Lightweight response
@@ -3127,7 +3458,7 @@ function compareVersions(v1, v2) {
 function displayUpgradeNotification(currentVersion, latestVersion) {
 	const message = boxen(
 		`${chalk.blue.bold('Update Available!')} ${chalk.dim(currentVersion)} → ${chalk.green(latestVersion)}\n\n` +
-			`Run ${chalk.cyan('npm i task-master-ai@latest -g')} to update to the latest version with new features and bug fixes.`,
+			`Run ${chalk.cyan('npm i hero-task-master-ai@latest -g')} to update to the latest version with new features and bug fixes.`,
 		{
 			padding: 1,
 			margin: { top: 1, bottom: 1 },

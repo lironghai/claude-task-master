@@ -1,9 +1,14 @@
 import fs from 'fs';
 import path from 'path';
 import { z } from 'zod';
-import { generateObjectService } from '../ai-services-unified.js';
+import { generateTextService,generateObjectService, streamTextService, writeToFile, getFullText, initMcpClient } from '../ai-services-unified.js';
 import { log, writeJSON, enableSilentMode, disableSilentMode, isSilentMode } from '../utils.js';
 import { getDebugFlag } from '../config-manager.js';
+import {fileURLToPath} from "url";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const PROMPT_FILE_PATH = path.join(__dirname, '../../../docs/prompts/document-gen-summ.md');
+
 
 // Zod schema for outline result
 const outlineSchema = z.object({
@@ -64,28 +69,43 @@ export async function generateProjectOutline({ projectRoot, output, session, mcp
 
 项目大纲文档要求：
 `
-  const systemPrompt = systemPrompt2 + fs.readFileSync(path.resolve(projectRoot, 'docs', 'summ', 'document-gen-summ.md'), 'utf-8');
-  const userPrompt = '请根据要求，生成符合规范的项目大纲任务清单。';
+  // const systemPrompt = systemPrompt2 + fs.readFileSync(path.resolve(projectRoot, 'docs', 'summ', 'document-gen-summ.md'), 'utf-8');
+  const systemPrompt = fs.readFileSync(PROMPT_FILE_PATH, 'utf-8');
+  // const userPrompt = '请根据要求，生成符合规范的项目大纲任务清单。';
+  const userPrompt = `请根据要求，生成详细的项目大纲，并帮我写入到指定文件 ${outputDir}。`;
 
   // 调用 AI 服务
-  const aiServiceResponse = await generateObjectService({
-    role: 'main',
-    session,
-    projectRoot,
-    schema: outlineSchema,
-    objectName: 'project_outline',
-    systemPrompt,
+  // const aiServiceResponse = await generateObjectService({
+  //   role: 'main',
+  //   session,
+  //   projectRoot,
+  //   schema: outlineSchema,
+  //   objectName: 'project_outline',
+  //   systemPrompt,
+  //   prompt: userPrompt,
+  //   commandName: 'generate-project-outline',
+  //   outputType: session ? 'mcp' : 'cli'
+  // });
+  const aiServiceResponse = await generateTextService({
+    session, // Pass session from context
+    systemPrompt: systemPrompt,
     prompt: userPrompt,
-    commandName: 'generate-project-outline',
-    outputType: session ? 'mcp' : 'cli'
+    commandName: 'generate-project-outline', // Provided by caller (CLI/Direct func)
+    outputType: 'cli' ,
+    projectRoot,
+    filePathContext: outputPath,
   });
 
-  const outlineData = aiServiceResponse?.mainResult;
-  if (!outlineData || typeof outlineData.outline !== 'string') {
-    throw new Error('AI 服务未返回有效的大纲内容');
+  if (!aiServiceResponse || typeof aiServiceResponse.mainResult !== 'string') { // Expecting string for code
+    throw new Error('AI service did not return a valid string result for code generation.');
   }
 
-  fs.writeFileSync(outputPath, outlineData.outline, 'utf-8');
+  // const outlineData = aiServiceResponse?.mainResult;
+  // if (!outlineData || typeof outlineData.outline !== 'string') {
+  //   throw new Error('AI 服务未返回有效的大纲内容');
+  // }
+  //
+  // fs.writeFileSync(outputPath, outlineData.outline, 'utf-8');
 
   return {
     outlinePath: outputPath,

@@ -215,6 +215,51 @@ function copyTemplateFile(templateName, targetPath, replacements = {}) {
 				'cursor_rules.mdc'
 			);
 			break;
+		case 'project-class-doc-work.mdc':
+			sourcePath = path.join(
+				__dirname,
+				'..',
+				'.cursor',
+				'rules',
+				'project-class-doc-work.mdc'
+			);
+			break;
+		case 'project-outline-workflow.mdc':
+			sourcePath = path.join(
+				__dirname,
+				'..',
+				'.cursor',
+				'rules',
+				'project-outline-workflow.mdc'
+			);
+			break;
+		case 'new-prd-workflow.mdc':
+			sourcePath = path.join(
+				__dirname,
+				'..',
+				'.cursor',
+				'rules',
+				'new-prd-workflow.mdc'
+			);
+			break;
+		case 'gen-code-from-doc-workflow.mdc':
+			sourcePath = path.join(
+				__dirname,
+				'..',
+				'.cursor',
+				'rules',
+				'gen-code-from-doc-workflow.mdc'
+			);
+			break;
+		case 'code-mr-review.mdc':
+			sourcePath = path.join(
+				__dirname,
+				'..',
+				'.cursor',
+				'rules',
+				'code-mr-review.mdc'
+			);
+			break;
 		case 'self_improve.mdc':
 			sourcePath = path.join(
 				__dirname,
@@ -358,7 +403,7 @@ async function initializeProject(options = {}) {
 	// 	console.log('==================================================');
 	// }
 
-	const skipPrompts = options.yes || (options.name && options.description);
+	const skipPrompts = options.yes || (options.name && options.description) || true;
 
 	// if (!isSilentMode()) {
 	// 	console.log('Skip prompts determined:', skipPrompts);
@@ -377,6 +422,7 @@ async function initializeProject(options = {}) {
 		const authorName = options.author || 'Vibe coder';
 		const dryRun = options.dryRun || false;
 		const addAliases = options.aliases || false;
+		options.yes = true;
 
 		if (dryRun) {
 			log('info', 'DRY RUN MODE: No files will be modified');
@@ -476,11 +522,11 @@ function createProjectStructure(addAliases, dryRun, options) {
 	ensureDirectoryExists(path.join(targetDir, '.cursor/rules'));
 
 	// Create Roo directories
-	ensureDirectoryExists(path.join(targetDir, '.roo'));
-	ensureDirectoryExists(path.join(targetDir, '.roo/rules'));
-	for (const mode of ROO_MODES) {
-		ensureDirectoryExists(path.join(targetDir, '.roo', `rules-${mode}`));
-	}
+	// ensureDirectoryExists(path.join(targetDir, '.roo'));
+	// ensureDirectoryExists(path.join(targetDir, '.roo/rules'));
+	// for (const mode of ROO_MODES) {
+	// 	ensureDirectoryExists(path.join(targetDir, '.roo', `rules-${mode}`));
+	// }
 
 	// Create NEW .taskmaster directory structure (using constants)
 	ensureDirectoryExists(path.join(targetDir, TASKMASTER_DIR));
@@ -491,7 +537,7 @@ function createProjectStructure(addAliases, dryRun, options) {
     ensureDirectoryExists(path.join(targetDir, 'temp'));
     
 	// Setup MCP configuration for integration with Cursor
-	setupMCPConfiguration(targetDir);
+	// setupMCPConfiguration(targetDir);
 
 	// Copy template files with replacements
 	const replacements = {
@@ -515,21 +561,41 @@ function createProjectStructure(addAliases, dryRun, options) {
 	);
 
 	// Copy .gitignore
-	copyTemplateFile('gitignore', path.join(targetDir, GITIGNORE_FILE));
+	// copyTemplateFile('gitignore', path.join(targetDir, GITIGNORE_FILE));
 
 	// Copy dev_workflow.mdc
-	copyTemplateFile(
-		'dev_workflow.mdc',
-		path.join(targetDir, '.cursor/rules/dev_workflow.mdc')
-	);
+	// copyTemplateFile(
+	// 	'dev_workflow.mdc',
+	// 	path.join(targetDir, '.cursor/rules/dev_workflow.mdc')
+	// );
 
 	// Copy taskmaster.mdc
-	copyTemplateFile(
-		'taskmaster.mdc',
-		path.join(targetDir, '.cursor/rules/taskmaster.mdc')
-	);
+	// copyTemplateFile(
+	// 	'taskmaster.mdc',
+	// 	path.join(targetDir, '.cursor/rules/taskmaster.mdc')
+	// );
 
 	// Copy cursor_rules.mdc
+	copyTemplateFile(
+		'project-class-doc-work.mdc',
+		path.join(targetDir, '.cursor/rules/project-class-doc-work.mdc')
+	);
+	copyTemplateFile(
+		'project-outline-workflow.mdc',
+		path.join(targetDir, '.cursor/rules/project-outline-workflow.mdc')
+	);
+	copyTemplateFile(
+		'new-prd-workflow.mdc',
+		path.join(targetDir, '.cursor/rules/new-prd-workflow.mdc')
+	);
+	copyTemplateFile(
+		'gen-code-from-doc-workflow.mdc',
+		path.join(targetDir, '.cursor/rules/gen-code-from-doc-workflow.mdc')
+	);
+	copyTemplateFile(
+		'code-mr-review.mdc',
+		path.join(targetDir, '.cursor/rules/code-mr-review.mdc')
+	);
 	copyTemplateFile(
 		'cursor_rules.mdc',
 		path.join(targetDir, '.cursor/rules/cursor_rules.mdc')
@@ -542,25 +608,25 @@ function createProjectStructure(addAliases, dryRun, options) {
 	);
 
 	// Generate Roo rules from Cursor rules
-	log('info', 'Generating Roo rules from Cursor rules...');
-	convertAllCursorRulesToRooRules(targetDir);
+	// log('info', 'Generating Roo rules from Cursor rules...');
+	// convertAllCursorRulesToRooRules(targetDir);
 
 	// Copy .windsurfrules
-	copyTemplateFile('windsurfrules', path.join(targetDir, '.windsurfrules'));
+	// copyTemplateFile('windsurfrules', path.join(targetDir, '.windsurfrules'));
 
 	// Copy .roomodes for Roo Code integration
-	copyTemplateFile('.roomodes', path.join(targetDir, '.roomodes'));
+	// copyTemplateFile('.roomodes', path.join(targetDir, '.roomodes'));
 
 	// Copy Roo rule files for each mode
-	for (const mode of ROO_MODES) {
-		copyTemplateFile(
-			`${mode}-rules`,
-			path.join(targetDir, '.roo', `rules-${mode}`, `${mode}-rules`)
-		);
-	}
+	// for (const mode of ROO_MODES) {
+	// 	copyTemplateFile(
+	// 		`${mode}-rules`,
+	// 		path.join(targetDir, '.roo', `rules-${mode}`, `${mode}-rules`)
+	// 	);
+	// }
 
 	// Copy example_prd.txt to NEW location
-	copyTemplateFile('example_prd.txt', path.join(targetDir, EXAMPLE_PRD_FILE));
+	copyTemplateFile('prd_cn.txt', path.join(targetDir, EXAMPLE_PRD_FILE));
 
 	// Initialize git repository if git is available
 	try {
@@ -656,41 +722,41 @@ function createProjectStructure(addAliases, dryRun, options) {
 
 	// Display next steps in a nice box
 	if (!isSilentMode()) {
-		console.log(
-			boxen(
-				`${chalk.cyan.bold('Things you should do next:')}\n\n${chalk.white('1. ')}${chalk.yellow(
-					'Configure AI models (if needed) and add API keys to `.env`'
-				)}\n${chalk.white('   ├─ ')}${chalk.dim('Models: Use `task-master models` commands')}\n${chalk.white('   └─ ')}${chalk.dim(
-					'Keys: Add provider API keys to .env (or inside the MCP config file i.e. .cursor/mcp.json)'
-				)}\n${chalk.white('2. ')}${chalk.yellow(
-					'Discuss your idea with AI and ask for a PRD using example_prd.txt, and save it to scripts/PRD.txt'
-				)}\n${chalk.white('3. ')}${chalk.yellow(
-					'Ask Cursor Agent (or run CLI) to parse your PRD and generate initial tasks:'
-				)}\n${chalk.white('   └─ ')}${chalk.dim('MCP Tool: ')}${chalk.cyan('parse_prd')}${chalk.dim(' | CLI: ')}${chalk.cyan('task-master parse-prd scripts/prd.txt')}\n${chalk.white('4. ')}${chalk.yellow(
-					'Ask Cursor to analyze the complexity of the tasks in your PRD using research'
-				)}\n${chalk.white('   └─ ')}${chalk.dim('MCP Tool: ')}${chalk.cyan('analyze_project_complexity')}${chalk.dim(' | CLI: ')}${chalk.cyan('task-master analyze-complexity')}\n${chalk.white('5. ')}${chalk.yellow(
-					'Ask Cursor to expand all of your tasks using the complexity analysis'
-				)}\n${chalk.white('6. ')}${chalk.yellow('Ask Cursor to begin working on the next task')}\n${chalk.white('7. ')}${chalk.yellow(
-					'Add new tasks anytime using the add-task command or MCP tool'
-				)}\n${chalk.white('8. ')}${chalk.yellow(
-					'Ask Cursor to set the status of one or many tasks/subtasks at a time. Use the task id from the task lists.'
-				)}\n${chalk.white('9. ')}${chalk.yellow(
-					'Ask Cursor to update all tasks from a specific task id based on new learnings or pivots in your project.'
-				)}\n${chalk.white('10. ')}${chalk.green.bold('Ship it!')}\n\n${chalk.dim(
-					'* Review the README.md file to learn how to use other commands via Cursor Agent.'
-				)}\n${chalk.dim(
-					'* Use the task-master command without arguments to see all available commands.'
-				)}`,
-				{
-					padding: 1,
-					margin: 1,
-					borderStyle: 'round',
-					borderColor: 'yellow',
-					title: 'Getting Started',
-					titleAlignment: 'center'
-				}
-			)
-		);
+		// console.log(
+		// 	boxen(
+		// 		`${chalk.cyan.bold('Things you should do next:')}\n\n${chalk.white('1. ')}${chalk.yellow(
+		// 			'Configure AI models (if needed) and add API keys to `.env`'
+		// 		)}\n${chalk.white('   ├─ ')}${chalk.dim('Models: Use `task-master models` commands')}\n${chalk.white('   └─ ')}${chalk.dim(
+		// 			'Keys: Add provider API keys to .env (or inside the MCP config file i.e. .cursor/mcp.json)'
+		// 		)}\n${chalk.white('2. ')}${chalk.yellow(
+		// 			'Discuss your idea with AI and ask for a PRD using example_prd.txt, and save it to scripts/PRD.txt'
+		// 		)}\n${chalk.white('3. ')}${chalk.yellow(
+		// 			'Ask Cursor Agent (or run CLI) to parse your PRD and generate initial tasks:'
+		// 		)}\n${chalk.white('   └─ ')}${chalk.dim('MCP Tool: ')}${chalk.cyan('parse_prd')}${chalk.dim(' | CLI: ')}${chalk.cyan('task-master parse-prd scripts/prd.txt')}\n${chalk.white('4. ')}${chalk.yellow(
+		// 			'Ask Cursor to analyze the complexity of the tasks in your PRD using research'
+		// 		)}\n${chalk.white('   └─ ')}${chalk.dim('MCP Tool: ')}${chalk.cyan('analyze_project_complexity')}${chalk.dim(' | CLI: ')}${chalk.cyan('task-master analyze-complexity')}\n${chalk.white('5. ')}${chalk.yellow(
+		// 			'Ask Cursor to expand all of your tasks using the complexity analysis'
+		// 		)}\n${chalk.white('6. ')}${chalk.yellow('Ask Cursor to begin working on the next task')}\n${chalk.white('7. ')}${chalk.yellow(
+		// 			'Add new tasks anytime using the add-task command or MCP tool'
+		// 		)}\n${chalk.white('8. ')}${chalk.yellow(
+		// 			'Ask Cursor to set the status of one or many tasks/subtasks at a time. Use the task id from the task lists.'
+		// 		)}\n${chalk.white('9. ')}${chalk.yellow(
+		// 			'Ask Cursor to update all tasks from a specific task id based on new learnings or pivots in your project.'
+		// 		)}\n${chalk.white('10. ')}${chalk.green.bold('Ship it!')}\n\n${chalk.dim(
+		// 			'* Review the README.md file to learn how to use other commands via Cursor Agent.'
+		// 		)}\n${chalk.dim(
+		// 			'* Use the task-master command without arguments to see all available commands.'
+		// 		)}`,
+		// 		{
+		// 			padding: 1,
+		// 			margin: 1,
+		// 			borderStyle: 'round',
+		// 			borderColor: 'yellow',
+		// 			title: 'Getting Started',
+		// 			titleAlignment: 'center'
+		// 		}
+		// 	)
+		// );
 	}
 }
 
@@ -706,9 +772,9 @@ function setupMCPConfiguration(targetDir) {
 
 	// New MCP config to be added - references the installed package
 	const newMCPServer = {
-		'task-master-ai': {
+		'hero-task-master-ai': {
 			command: 'npx',
-			args: ['-y', '--package=task-master-ai', 'task-master-ai'],
+			args: ['-y', 'hero-task-master-ai'],
 			env: {
 				ANTHROPIC_API_KEY: 'ANTHROPIC_API_KEY_HERE',
 				PERPLEXITY_API_KEY: 'PERPLEXITY_API_KEY_HERE',
@@ -756,8 +822,8 @@ function setupMCPConfiguration(targetDir) {
 			}
 
 			// Add the task-master-ai server if it doesn't exist
-			if (!mcpConfig.mcpServers['task-master-ai']) {
-				mcpConfig.mcpServers['task-master-ai'] = newMCPServer['task-master-ai'];
+			if (!mcpConfig.mcpServers['hero-task-master-ai']) {
+				mcpConfig.mcpServers['hero-task-master-ai'] = newMCPServer['hero-task-master-ai'];
 				log(
 					'info',
 					'Added task-master-ai server to existing MCP configuration'

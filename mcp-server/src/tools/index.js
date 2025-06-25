@@ -43,8 +43,8 @@ export function registerTaskMasterTools(server) {
 		// Register each tool in a logical workflow order
 
 		// Group 1: Initialization & Setup
-		registerInitializeProjectTool(server);
-		registerModelsTool(server);
+		// registerInitializeProjectTool(server);
+		// registerModelsTool(server);
 		registerParsePRDTool(server);
 
 		// Group 2: Task Listing & Viewing

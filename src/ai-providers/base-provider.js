@@ -1,4 +1,12 @@
-import {experimental_createMCPClient as createMCPClient, generateObject, generateText, streamText} from 'ai';
+import {
+	experimental_createMCPClient as createMCPClient,
+	generateObject,
+	generateText,
+	NoSuchToolError,
+	streamText
+} from './base_index.js';
+// } from 'ai';
+// } from './base_index.js';
 import {log} from '../../scripts/modules/index.js';
 import {Experimental_StdioMCPTransport as StdioMCPTransport} from 'ai/mcp-stdio';
 
@@ -18,6 +26,8 @@ export class BaseAIProvider {
 		this.terminalClient = null;
 		this.filesystemClient = null;
 		this.fetchClient = null;
+		this.thinkingClient = null;
+		this.context7Client = null;
 	}
 
 	async initMcpClient() {
@@ -53,6 +63,32 @@ export class BaseAIProvider {
 				}),
 			});
 		}
+		if (!this.thinkingClient) {
+			this.thinkingClient = await createMCPClient({
+				transport: new StdioMCPTransport({
+					command: "cmd",
+					args: [
+						"/c",
+						"npx",
+						"-y",
+						"@modelcontextprotocol/server-sequential-thinking@latest"
+					],
+				}),
+			});
+		}
+		if (!this.context7Client) {
+			this.context7Client = await createMCPClient({
+				transport: new StdioMCPTransport({
+					command: "cmd",
+					args: [
+						"/c",
+						"npx",
+						"-y",
+						"@upstash/context7-mcp@latest"
+					]
+				}),
+			});
+		}
 	}
 
 	async closeMcpClient() {
@@ -66,6 +102,12 @@ export class BaseAIProvider {
 
 		if (this.fetchClient) {
 			await this.fetchClient?.close();
+		}
+		if (this.thinkingClient) {
+			await this.thinkingClient?.close();
+		}
+		if (this.context7Client) {
+			await this.context7Client?.close();
 		}
 	}
 
@@ -154,11 +196,15 @@ export class BaseAIProvider {
 		await this.initMcpClient();
 		const toolSetOne = await this.terminalClient?.tools();
 		const toolSetTwo = await this.filesystemClient?.tools();
-		const toolSetThree = await this.fetchClient?.tools();
+		// const toolSetThree = await this.fetchClient?.tools();
+		const thinkingTools = await this.thinkingClient?.tools();
+		const context7Tools = await this.context7Client?.tools();
 		return {
 			...toolSetOne,
 			...toolSetTwo,
-			...toolSetThree, // note: this approach causes subsequent tool sets to override tools with the same name
+			// ...toolSetThree, // note: this approach causes subsequent tool sets to override tools with the same name
+			...thinkingTools,
+			...context7Tools
 		};
 	}
 
@@ -175,25 +221,163 @@ export class BaseAIProvider {
 				`Generating ${this.name} text with model: ${params.modelId}`
 			);
 
+			let curtime  = Date.now();
+			let sessionTime  = Date.now();
 			const client = this.getClient(params);
-			const tools = await this.getTools(params);
+			// const tools = await this.getTools(params);
+			const tools = params.tools;
 			const result = await generateText({
 				model: client(params.modelId),
 				tools: tools,
 				toolChoice: 'auto',
+				experimental_activeTools: params.activeTools,
+				experimental_continueSteps: true,
 				messages: params.messages,
-				maxSteps: 1000,
+				maxSteps: 50,
 				maxTokens: params.maxTokens,
-				temperature: params.temperature
+				temperature: params.temperature,
+				// abortSignal: AbortSignal.timeout(6000000),
+				// experimental_repairToolCall: async ({
+				// 										toolCall,
+				// 										tools,
+				// 										parameterSchema,
+				// 										error,
+				// 									}) => {
+				// 	if (NoSuchToolError.isInstance(error)) {
+				// 		return null; // do not attempt to fix invalid tool names
+				// 	}
+				//
+				// 	const tool = tools[toolCall.toolName];
+				//
+				// 	const { object: repairedArgs } = await generateObject({
+				// 		model: client(params.modelId),
+				// 		schema: tool.parameters,
+				// 		prompt: [
+				// 			`The model tried to call the tool "${toolCall.toolName}"` +
+				// 			` with the following arguments:`,
+				// 			JSON.stringify(toolCall.args),
+				// 			`The tool accepts the following schema:`,
+				// 			JSON.stringify(parameterSchema(toolCall)),
+				// 			'Please fix the arguments.',
+				// 		].join('\n'),
+				// 	});
+				//
+				// 	return { ...toolCall, args: JSON.stringify(repairedArgs) };
+				// },
+
+
+				experimental_prepareStep: async (prepareStepArgs) => {
+					// when nothing is returned, the default settings are used
+					log(
+						'debug',
+						`Generating prepareStep model: ${prepareStepArgs.model.modelId} ,stepNumber: ${prepareStepArgs.stepNumber} ,maxSteps: ${prepareStepArgs.maxSteps}`
+					);
+					curtime = Date.now();
+				},
+
+				experimental_transform: {
+					transformMessages: async (currentMessages) => {
+						// 基于消息数量截断
+						let maxMessages = 100;
+						if (currentMessages.length > maxMessages) {
+							console.log(`Truncating ${currentMessages.length} messages to ${maxMessages}`);
+							return this.truncateByCount(currentMessages, maxMessages);
+						}
+
+						// 基于 token 数量截断
+						const tokenCount = this.estimateTokenCount(currentMessages);
+						let maxTokens = 20480;
+						if (tokenCount > maxTokens) {
+							console.log(`Truncating ${tokenCount} tokens to ~${maxTokens}`);
+							return await this.truncateByTokens(currentMessages, maxTokens);
+						}
+
+						return currentMessages;
+					}
+				},
+				experimental_repairToolCall: async ({
+														toolCall,
+														tools,
+														error,
+														messages,
+														system,
+													}) => {
+					const result = await generateText({
+							model: client(params.modelId),
+						system,
+						messages: [
+							...messages,
+							{
+								role: 'assistant',
+								content: [
+									{
+										type: 'tool-call',
+										toolCallId: toolCall.toolCallId,
+										toolName: toolCall.toolName,
+										args: toolCall.args,
+									},
+								],
+							},
+							{
+								role: 'tool',
+								content: [
+									{
+										type: 'tool-result',
+										toolCallId: toolCall.toolCallId,
+										toolName: toolCall.toolName,
+										result: error.message,
+									},
+								],
+							},
+						],
+						tools,
+					});
+
+					const newToolCall = result.toolCalls.find(
+						newToolCall => newToolCall.toolName === toolCall.toolName,
+					);
+
+					return newToolCall != null
+						? {
+							toolCallType: 'function',
+							toolCallId: toolCall.toolCallId,
+							toolName: toolCall.toolName,
+							args: JSON.stringify(newToolCall.args),
+						}
+						: null;
+				},
+
+				onStepFinish(onStepFinishArgs) {
+					// your own logic, e.g. for saving the chat history or recording usage
+					const toolName = onStepFinishArgs.toolCalls[0]?.toolName;
+					let toolArgs = null;
+					let toolRes = null;
+					if (toolName === 'read_file' || toolName === 'write_file'){
+						toolArgs = onStepFinishArgs.toolCalls[0]?.args.size;
+						toolRes = onStepFinishArgs.toolResults[0]?.result?.content.size;
+					}else {
+						toolArgs = JSON.stringify(onStepFinishArgs.toolCalls[0]?.args);
+						toolRes = JSON.stringify(onStepFinishArgs.toolResults[0]?.result?.content);
+					}
+					log(
+						'debug',
+						`Generating onStepFinish text: ${onStepFinishArgs.text} ,toolCalls: ${onStepFinishArgs.toolCalls[0]?.toolName} usage: ${onStepFinishArgs.usage?.totalTokens} ,time: ${Date.now() - curtime} \\n,args: ${toolArgs} \\n,toolResults: ${toolRes}`
+					);
+
+				},
 			});
 
 			log(
 				'debug',
-				`${this.name} generateText completed successfully for model: ${params.modelId}`
+				`${this.name} generateText completed successfully for model: ${params.modelId} , tools call: ${result.steps} time: ${Date.now() - sessionTime}`
 			);
 
 			return {
+				messages: result.response.messages,
+				toolResults: result.toolResults,
+				steps: result.steps,
 				text: result.text,
+				finishReason: result.finishReason,
 				usage: {
 					inputTokens: result.usage?.promptTokens,
 					outputTokens: result.usage?.completionTokens,
@@ -217,12 +401,45 @@ export class BaseAIProvider {
 
 			log('debug', `Streaming ${this.name} text with model: ${params.modelId}`);
 
+			let curtime  = Date.now();
 			const client = this.getClient(params);
+			// const tools = await this.getTools(params);
 			const stream = await streamText({
 				model: client(params.modelId),
+				tools: params.tools,
+				toolChoice: 'auto',
+				experimental_activeTools: params.activeTools,
+				experimental_continueSteps: true,
 				messages: params.messages,
+				maxSteps: 50,
 				maxTokens: params.maxTokens,
-				temperature: params.temperature
+				temperature: params.temperature,
+				onStepFinish(onStepFinishArgs) {
+					// your own logic, e.g. for saving the chat history or recording usage
+					const toolName = onStepFinishArgs.toolCalls[0]?.toolName;
+					let toolArgs = null;
+					let toolRes = null;
+					if (toolName === 'read_file' || toolName === 'write_file'){
+						toolArgs = onStepFinishArgs.toolCalls[0]?.args.size;
+						toolRes = onStepFinishArgs.toolResults[0]?.result?.content.size;
+					}else {
+						toolArgs = JSON.stringify(onStepFinishArgs.toolCalls[0]?.args);
+						toolRes = JSON.stringify(onStepFinishArgs.toolResults[0]?.result?.content);
+					}
+					log(
+						'debug',
+						`streamText Generating onStepFinish text: ${onStepFinishArgs.text} ,stepType: ${onStepFinishArgs.stepType} ,stepNumber: ${onStepFinishArgs.stepNumber} ,toolCalls: ${onStepFinishArgs.toolCalls[0]?.toolName} usage: ${onStepFinishArgs.usage?.totalTokens} ,time: ${Date.now() - curtime} \\n,args: ${toolArgs} \\n,toolResults: ${toolRes} `
+					);
+
+					curtime  = Date.now();
+
+				},
+				onFinish(onFinishArgs) {
+					log(
+						'debug',
+						`streamText Generating onFinish `
+					);
+				}
 			});
 
 			log(
@@ -283,4 +500,31 @@ export class BaseAIProvider {
 			this.handleError('object generation', error);
 		}
 	}
+
+	truncateByCount(messages, maxCount) {
+		const systemMessages = messages.filter(m => m.role === 'system');
+		const otherMessages = messages.filter(m => m.role !== 'system');
+		const keepCount = Math.max(1, maxCount - systemMessages.length);
+
+		return [
+			...systemMessages,
+			...otherMessages.slice(-keepCount)
+		];
+	}
+
+	estimateTokenCount(messages) {
+		// 简单估算：每个字符约 0.25 token
+		return messages.reduce((total, msg) => {
+			return total + (msg.content?.length || 0) * 0.25;
+		}, 0);
+	}
+
+	async truncateByTokens(messages, maxTokens) {
+		// 实现基于 token 的截断逻辑
+		// ... (使用前面提到的 tiktoken 方法)
+		return messages; // 简化示例
+	}
+
+
+
 }
