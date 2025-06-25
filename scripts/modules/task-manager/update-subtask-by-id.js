@@ -235,11 +235,14 @@ Current Subtask Details (for context only):\n${subtask.details || '(No existing 
 Your Goal: Based *only* on the user's request and all the provided context (including existing details if relevant to the request), GENERATE the new text content that should be added to the subtask's details.
 Focus *only* on generating the substance of the update.
 
+Language: Chinese
+
 Output Requirements:
 1. Return *only* the newly generated text content as a plain string. Do NOT return a JSON object or any other structured data.
 2. Your string response should NOT include any of the subtask's original details, unless the user's request explicitly asks to rephrase, summarize, or directly modify existing text.
 3. Do NOT include any timestamps, XML-like tags, markdown, or any other special formatting in your string response.
-4. Ensure the generated text is concise yet complete for the update based on the user request. Avoid conversational fillers or explanations about what you are doing (e.g., do not start with "Okay, here's the update...").`;
+4. Ensure the generated text is concise yet complete for the update based on the user request. Avoid conversational fillers or explanations about what you are doing (e.g., do not start with "Okay, here's the update...").
+5. Reply in the prescribed language.`;
 
 			// Pass the existing subtask.details in the user prompt for the AI's context.
 			let userPrompt = `Task Context:\n${contextString}\n\nUser Request: "${prompt}"\n\nBased on the User Request and all the Task Context (including current subtask details provided above), what is the new information or text that should be appended to this subtask's details? Return ONLY this new text as a plain string.`;

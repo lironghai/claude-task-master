@@ -9,7 +9,7 @@ This document provides a detailed reference for interacting with Taskmaster, cov
 
 **Note:** For interacting with Taskmaster programmatically or via integrated tools, using the **MCP tools is strongly recommended** due to better performance, structured data, and error handling. The CLI commands serve as a user-friendly alternative and fallback. 
 
-**Important:** Several MCP tools involve AI processing... The AI-powered tools include `parse_prd`, `analyze_project_complexity`, `update_subtask`, `update_task`, `update`, `expand_all`, `expand_task`, and `add_task`.
+**Important:** Several MCP tools involve AI processing... The AI-powered tools include `project_code_init`, `parse_prd`, `analyze_project_complexity`, `update_subtask`, `update_task`, `update`, `expand_all`, `expand_task`, and `add_task`.
 
 **🏷️ Tagged Task Lists System:** Task Master now supports **tagged task lists** for multi-context task management. This allows you to maintain separate, isolated lists of tasks for different features, branches, or experiments. Existing projects are seamlessly migrated to use a default "master" tag. Most commands now support a `--tag <name>` flag to specify which context to operate on. If omitted, commands use the currently active tag.
 
@@ -40,10 +40,22 @@ This document provides a detailed reference for interacting with Taskmaster, cov
     *   `noGit`: `Skip initializing a Git repository entirely. Default is false.` (CLI: `--no-git`)
     *   `yes`: `Skip prompts and use defaults/provided arguments. Default is false.` (CLI: `-y, --yes`)
 *   **Usage:** Run this once at the beginning of a new project, typically via an integrated tool like Cursor. Operates on the current working directory of the MCP server. 
-*   **Important:** Once complete, you *MUST* parse a prd in order to generate tasks. There will be no tasks files until then. The next step after initializing should be to create a PRD using the example PRD in .taskmaster/templates/example_prd.txt. 
+*   **Important:** Once complete, you *MUST* parse a prd in order to generate tasks. There will be no tasks files until then. The next step after initializing should be to create a PRD using the example PRD in .taskmaster/templates/example_prd.txt.
 *   **Tagging:** Use the `--tag` option to parse the PRD into a specific, non-default tag context. If the tag doesn't exist, it will be created automatically. Example: `task-master parse-prd spec.txt --tag=new-feature`.
 
-### 2. Parse PRD (`parse_prd`)
+### 2. Initialize Project Code (`project_code_init`)
+
+*   **MCP Tool:** `project_code_init`
+*   **CLI Command:** `task-master project_code_init [options]`
+*   **Description:** `Use Taskmaster to generate a workflow task list for writing project code, and automatically generate the initial task set in tasks.json.`
+*   **Key Parameters/Options:**
+    *   `numTasks`: `Approximate number of top-level tasks Taskmaster should aim to generate from the document.` (CLI: `-n, --num-tasks <number>`)
+*   **Usage:** Useful for project code initialization to guide the gradual initialization of the project.
+*   **Notes:** Task Master will strictly adhere to all specific requirements mentioned in the task, such as execution plan, library, project dependencies, database schema, framework, technology stack, method implementation logic, etc. The task aims to provide the most direct implementation path while avoiding excessive engineering.
+*   **Important:** This MCP tool will make AI calls, which may take up to ten minutes to complete. Please inform the user to be patient during the operation process. If the user does not have the required documents for the task, such as project outline, class documents, etc., prompt the user to provide relevant documents for use with project_comde_init.
+
+
+### 3. Parse PRD (`parse_prd`)
 
 *   **MCP Tool:** `parse_prd`
 *   **CLI Command:** `task-master parse-prd [file] [options]`
@@ -529,6 +541,50 @@ This new suite of commands allows you to manage different task contexts (tags).
     *   `status`: `Filter tasks by status (e.g., 'pending', 'done').` (CLI: `-s, --status <status>`)
     *   `withSubtasks`: `Include subtasks in the export.` (CLI: `--with-subtasks`)
     *   `tag`: `Specify which tag context to export from. Defaults to the current active tag.` (CLI: `--tag <name>`)
+
+---
+
+## Code Generation
+
+### 25. Generate Documentation From Code (`generate_documentation_from_code`)
+
+*   **MCP Tool:** `generate_documentation_from_code`
+*   **CLI Command:** `task-master generate-docs-from-code [options]` (Assumed CLI command name)
+*   **Description:** `Generates Markdown documentation files from source code files using an AI model. Processes a map of code file paths to output documentation file paths.`
+*   **Key MCP Parameters/Options:**
+    *   `projectRoot`: `Required. The absolute root directory of the project.`
+    *   `documentationMap`: `Required. A map where keys are source code file paths (relative to projectRoot) and values are the corresponding output documentation file paths (relative to projectRoot). Example: {"src/module.js": "docs/module.md"}`
+    *   `overwrite`: `Optional, boolean. Whether to overwrite existing documentation files. Defaults to false.`
+    *   `reportProgress`: `Optional. Callback function provided by MCP client to report progress updates.`
+*   **Key CLI Options:**
+    *   `-p, --project-root <path>`: `The root directory of the project. Defaults to auto-detection.`
+    *   `-m, --map <jsonStringOrFilePath>`: `Required. A JSON string or a path to a JSON file mapping code file paths to documentation file paths. E.g., '{"src/utils.js":"docs/utils.md"}' or ./docmap.json`
+    *   `-o, --overwrite`: `Overwrite existing documentation files if they exist.`
+*   **Usage:** Use this tool/command to automate the creation and updating of documentation for your codebase.
+*   **Important:** This tool/command makes AI calls for each code-to-documentation mapping. The quality of the generated documentation depends on the AI model's capabilities and the clarity of the source code. A default system prompt is used, but can be overridden by placing a custom prompt at `.taskmaster/prompts/gen_doc_from_code.md` (Note: this path might differ, check source `generate-documentation-from-code-direct.js` for the exact PROMPT_FILE_PATH).
+
+### 26. Generate Code From Documentation (`generate_code_from_documentation`)
+
+*   **MCP Tool:** `generate_code_from_documentation`
+*   **CLI Command:** `task-master generate-code-from-docs [options]`
+*   **Description:** `Generates code files from documentation files using an AI model. Processes a map of document paths to output code file paths.`
+*   **Key MCP Parameters/Options:**
+    *   `projectRoot`: `Optional. The absolute root directory of the project. If not provided, it will be derived from the session.`
+    *   `codeGenerationMap`: `Required. A map where keys are document file paths (relative to projectRoot) and values are the corresponding output code file paths (relative to projectRoot). Example: {"docs/spec.md": "src/implementation.js"}`
+    *   `overwrite`: `Optional, boolean. Whether to overwrite existing code files. Defaults to false.`
+    *   `targetLanguage`: `Optional, string. The target programming language for code generation (e.g., 'JavaScript', 'Python').`
+    *   `targetFramework`: `Optional, string. The target framework, if applicable (e.g., 'React', 'Express').`
+    *   `projectOutlinePath`: `Optional, string. Path to a project outline document to provide broader context for code generation.`
+    *   `reportProgress`: `Optional. Callback function provided by MCP client to report progress updates.`
+*   **Key CLI Options:**
+    *   `-p, --project-root <path>`: `The root directory of the project. Defaults to auto-detection.`
+    *   `-m, --map <jsonStringOrFilePath>`: `Required. A JSON string or a path to a JSON file mapping document paths to code file paths. E.g., '{"docs/spec.md":"src/impl.js"}' or ./map.json`
+    *   `-o, --overwrite`: `Overwrite existing code files if they exist.`
+    *   `-l, --lang <language>`: `Target programming language for code generation.`
+    *   `-f, --framework <framework>`: `Target framework for code generation.`
+    *   `--outline <path>`: `Path to a project outline document to provide broader context for code generation.`
+*   **Usage:** Use this tool/command to automate the creation of boilerplate or initial code structures based on provided documentation or specification files.
+*   **Important:** This tool/command makes AI calls for each document-to-code mapping and can take time to complete, especially for multiple files. The quality of the generated code depends heavily on the clarity and detail of the input documentation and the capabilities of the selected AI model.
 
 ---
 

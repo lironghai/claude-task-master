@@ -29,6 +29,7 @@ export class OpenAIProvider extends BaseAIProvider {
 			}
 
 			return createOpenAI({
+				compatibility: 'strict',
 				apiKey,
 				...(baseURL && { baseURL })
 			});

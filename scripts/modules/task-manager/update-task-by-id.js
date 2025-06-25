@@ -446,6 +446,8 @@ Current Task Details (for context only):\n${taskToUpdate.details || '(No existin
 You will be given a task and a prompt describing changes or new implementation details.
 Your job is to update the task to reflect these changes, while preserving its basic structure.
 
+Language: Chinese
+
 Guidelines:
 1. VERY IMPORTANT: NEVER change the title of the task - keep it exactly as is
 2. Maintain the same ID, status, and dependencies unless specifically mentioned in the prompt
@@ -460,6 +462,7 @@ Guidelines:
 11. Ensure any new subtasks have unique IDs that don't conflict with existing ones
 12. CRITICAL: For subtask IDs, use ONLY numeric values (1, 2, 3, etc.) NOT strings ("1", "2", "3")
 13. CRITICAL: Subtask IDs should start from 1 and increment sequentially (1, 2, 3...) - do NOT use parent task ID as prefix
+14. Reply in the prescribed language.
 
 The changes described in the prompt should be thoughtfully applied to make the task more accurate and actionable.`;
 

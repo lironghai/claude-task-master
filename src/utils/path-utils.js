@@ -25,6 +25,12 @@ import { getLoggerOrDefault } from './logger-utils.js';
 export function normalizeProjectRoot(projectRoot) {
 	if (!projectRoot) return projectRoot;
 
+	if (typeof projectRoot === 'object') {
+		const logger = getLoggerOrDefault();
+		logger.error?.(`projectRoot must be a string, not an object! projectRoot: ${JSON.stringify(projectRoot)}`);
+		return "";
+	}
+
 	// Split the path into segments
 	const segments = projectRoot.split(path.sep);
 
@@ -432,7 +438,7 @@ export function findConfigPath(explicitPath = null, args = null, log = null) {
 			// Issue deprecation warning for legacy paths
 			if (configPath?.endsWith(LEGACY_CONFIG_FILE)) {
 				logger.warn?.(
-					`⚠️  DEPRECATION WARNING: Found configuration in legacy location '${configPath}'. Please migrate to .taskmaster/config.json. Run 'task-master migrate' to automatically migrate your project.`
+					`⚠️ 2 DEPRECATION WARNING: Found configuration in legacy location '${configPath}'. Please migrate to .taskmaster/config.json. Run 'task-master migrate' to automatically migrate your project.`
 				);
 			}
 

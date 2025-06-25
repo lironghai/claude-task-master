@@ -420,7 +420,8 @@ async function setModel(role, modelId, options = {}) {
 
 	try {
 		const availableModels = getAvailableModels(projectRoot);
-		const currentConfig = getConfig(projectRoot);
+		const { effectiveConfig }= getConfig(projectRoot);
+		const currentConfig = effectiveConfig;
 		let determinedProvider = null; // Initialize provider
 		let warningMessage = null;
 

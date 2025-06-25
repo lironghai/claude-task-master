@@ -1,6 +1,7 @@
 {
+	"timeout": 300000,
 	"mcpServers": {
-		"task-master-ai": {
+		"hero-task-master-ai": {
 			"command": "node",
 			"args": ["./mcp-server/server.js"],
 			"env": {

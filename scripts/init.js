@@ -71,18 +71,13 @@ function displayBanner() {
 	if (isSilentMode()) return;
 
 	console.clear();
-	const bannerText = figlet.textSync('Task Master AI', {
+	const bannerText = figlet.textSync('Hero Task Master AI', {
 		font: 'Standard',
 		horizontalLayout: 'default',
 		verticalLayout: 'default'
 	});
 
 	console.log(coolGradient(bannerText));
-
-	// Add creator credit line below the banner
-	console.log(
-		chalk.dim('by ') + chalk.cyan.underline('https://x.com/eyaltoledano')
-	);
 
 	console.log(
 		boxen(chalk.white(`${chalk.bold('Initializing')} your new project`), {
@@ -587,6 +582,7 @@ function createProjectStructure(
 	ensureDirectoryExists(path.join(targetDir, TASKMASTER_DOCS_DIR));
 	ensureDirectoryExists(path.join(targetDir, TASKMASTER_REPORTS_DIR));
 	ensureDirectoryExists(path.join(targetDir, TASKMASTER_TEMPLATES_DIR));
+    ensureDirectoryExists(path.join(targetDir, 'temp'));
 
 	// Create initial state.json file for tag management
 	createInitialStateFile(targetDir);
@@ -643,7 +639,7 @@ function createProjectStructure(
 	}
 
 	// Copy example_prd.txt to NEW location
-	copyTemplateFile('example_prd.txt', path.join(targetDir, EXAMPLE_PRD_FILE));
+	copyTemplateFile('prd_cn.txt', path.join(targetDir, EXAMPLE_PRD_FILE));
 
 	// Initialize git repository if git is available
 	try {

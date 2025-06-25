@@ -96,7 +96,7 @@ MCP (Model Control Protocol) lets you run Task Master directly from your editor.
 
 > **Note**: If you see `0 tools enabled` in the MCP settings, try removing the `--package=task-master-ai` flag from `args`.
 
-###### VS Code (`servers` + `type`)
+###### VS Code (`servers` + `type`)
 
 ```json
 {
