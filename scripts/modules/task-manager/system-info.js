@@ -332,6 +332,105 @@ function getNpmVersion(options = {}) {
 }
 
 /**
+ * Get local IP address
+ * @returns {string} - Local IP address or "无法获取"
+ */
+function getLocalIP() {
+	try {
+		const interfaces = os.networkInterfaces();
+		
+		// 按优先级查找网络接口
+		const priorityInterfaces = [
+			'以太网', 'Ethernet', 'eth0', 'en0', 'en1',  // 有线网络
+			'WLAN', 'Wi-Fi', 'wlan0', 'wifi0',          // 无线网络
+			'本地连接', 'Local Area Connection'          // Windows本地连接
+		];
+		
+		// 首先尝试优先级接口
+		for (const priority of priorityInterfaces) {
+			if (interfaces[priority]) {
+				for (const iface of interfaces[priority]) {
+					if (iface.family === 'IPv4' && !iface.internal) {
+						return iface.address;
+					}
+				}
+			}
+		}
+		
+		// 如果优先级接口没找到，遍历所有接口
+		for (const name of Object.keys(interfaces)) {
+			// 跳过虚拟网络接口
+			if (name.toLowerCase().includes('virtual') || 
+				name.toLowerCase().includes('veth') || 
+				name.toLowerCase().includes('docker') || 
+				name.toLowerCase().includes('vmware') ||
+				name.toLowerCase().includes('virtualbox')) {
+				continue;
+			}
+			
+			for (const iface of interfaces[name]) {
+				if (iface.family === 'IPv4' && !iface.internal) {
+					return iface.address;
+				}
+			}
+		}
+		
+		return '无法获取';
+	} catch (error) {
+		return '无法获取';
+	}
+}
+
+/**
+ * Get public IP address
+ * @param {Object} options - Options object with logging
+ * @returns {Promise<string>} - Public IP address or "无法获取"
+ */
+async function getPublicIP(options = {}) {
+	const log = options.mcpLog || console;
+	
+	// 多个IP检测服务，提高可靠性
+	const services = [
+		'https://api.ipify.org',
+		'https://ipv4.icanhazip.com',
+		'https://api.ip.sb/ip',
+		'https://ifconfig.me/ip'
+	];
+	
+	for (const service of services) {
+		try {
+			const controller = new AbortController();
+			const timeoutId = setTimeout(() => controller.abort(), 3000); // 3秒超时
+			
+			const response = await fetch(service, {
+				signal: controller.signal,
+				headers: {
+					'User-Agent': 'TaskMaster-SystemInfo/1.0'
+				}
+			});
+			
+			clearTimeout(timeoutId);
+			
+			if (response.ok) {
+				const ip = await response.text();
+				const cleanIP = ip.trim();
+				
+				// 验证IP格式
+				if (/^\d+\.\d+\.\d+\.\d+$/.test(cleanIP)) {
+					log.debug && log.debug(`Public IP obtained from ${service}: ${cleanIP}`);
+					return cleanIP;
+				}
+			}
+		} catch (error) {
+			log.debug && log.debug(`Failed to get IP from ${service}: ${error.message}`);
+			continue;
+		}
+	}
+	
+	return '无法获取';
+}
+
+/**
  * Detect terminal type
  * @returns {string} - Terminal type in Chinese
  */
@@ -487,6 +586,12 @@ function isRemoteEnvironment() {
 export async function getSystemInfo(params = {}, context = {}, outputFormat = 'json') {
 	const options = { mcpLog: context.mcpLog };
 	
+	// 获取本地IP（同步）
+	const localIP = getLocalIP();
+	
+	// 获取公网IP（异步）
+	const publicIP = await getPublicIP(options);
+	
 	const systemInfo = {
 		'操作系统': getPlatformInfo(),
 		'Python版本': getPythonVersion(options),
@@ -497,6 +602,8 @@ export async function getSystemInfo(params = {}, context = {}, outputFormat = 'j
 		'Maven版本': getMavenVersion(options),
 		'Git版本': getGitVersion(options),
 		'Docker版本': getDockerVersion(options),
+		'本地IP': localIP,
+		'公网IP': publicIP,
 		'终端类型': getTerminalType(),
 		'WSL环境': isWSLEnvironment(options),
 		'远程环境': isRemoteEnvironment()
