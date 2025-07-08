@@ -1,13 +1,9 @@
-import {
-	experimental_createMCPClient as createMCPClient,
-	generateObject,
-	generateText,
-	NoSuchToolError,
-	streamText
-} from './base_index.js';
+import { xperimental_createMCPClient as createMCPClient, 
+	generateObject, generateText, streamText, NoSuchToolError } from './base_index.js';
+
 // } from 'ai';
 // } from './base_index.js';
-import {log} from '../../scripts/modules/index.js';
+import { log } from '../../scripts/modules/index.js';
 import {Experimental_StdioMCPTransport as StdioMCPTransport} from 'ai/mcp-stdio';
 
 /**
@@ -221,9 +217,9 @@ export class BaseAIProvider {
 				`Generating ${this.name} text with model: ${params.modelId}`
 			);
 
+			const client = await this.getClient(params);
 			let curtime  = Date.now();
 			let sessionTime  = Date.now();
-			const client = this.getClient(params);
 			// const tools = await this.getTools(params);
 			const tools = params.tools;
 			const result = await generateText({
@@ -401,8 +397,8 @@ export class BaseAIProvider {
 
 			log('debug', `Streaming ${this.name} text with model: ${params.modelId}`);
 
+			const client = await this.getClient(params);
 			let curtime  = Date.now();
-			const client = this.getClient(params);
 			// const tools = await this.getTools(params);
 			const stream = await streamText({
 				model: client(params.modelId),
@@ -473,7 +469,7 @@ export class BaseAIProvider {
 				`Generating ${this.name} object ('${params.objectName}') with model: ${params.modelId}`
 			);
 
-			const client = this.getClient(params);
+			const client = await this.getClient(params);
 			const result = await generateObject({
 				model: client(params.modelId),
 				messages: params.messages,

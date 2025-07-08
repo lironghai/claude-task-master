@@ -4,8 +4,6 @@ import chalk from 'chalk';
 import boxen from 'boxen';
 import { z } from 'zod';
 
-// console.log('parse-prd 启动');
-
 import {
 	log,
 	writeJSON,
@@ -63,7 +61,6 @@ const prdResponseSchema = z.object({
  * @param {string} [outputFormat='text'] - Output format ('text' or 'json').
  */
 async function parsePRD(prdPath, tasksPath, numTasks, options = {}) {
-	// console.log('parsePRD 函数已进入');
 	const {
 		reportProgress,
 		mcpLog,
@@ -200,7 +197,7 @@ Your task breakdown should incorporate this research, resulting in more detailed
 		const systemPrompt = `You are an AI assistant specialized in analyzing Product Requirements Documents (PRDs) and generating a structured, logically ordered, dependency-aware and sequenced list of development tasks in JSON format.${researchPromptAddition}
 
 Language: Chinese
-Analyze the provided PRD content and generate approximately ${numTasks} top-level development tasks. If the complexity or the level of detail of the PRD is high, generate more tasks relative to the complexity of the PRD
+Analyze the provided PRD content and generate ${numTasks > 0 ? 'approximately ' + numTasks : 'an appropriate number of'} top-level development tasks. If the complexity or the level of detail of the PRD is high, generate more tasks relative to the complexity of the PRD
 Each task should represent a logical unit of work needed to implement the requirements and focus on the most direct and effective way to implement the requirements without unnecessary complexity or overengineering. Include pseudo-code, implementation details, and test strategy for each task. Find the most up to date information to implement each task.
 Assign sequential IDs starting from ${nextId}. Infer title, description, details, and test strategy for each task based *only* on the PRD content.
 Set status to 'pending', dependencies to an empty array [], and priority to 'medium' initially for all tasks.
@@ -220,7 +217,7 @@ Each task should follow this JSON structure:
 
 Guidelines:
 1. Reply in the prescribed language
-1. Unless complexity warrants otherwise, create exactly ${numTasks} tasks, numbered sequentially starting from ${nextId}
+1. ${numTasks > 0 ? 'Unless complexity warrants otherwise' : 'Depending on the complexity'}, create ${numTasks > 0 ? 'exactly ' + numTasks : 'an appropriate number of'} tasks, numbered sequentially starting from ${nextId}
 2. Each task should be atomic and focused on a single responsibility following the most up to date best practices and standards
 3. Order tasks logically - consider dependencies and implementation sequence
 4. Early tasks should focus on setup, core functionality first, then advanced features
@@ -240,7 +237,7 @@ Guidelines:
 Project outline: \n` + projectSummContent;
 
 		// Build user prompt with PRD content
-		const userPrompt = `Here's the Product Requirements Document (PRD) to break down into approximately ${numTasks} tasks, starting IDs from ${nextId}:${research ? '\n\nRemember to thoroughly research current best practices and technologies before task breakdown to provide specific, actionable implementation details.' : ''}\n\n${prdContent}\n\n
+		const userPrompt = `Here's the Product Requirements Document (PRD) to break down into approximately ${numTasks > 0 ? 'approximately ' + numTasks : 'an appropriate number of'} tasks, starting IDs from ${nextId}:${research ? '\n\nRemember to thoroughly research current best practices and technologies before task breakdown to provide specific, actionable implementation details.' : ''}\n\n${prdContent}\n\n
 
 		Return your response in this format:
 {
@@ -255,7 +252,7 @@ Project outline: \n` + projectSummContent;
     ],
     "metadata": {
         "projectName": "PRD Implementation",
-        "totalTasks": ${numTasks},
+        "totalTasks": {number of tasks},
         "sourceFile": "${prdPath}",
         "generatedAt": "YYYY-MM-DD"
     }
@@ -279,11 +276,6 @@ Project outline: \n` + projectSummContent;
 			commandName: 'parse-prd',
 			outputType: isMCP ? 'mcp' : 'cli'
 		});
-
-		report(
-			`generateObjectService 调用完成   ${aiServiceResponse}`,
-			'info'
-		);
 
 		// Create the directory if it doesn't exist
 		const tasksDir = path.dirname(tasksPath);
@@ -435,7 +427,6 @@ Project outline: \n` + projectSummContent;
 			tagInfo: aiServiceResponse?.tagInfo
 		};
 	} catch (error) {
-		console.log('parsePRD 捕获到异常', error);
 		report(`Error parsing PRD: ${error.message}`, 'error');
 
 		// Only show error UI for text output (CLI)

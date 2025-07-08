@@ -1,6 +1,6 @@
 {
 	"name": "hero-task-master-ai",
-	"version": "0.18.0",
+	"version": "0.19.0",
 	"description": "A task management system for ambitious AI-driven development that doesn't overwhelm and confuse Cursor.",
 	"main": "index.js",
 	"type": "module",
@@ -10,8 +10,8 @@
 		"task-master-ai": "mcp-server/server.js"
 	},
 	"scripts": {
-		"test_old": "node --experimental-vm-modules node_modules/.bin/jest",
-		"test": "node_modules/.bin/jest",
+		"test_new": "node_modules/.bin/jest",
+		"test": "node --experimental-vm-modules node_modules/.bin/jest",
 		"test:fails": "node --experimental-vm-modules node_modules/.bin/jest --onlyFailures",
 		"test:watch": "node --experimental-vm-modules node_modules/.bin/jest --watch",
 		"test:coverage": "node --experimental-vm-modules node_modules/.bin/jest --coverage",
@@ -70,6 +70,7 @@
 		"gradient-string": "^3.0.0",
 		"helmet": "^8.1.0",
 		"inquirer": "^12.5.0",
+		"jsonc-parser": "^3.3.1",
 		"jsonwebtoken": "^9.0.2",
 		"lru-cache": "^10.2.0",
 		"ollama-ai-provider": "^1.2.0",
@@ -81,7 +82,8 @@
 		"zod": "^3.23.8"
 	},
 	"optionalDependencies": {
-		"@anthropic-ai/claude-code": "^1.0.25"
+		"@anthropic-ai/claude-code": "^1.0.25",
+		"ai-sdk-provider-gemini-cli": "^0.0.3"
 	},
 	"engines": {
 		"node": ">=18.0.0"

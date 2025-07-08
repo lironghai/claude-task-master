@@ -31,6 +31,8 @@ export function normalizeProjectRoot(projectRoot) {
 		return "";
 	}
 
+	projectRoot = String(projectRoot);
+
 	// Split the path into segments
 	const segments = projectRoot.split(path.sep);
 
@@ -438,7 +440,7 @@ export function findConfigPath(explicitPath = null, args = null, log = null) {
 			// Issue deprecation warning for legacy paths
 			if (configPath?.endsWith(LEGACY_CONFIG_FILE)) {
 				logger.warn?.(
-					`⚠️ 2 DEPRECATION WARNING: Found configuration in legacy location '${configPath}'. Please migrate to .taskmaster/config.json. Run 'task-master migrate' to automatically migrate your project.`
+					`⚠️  DEPRECATION WARNING: Found configuration in legacy location '${configPath}'. Please migrate to .taskmaster/config.json. Run 'task-master migrate' to automatically migrate your project.`
 				);
 			}
 

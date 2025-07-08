@@ -1,8 +1,9 @@
 import fs from 'fs';
 import path from 'path';
 import chalk from 'chalk';
+import { z } from 'zod';
 import { fileURLToPath } from 'url';
-import { log, findProjectRoot, resolveEnvVariable as originalResolveEnvVariable } from './utils.js';
+import { log, findProjectRoot, resolveEnvVariable as originalResolveEnvVariable, isEmpty } from './utils.js';
 import { LEGACY_CONFIG_FILE } from '../../src/constants/paths.js';
 import { findConfigPath } from '../../src/utils/path-utils.js';
 import {
@@ -12,6 +13,7 @@ import {
 	ALL_PROVIDERS
 } from '../../src/constants/providers.js';
 import dotenv from 'dotenv';
+import { AI_COMMAND_NAMES } from '../../src/constants/commands.js';
 
 // Calculate __dirname in ESM
 const __filename = fileURLToPath(import.meta.url);
@@ -61,9 +63,6 @@ try {
 	process.exit(1); // Exit if models can't be loaded
 }
 
-// Define valid providers dynamically from the loaded MODEL_MAP
-console.log(`[config-manager] Supported providers---------`)
-
 // Default configuration values (used if config file is missing or incomplete)
 const DEFAULTS = {
 	models: {
@@ -90,13 +89,16 @@ const DEFAULTS = {
 	global: {
 		logLevel: 'info',
 		debug: false,
+		defaultNumTasks: 10,
 		defaultSubtasks: 5,
 		defaultPriority: 'medium',
 		projectName: 'Task Master',
 		ollamaBaseURL: 'http://localhost:11434/api',
 		bedrockBaseURL: 'https://bedrock.us-east-1.amazonaws.com',
+		responseLanguage: 'English',
 		useDefaultConfiguration: true
-	}
+	},
+	claudeCode: {}
 };
 
 // --- Internal Config Loading ---
@@ -212,7 +214,8 @@ function _loadAndValidateConfig(explicitRoot = null) {
 							? { ...defaults.models.fallback, ...parsedConfig.models.fallback }
 							: { ...defaults.models.fallback }
 				},
-				global: { ...defaults.global, ...parsedConfig?.global }
+				global: { ...defaults.global, ...parsedConfig?.global },
+				claudeCode: { ...defaults.claudeCode, ...parsedConfig?.claudeCode }
 			};
 			configSource = `file (${configPath})`; // Update source info
 
@@ -254,6 +257,9 @@ function _loadAndValidateConfig(explicitRoot = null) {
 				);
 				config.models.fallback.provider = undefined;
 				config.models.fallback.modelId = undefined;
+			}
+			if (config.claudeCode && !isEmpty(config.claudeCode)) {
+				config.claudeCode = validateClaudeCodeSettings(config.claudeCode);
 			}
 		} catch (error) {
 			// Use console.error for actual errors during parsing
@@ -540,6 +546,83 @@ function validateProviderModelCombination(providerName, modelId) {
 	);
 }
 
+/**
+ * Validates Claude Code AI provider custom settings
+ * @param {object} settings The settings to validate
+ * @returns {object} The validated settings
+ */
+function validateClaudeCodeSettings(settings) {
+	// Define the base settings schema without commandSpecific first
+	const BaseSettingsSchema = z.object({
+		maxTurns: z.number().int().positive().optional(),
+		customSystemPrompt: z.string().optional(),
+		appendSystemPrompt: z.string().optional(),
+		permissionMode: z
+			.enum(['default', 'acceptEdits', 'plan', 'bypassPermissions'])
+			.optional(),
+		allowedTools: z.array(z.string()).optional(),
+		disallowedTools: z.array(z.string()).optional(),
+		mcpServers: z
+			.record(
+				z.string(),
+				z.object({
+					type: z.enum(['stdio', 'sse']).optional(),
+					command: z.string(),
+					args: z.array(z.string()).optional(),
+					env: z.record(z.string()).optional(),
+					url: z.string().url().optional(),
+					headers: z.record(z.string()).optional()
+				})
+			)
+			.optional()
+	});
+
+	// Define CommandSpecificSchema using the base schema
+	const CommandSpecificSchema = z.record(
+		z.enum(AI_COMMAND_NAMES),
+		BaseSettingsSchema
+	);
+
+	// Define the full settings schema with commandSpecific
+	const SettingsSchema = BaseSettingsSchema.extend({
+		commandSpecific: CommandSpecificSchema.optional()
+	});
+
+	let validatedSettings = {};
+
+	try {
+		validatedSettings = SettingsSchema.parse(settings);
+	} catch (error) {
+		console.warn(
+			chalk.yellow(
+				`Warning: Invalid Claude Code settings in config: ${error.message}. Falling back to default.`
+			)
+		);
+
+		validatedSettings = {};
+	}
+
+	return validatedSettings;
+}
+
+// --- Claude Code Settings Getters ---
+
+function getClaudeCodeSettings(explicitRoot = null, forceReload = false) {
+	const config = getConfig(explicitRoot, forceReload);
+	// Ensure Claude Code defaults are applied if Claude Code section is missing
+	return { ...DEFAULTS.claudeCode, ...(config?.claudeCode || {}) };
+}
+
+function getClaudeCodeSettingsForCommand(
+	commandName,
+	explicitRoot = null,
+	forceReload = false
+) {
+	const settings = getClaudeCodeSettings(explicitRoot, forceReload);
+	const commandSpecific = settings?.commandSpecific || {};
+	return { ...settings, ...commandSpecific[commandName] };
+}
+
 // --- Role-Specific Getters ---
 
 function getModelConfigForRole(role, explicitRoot = null) {
@@ -694,6 +777,11 @@ function getVertexLocation(explicitRoot = null) {
 	return getGlobalConfig(explicitRoot).vertexLocation || 'us-central1';
 }
 
+function getResponseLanguage(explicitRoot = null) {
+	// Directly return value from config
+	return getGlobalConfig(explicitRoot).responseLanguage;
+}
+
 /**
  * Gets model parameters (maxTokens, temperature) for a specific role,
  * considering model-specific overrides from supported-models.json.
@@ -770,7 +858,8 @@ function isApiKeySet(providerName, session = null, projectRoot = null) {
 	// Providers that don't require API keys for authentication
 	const providersWithoutApiKeys = [
 		CUSTOM_PROVIDERS.OLLAMA,
-		CUSTOM_PROVIDERS.BEDROCK
+		CUSTOM_PROVIDERS.BEDROCK,
+		CUSTOM_PROVIDERS.GEMINI_CLI
 	];
 
 	if (providersWithoutApiKeys.includes(providerName?.toLowerCase())) {
@@ -833,7 +922,7 @@ function isApiKeySet(providerName, session = null, projectRoot = null) {
  * @returns {boolean} True if the key exists and is not a placeholder, false otherwise.
  */
 function getMcpApiKeyStatus(providerName, projectRoot = null) {
-	const rootDir = projectRoot || findProjectRoot();
+	const rootDir = projectRoot || findProjectRoot(); // Use existing root finding
 	if (!rootDir) {
 		console.warn(
 			chalk.yellow('Warning: Could not find project root to check mcp.json.')
@@ -1081,15 +1170,26 @@ function getBaseUrlForRole(role, explicitRoot = null) {
 	return undefined;
 }
 
+// Export the providers without API keys array for use in other modules
+export const providersWithoutApiKeys = [
+	CUSTOM_PROVIDERS.OLLAMA,
+	CUSTOM_PROVIDERS.BEDROCK,
+	CUSTOM_PROVIDERS.GEMINI_CLI
+];
+
 export {
 	// Core config access
 	getConfig,
 	writeConfig,
 	ConfigurationError,
 	isConfigFilePresent,
+	// Claude Code settings
+	getClaudeCodeSettings,
+	getClaudeCodeSettingsForCommand,
 	// Validation
 	validateProvider,
 	validateProviderModelCombination,
+	validateClaudeCodeSettings,
 	VALIDATED_PROVIDERS,
 	CUSTOM_PROVIDERS,
 	ALL_PROVIDERS,
@@ -1119,6 +1219,7 @@ export {
 	getOllamaBaseURL,
 	getAzureBaseURL,
 	getBedrockBaseURL,
+	getResponseLanguage,
 	getParametersForRole,
 	getUserId,
 	// API Key Checkers (still relevant)

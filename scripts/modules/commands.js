@@ -43,6 +43,7 @@ import {
 	taskExists,
 	moveTask,
 	migrateProject,
+	setResponseLanguage,
 	genDocFromCodePlan,
 	generateCodeFromDocumentation,
 	handleGenerateDocumentationFromCodeCommand,
@@ -75,7 +76,9 @@ import {
 	ConfigurationError,
 	isConfigFilePresent,
 	getAvailableModels,
-	getBaseUrlForRole
+	getBaseUrlForRole,
+	getDefaultNumTasks,
+	getDefaultSubtasks
 } from './config-manager.js';
 
 import { CUSTOM_PROVIDERS } from '../../src/constants/providers.js';
@@ -136,17 +139,17 @@ import { generateProjectOutline } from './task-manager/project-outline.js';
 import { generateProjectCodeInit } from './task-manager/project-code-init.js';
 import { RULE_PROFILES } from '../../src/constants/profiles.js';
 import {
-    convertAllRulesToProfileRules,
-    removeProfileRules,
-    isValidProfile,
-    getRulesProfile
+	convertAllRulesToProfileRules,
+	removeProfileRules,
+	isValidProfile,
+	getRulesProfile
 } from '../../src/utils/rule-transformer.js';
 import {
-    runInteractiveProfilesSetup,
-    generateProfileSummary,
-    categorizeProfileResults,
-    generateProfileRemovalSummary,
-    categorizeRemovalResults
+	runInteractiveProfilesSetup,
+	generateProfileSummary,
+	categorizeProfileResults,
+	generateProfileRemovalSummary,
+	categorizeRemovalResults
 } from '../../src/utils/profiles.js';
 
 /**
@@ -812,7 +815,11 @@ function registerCommands(programInstance) {
 			'Path to the PRD file (alternative to positional argument)'
 		)
 		.option('-o, --output <file>', 'Output file path', TASKMASTER_TASKS_FILE)
-		.option('-n, --num-tasks <number>', 'Number of tasks to generate', '10')
+		.option(
+			'-n, --num-tasks <number>',
+			'Number of tasks to generate',
+			getDefaultNumTasks()
+		)
 		.option('-f, --force', 'Skip confirmation when overwriting existing tasks')
 		.option(
 			'--append',
@@ -3433,6 +3440,10 @@ ${result.result}
 			'--vertex',
 			'Allow setting a custom Vertex AI model ID (use with --set-*) '
 		)
+		.option(
+			'--gemini-cli',
+			'Allow setting a Gemini CLI model ID (use with --set-*)'
+		)
 		.addHelpText(
 			'after',
 			`
@@ -3447,6 +3458,7 @@ Examples:
   $ task-master models --set-main sonnet --claude-code           # Set Claude Code model for main role
   $ task-master models --set-main gpt-4o --azure # Set custom Azure OpenAI model for main role
   $ task-master models --set-main claude-3-5-sonnet@20241022 --vertex # Set custom Vertex AI model for main role
+  $ task-master models --set-main gemini-2.5-pro --gemini-cli # Set Gemini CLI model for main role
   $ task-master models --setup                            # Run interactive setup`
 		)
 		.action(async (options) => {
@@ -3460,12 +3472,13 @@ Examples:
 				options.openrouter,
 				options.ollama,
 				options.bedrock,
-				options.claudeCode
+				options.claudeCode,
+				options.geminiCli
 			].filter(Boolean).length;
 			if (providerFlags > 1) {
 				console.error(
 					chalk.red(
-						'Error: Cannot use multiple provider flags (--openrouter, --ollama, --bedrock, --claude-code) simultaneously.'
+						'Error: Cannot use multiple provider flags (--openrouter, --ollama, --bedrock, --claude-code, --gemini-cli) simultaneously.'
 					)
 				);
 				process.exit(1);
@@ -3509,7 +3522,9 @@ Examples:
 									? 'bedrock'
 									: options.claudeCode
 										? 'claude-code'
-										: undefined
+										: options.geminiCli
+											? 'gemini-cli'
+											: undefined
 					});
 					if (result.success) {
 						console.log(chalk.green(`✅ ${result.data.message}`));
@@ -3533,7 +3548,9 @@ Examples:
 									? 'bedrock'
 									: options.claudeCode
 										? 'claude-code'
-										: undefined
+										: options.geminiCli
+											? 'gemini-cli'
+											: undefined
 					});
 					if (result.success) {
 						console.log(chalk.green(`✅ ${result.data.message}`));
@@ -3559,7 +3576,9 @@ Examples:
 									? 'bedrock'
 									: options.claudeCode
 										? 'claude-code'
-										: undefined
+										: options.geminiCli
+											? 'gemini-cli'
+											: undefined
 					});
 					if (result.success) {
 						console.log(chalk.green(`✅ ${result.data.message}`));
@@ -3653,6 +3672,63 @@ Examples:
 			}
 			// --- IMPORTANT: Exit after displaying status ---
 			return; // Stop execution here
+		});
+
+	// response-language command
+	programInstance
+		.command('lang')
+		.description('Manage response language settings')
+		.option('--response <response_language>', 'Set the response language')
+		.option('--setup', 'Run interactive setup to configure response language')
+		.action(async (options) => {
+			const projectRoot = findProjectRoot(); // Find project root for context
+			const { response, setup } = options;
+			console.log(
+				chalk.blue('Response language set to:', JSON.stringify(options))
+			);
+			let responseLanguage = response || 'English';
+			if (setup) {
+				console.log(
+					chalk.blue('Starting interactive response language setup...')
+				);
+				try {
+					const userResponse = await inquirer.prompt([
+						{
+							type: 'input',
+							name: 'responseLanguage',
+							message: 'Input your preferred response language',
+							default: 'English'
+						}
+					]);
+
+					console.log(
+						chalk.blue(
+							'Response language set to:',
+							userResponse.responseLanguage
+						)
+					);
+					responseLanguage = userResponse.responseLanguage;
+				} catch (setupError) {
+					console.error(
+						chalk.red('\\nInteractive setup failed unexpectedly:'),
+						setupError.message
+					);
+				}
+			}
+
+			const result = setResponseLanguage(responseLanguage, {
+				projectRoot
+			});
+
+			if (result.success) {
+				console.log(chalk.green(`✅ ${result.data.message}`));
+			} else {
+				console.error(
+					chalk.red(
+						`❌ Error setting response language: ${result.error.message}`
+					)
+				);
+			}
 		});
 
 	// move-task command
@@ -3822,7 +3898,11 @@ Examples:
 		$ task-master rules --${RULES_SETUP_ACTION}                  # Interactive setup to select rule profiles`
 		)
 		.action(async (action, profiles, options) => {
-			const projectDir = process.cwd();
+			const projectRoot = findProjectRoot();
+			if (!projectRoot) {
+				console.error(chalk.red('Error: Could not find project root.'));
+				process.exit(1);
+			}
 
 			/**
 			 * 'task-master rules --setup' action:
@@ -3869,7 +3949,7 @@ Examples:
 					const profileConfig = getRulesProfile(profile);
 
 					const addResult = convertAllRulesToProfileRules(
-						projectDir,
+						projectRoot,
 						profileConfig
 					);
 
@@ -3915,8 +3995,8 @@ Examples:
 				let confirmed = true;
 				if (!options.force) {
 					// Check if this removal would leave no profiles remaining
-					if (wouldRemovalLeaveNoProfiles(projectDir, expandedProfiles)) {
-						const installedProfiles = getInstalledProfiles(projectDir);
+					if (wouldRemovalLeaveNoProfiles(projectRoot, expandedProfiles)) {
+						const installedProfiles = getInstalledProfiles(projectRoot);
 						confirmed = await confirmRemoveAllRemainingProfiles(
 							expandedProfiles,
 							installedProfiles
@@ -3946,12 +4026,12 @@ Examples:
 				if (action === RULES_ACTIONS.ADD) {
 					console.log(chalk.blue(`Adding rules for profile: ${profile}...`));
 					const addResult = convertAllRulesToProfileRules(
-						projectDir,
+						projectRoot,
 						profileConfig
 					);
 					if (typeof profileConfig.onAddRulesProfile === 'function') {
-						const assetsDir = path.join(process.cwd(), 'assets');
-						profileConfig.onAddRulesProfile(projectDir, assetsDir);
+						const assetsDir = path.join(projectRoot, 'assets');
+						profileConfig.onAddRulesProfile(projectRoot, assetsDir);
 					}
 					console.log(
 						chalk.blue(`Completed adding rules for profile: ${profile}`)
@@ -3967,7 +4047,7 @@ Examples:
 					console.log(chalk.green(generateProfileSummary(profile, addResult)));
 				} else if (action === RULES_ACTIONS.REMOVE) {
 					console.log(chalk.blue(`Removing rules for profile: ${profile}...`));
-					const result = removeProfileRules(projectDir, profileConfig);
+					const result = removeProfileRules(projectRoot, profileConfig);
 					removalResults.push(result);
 					console.log(
 						chalk.green(generateProfileRemovalSummary(profile, result))
