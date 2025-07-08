@@ -10,8 +10,8 @@
 		"task-master-ai": "mcp-server/server.js"
 	},
 	"scripts": {
-      "test_old": "node --experimental-vm-modules node_modules/.bin/jest",
-      "test": "node_modules/.bin/jest",
+		"test_old": "node --experimental-vm-modules node_modules/.bin/jest",
+		"test": "node_modules/.bin/jest",
 		"test:fails": "node --experimental-vm-modules node_modules/.bin/jest --onlyFailures",
 		"test:watch": "node --experimental-vm-modules node_modules/.bin/jest --watch",
 		"test:coverage": "node --experimental-vm-modules node_modules/.bin/jest --coverage",
@@ -75,6 +75,7 @@
 		"ollama-ai-provider": "^1.2.0",
 		"openai": "^4.89.0",
 		"ora": "^8.2.0",
+		"task-master-ai": "^0.18.0",
 		"tiktoken": "^1.0.21",
 		"uuid": "^11.1.0",
 		"zod": "^3.23.8"
@@ -85,7 +86,6 @@
 	"engines": {
 		"node": ">=18.0.0"
 	},
-
 	"files": [
 		"scripts/**",
 		"assets/**",
