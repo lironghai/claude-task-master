@@ -1749,6 +1749,31 @@ function registerCommands(programInstance) {
 			await analyzeTaskComplexity(updatedOptions);
 		});
 
+	// system-info command
+	programInstance
+		.command('system-info')
+		.alias('sysinfo')
+		.description('获取当前系统的详细信息，包括平台、版本和环境配置')
+		.action(async (options) => {
+			try {
+				const { getSystemInfo } = await import('./task-manager/system-info.js');
+				
+				const context = {
+					mcpLog: {
+						info: (msg) => console.log(chalk.blue('INFO:'), msg),
+						debug: (msg) => console.log(chalk.gray('DEBUG:'), msg),
+						error: (msg) => console.error(chalk.red('ERROR:'), msg)
+					}
+				};
+				
+				const result = await getSystemInfo({}, context, 'text');
+				
+			} catch (error) {
+				console.error(chalk.red('获取系统信息时发生错误:'), error.message);
+				process.exit(1);
+			}
+		});
+
 	// research command
 	programInstance
 		.command('research')

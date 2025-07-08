@@ -42,6 +42,7 @@ import { projectOutlineDirect } from './direct-functions/project-outline.js';
 import { projectCodeInitDirect } from './direct-functions/project-code-init.js';
 import { generateDocumentationFromCodeDirect } from './direct-functions/generate-documentation-from-code-direct.js';
 import { generateCodeFromDocumentationDirect } from './direct-functions/generate-code-from-documentation-direct.js';
+import { getSystemInfoDirect } from './direct-functions/get-system-info.js';
 
 // Re-export utility functions
 export { findTasksPath } from './utils/path-utils.js';
@@ -84,7 +85,8 @@ export const directFunctions = new Map([
     ['projectOutlineDirect', projectOutlineDirect],
     ['projectCodeInitDirect', projectCodeInitDirect],
     ['generateDocumentationFromCodeDirect', generateDocumentationFromCodeDirect],
-    ['generateCodeFromDocumentationDirect', generateCodeFromDocumentationDirect]
+    ['generateCodeFromDocumentationDirect', generateCodeFromDocumentationDirect],
+	['getSystemInfoDirect', getSystemInfoDirect]
 
 ]);
 
@@ -126,5 +128,6 @@ export {
     projectOutlineDirect,
     projectCodeInitDirect,
     generateDocumentationFromCodeDirect,
-    generateCodeFromDocumentationDirect
+    generateCodeFromDocumentationDirect,
+	getSystemInfoDirect
 };

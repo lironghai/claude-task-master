@@ -42,6 +42,7 @@ import { registerProjectOutlineTool } from './project-outline.js';
 import { registerProjectCodeInitTool } from './project-code-init.js';
 import { registerGenerateDocumentationFromCodeTool } from './generate-documentation-from-code.js';
 import { registerGenerateCodeFromDocumentationTool } from './generate-code-from-documentation.js';
+import { registerGetSystemInfoTool } from './get-system-info.js';
 
 
 /**
@@ -104,8 +105,10 @@ export function registerTaskMasterTools(server) {
 		// Group 8: Research Features
 		registerResearchTool(server);
 
+        // Group 9: Code Generation & System Info
         registerGenerateDocumentationFromCodeTool(server);
         registerGenerateCodeFromDocumentationTool(server);
+		registerGetSystemInfoTool(server);
 	} catch (error) {
 		logger.error(`Error registering Task Master tools: ${error.message}`);
 		throw error;
