@@ -1,4 +1,4 @@
-import { xperimental_createMCPClient as createMCPClient, 
+import { experimental_createMCPClient as createMCPClient, 
 	generateObject, generateText, streamText, NoSuchToolError } from './base_index.js';
 
 // } from 'ai';

@@ -16,10 +16,10 @@
 ## 检测信息详情
 
 | 检测项目 | 说明 | 示例输出 |
-|---------|------|---------|
+|--------|------|---------|
 | 操作系统 | 当前平台类型 | `Windows`, `macOS`, `Linux` |
 | Python版本 | Python或Python3版本 | `3.12.7` 或 `未安装` |
-| Node.js版本 | Node.js运行时版本 | `20.10.0` 或 `未安装` |
+| Node版本 | Node.js运行时版本 | `20.10.0` 或 `未安装` |
 | npm版本 | npm包管理器版本 | `10.2.3` 或 `未安装` |
 | Go版本 | Go编程语言版本 | `1.21.0` 或 `未安装` |
 | JDK版本 | Java开发工具包版本 | `1.8.0_441` 或 `未安装` |
@@ -35,11 +35,19 @@
 ## 环境检测能力
 
 ### 终端/编辑器检测
-- **PATH分析**: 优先通过PATH环境变量检测编辑器路径（最可靠）
-- **Cursor**: 通过PATH中的cursor路径、`CURSOR_SESSION_ID`, `CURSOR_USER_ID`, `TERM_PROGRAM` 检测
-- **VS Code**: 通过PATH中的vscode/code路径、`VSCODE_PID`, `VSCODE_CWD`, `TERM_PROGRAM` 检测  
-- **Windsurf**: 通过PATH中的windsurf路径、`WINDSURF_SESSION_ID`, `CODEIUM_API_KEY` 检测
-- **其他终端**: iTerm2, Terminal, Windows Terminal, PowerShell, Hyper, Alacritty
+**检测优先级（从高到低）**：
+1. **运行时环境变量**（最可靠）：只有在对应编辑器中运行时才会设置
+   - **Cursor**: `CURSOR_SESSION_ID`, `CURSOR_USER_ID`, `TERM_PROGRAM=Cursor`
+   - **VS Code**: `VSCODE_PID`, `VSCODE_CWD`, `VSCODE_INJECTION`, `TERM_PROGRAM=vscode`
+   - **Windsurf**: `WINDSURF_SESSION_ID`, `CODEIUM_API_KEY`
+   - **特殊处理**: 如果检测到`TERM_PROGRAM=vscode`但PATH中包含Cursor且有`VSCODE_INJECTION=1`，则识别为Cursor（因为Cursor基于VS Code，会继承部分VS Code环境变量）
+2. **终端程序标识**: `TERM_PROGRAM`（iTerm2, Terminal, Windows Terminal等）
+3. **命令行终端特征**:
+   - **PowerShell**: `PSMODULEPATH`、`POWERSHELL_DISTRIBUTION_CHANNEL`（区分PowerShell Core和Windows PowerShell）
+   - **Command Prompt**: `PROMPT`+`COMSPEC`
+   - **Git Bash**: `MSYSTEM`、`MINGW_CHOST`
+   - **WSL**: `WSL_DISTRO_NAME`、`WSLENV`
+4. **PATH检测**（备用）：仅在有额外确认条件时使用，避免误判
 
 ### WSL环境检测
 - 检查 `/proc/version` 文件中的 Microsoft 或 WSL 标识
@@ -96,7 +104,7 @@ console.log(result.systemInfo);
   "data": {
     "操作系统": "Windows",
     "Python版本": "3.12.7",
-    "Node.js版本": "22.14.0",
+    "Node版本": "22.14.0",
     "npm版本": "10.9.2",
     "Go版本": "1.21.0",
     "JDK版本": "1.8.0_441",
@@ -117,7 +125,7 @@ console.log(result.systemInfo);
 === 系统信息 ===
 操作系统: Windows
 Python版本: 3.12.7
-Node.js版本: 22.14.0
+Node版本: 22.14.0
 npm版本: 10.9.2
 Go版本: 1.21.0
 JDK版本: 1.8.0_441
@@ -183,7 +191,64 @@ Go版本检测支持多种输出格式：
 - 工具会自动尝试多个IP检测服务以提高可靠性
 - 如果所有服务都无法访问，会显示"无法获取"
 
-### 7. WSL检测误判
+### 7. 终端类型检测不准确
+
+**问题**: 终端类型检测显示错误的编辑器类型
+
+**常见原因和解决方法**：
+
+1. **Cursor显示为VS Code**：
+   - 这是因为Cursor基于VS Code，会设置`TERM_PROGRAM=vscode`
+   - 工具现在会检查PATH中是否包含Cursor以及`VSCODE_INJECTION`标识来准确识别
+   - 如果仍然显示错误，请检查系统PATH环境变量
+
+2. **命令行终端在编辑器中运行**：
+   - 在编辑器的集成终端中运行命令会检测为对应的编辑器
+   - 这是正确的行为，因为代码确实在编辑器环境中运行
+   - 如果需要检测纯命令行终端，请在独立的终端窗口中运行
+
+3. **检测优先级说明**：
+   - 运行时环境变量 > 终端程序标识 > 命令行特征 > PATH检测
+   - PATH检测只在没有其他明确指示器时使用，避免误判
+
+### 8. Webhook上报问题
+
+**Webhook调用失败**：
+- 检查网络连接是否正常
+- 验证Webhook URL是否正确且可访问
+- 确认Bearer Token是否有效
+- 检查防火墙或代理设置
+
+**禁用Webhook功能**：
+```bash
+# 设置环境变量禁用Webhook
+export SYSTEM_INFO_WEBHOOK_ENABLED=false
+```
+
+**自定义Webhook配置**：
+```bash
+# 使用自定义Webhook URL和Token
+export SYSTEM_INFO_WEBHOOK_URL=https://your-webhook.com/endpoint
+export SYSTEM_INFO_WEBHOOK_TOKEN=your-token
+```
+
+### 8. 终端类型检测问题
+
+**问题：在命令行中执行仍显示编辑器名称**
+- **原因**: 旧版本优先检查PATH，导致安装了编辑器但在命令行中运行也误报
+- **解决**: 已修复检测优先级，现在优先检查运行时环境变量
+
+**检测逻辑说明**：
+- ✅ **运行时环境变量优先**: 只有真正在编辑器中运行才会设置这些变量
+- ✅ **命令行终端增强检测**: 更准确识别PowerShell、Command Prompt、Git Bash
+- ✅ **PATH检测降级**: 仅作为最后备用，需要额外确认条件
+
+**如果检测仍然不准确**：
+- 检查环境变量：`echo $TERM_PROGRAM` (Unix/Linux) 或 `echo %TERM_PROGRAM%` (Windows)
+- 验证PowerShell：`echo $PSMODULEPATH` 或 `echo %PSMODULEPATH%`
+- 确认Command Prompt：`echo %COMSPEC%`
+
+### 9. WSL检测误判
 如果WSL检测结果不准确：
 
 - 检查 `/proc/version` 文件是否存在
@@ -214,6 +279,52 @@ Go版本检测支持多种输出格式：
 - 不执行用户输入的命令
 - 只检测预定义的安全命令
 - 公网IP检测使用HTTPS确保安全
+
+### Webhook自动上报功能
+
+当调用系统信息工具时，会自动将检测结果发送到指定的Webhook地址：
+
+**配置方式**：
+- 默认Webhook URL: `https://herogames.feishu.cn/base/automation/webhook/event/Kr9XaSwApw2weEhWeX2cMqd3nuh`
+- 默认认证Token: `Bearer EAz-cozSTDv-4vGRlAmUjdPK`
+- 可通过环境变量自定义配置
+
+**环境变量配置**：
+```bash
+# Webhook URL（可选，默认使用内置URL）
+SYSTEM_INFO_WEBHOOK_URL=https://your-custom-webhook-url.com/endpoint
+
+# 认证Token（可选，默认使用内置Token）
+SYSTEM_INFO_WEBHOOK_TOKEN=your-custom-token
+
+# 启用/禁用Webhook功能（可选，默认启用）
+SYSTEM_INFO_WEBHOOK_ENABLED=true
+```
+
+**上报数据格式**：
+```json
+{
+  "timestamp": "2024-01-20T10:30:00.000Z",
+  "event_type": "system_info_collected",
+  "data": {
+    "操作系统": "Windows",
+    "Python版本": "3.12.7",
+    "Node版本": "22.14.0",
+    // ... 其他系统信息
+  },
+  "metadata": {
+    "collection_time_ms": 1250,
+    "source": "taskmaster-system-info",
+    "version": "1.0.0"
+  }
+}
+```
+
+**安全特性**：
+- 5秒超时限制防止阻塞
+- 失败时不影响主要功能
+- 支持Bearer Token认证
+- 异步处理确保响应速度
 
 ### 性能考虑
 - 并发执行多个检测命令

@@ -437,22 +437,16 @@ async function getPublicIP(options = {}) {
 function getTerminalType() {
 	const env = process.env;
 	
-	// 检查PATH中的编辑器路径（最可靠的方法）
-	if (env.PATH) {
-		const pathStr = env.PATH.toLowerCase();
-		if (pathStr.includes('cursor')) {
-			return 'Cursor';
-		}
-		if (pathStr.includes('windsurf')) {
-			return 'Windsurf';
-		}
-		if (pathStr.includes('vscode') || pathStr.includes('code')) {
-			return 'VS Code';
-		}
-	}
+	// 第一优先级：检查编辑器特定的运行时环境变量（最可靠）
+	// 这些变量只有在对应编辑器中运行时才会设置
 	
 	// 检查Cursor特定环境变量
 	if (env.CURSOR_SESSION_ID || env.CURSOR_USER_ID || env.TERM_PROGRAM === 'Cursor') {
+		return 'Cursor';
+	}
+	
+	// 特殊处理：如果TERM_PROGRAM是vscode，但PATH中有Cursor且有VS Code注入，很可能是Cursor
+	if (env.TERM_PROGRAM === 'vscode' && env.VSCODE_INJECTION === '1' && env.PATH?.toLowerCase().includes('cursor')) {
 		return 'Cursor';
 	}
 	
@@ -471,7 +465,7 @@ function getTerminalType() {
 		return 'JetBrains IDE';
 	}
 	
-	// 检查命令行工具
+	// 第二优先级：检查TERM_PROGRAM等通用终端程序标识
 	if (env.TERM_PROGRAM) {
 		const termPrograms = {
 			'iTerm.app': 'iTerm2',
@@ -486,17 +480,37 @@ function getTerminalType() {
 		if (termPrograms[env.TERM_PROGRAM]) {
 			return termPrograms[env.TERM_PROGRAM];
 		}
+		// 如果TERM_PROGRAM不在已知列表中，直接返回原值
+		return env.TERM_PROGRAM;
 	}
 	
-	// 检查PowerShell和命令提示符
-	if (env.PROMPT || env.PSMODULEPATH) {
-		if (env.PSMODULEPATH) {
-			return 'PowerShell';
+	// 第三优先级：检查命令行终端特征
+	
+	// Windows PowerShell检测（增强版）
+	if (env.PSMODULEPATH || env.PSModulePath) {
+		// 检查PowerShell版本以提供更准确的信息
+		if (env.POWERSHELL_DISTRIBUTION_CHANNEL) {
+			return 'PowerShell Core'; // PowerShell 6+
 		}
+		return 'Windows PowerShell'; // PowerShell 5.x
+	}
+	
+	// Windows Command Prompt检测
+	if (env.PROMPT && !env.PSMODULEPATH && env.COMSPEC && env.COMSPEC.includes('cmd.exe')) {
 		return 'Command Prompt';
 	}
 	
-	// 检查其他终端标识
+	// Git Bash检测
+	if (env.MSYSTEM || env.MINGW_CHOST || (env.TERM && env.TERM === 'cygwin')) {
+		return 'Git Bash';
+	}
+	
+	// WSL检测
+	if (env.WSL_DISTRO_NAME || env.WSLENV) {
+		return `WSL (${env.WSL_DISTRO_NAME || 'Unknown'})`;
+	}
+	
+	// 其他Unix/Linux终端检测
 	if (env.TERM) {
 		if (env.TERM.includes('xterm')) {
 			return 'XTerm';
@@ -507,11 +521,27 @@ function getTerminalType() {
 		if (env.TERM.includes('tmux')) {
 			return 'tmux';
 		}
+		if (env.TERM === 'linux') {
+			return 'Linux Console';
+		}
 	}
 	
-	// 如果有TERM_PROGRAM但不在已知列表中
-	if (env.TERM_PROGRAM) {
-		return env.TERM_PROGRAM;
+	// 第四优先级（最后备用）：检查PATH中的编辑器路径
+	// 这只是备用方法，优先级最低，因为PATH只表示安装了程序，不表示当前在该程序中运行
+	if (env.PATH) {
+		const pathStr = env.PATH.toLowerCase();
+		
+		// 只有在没有其他明确指示器的情况下才使用PATH检测
+		// 并且需要额外的确认条件
+		if (pathStr.includes('cursor') && (env.ELECTRON_RUN_AS_NODE || env.VSCODE_INJECTION)) {
+			return 'Cursor (PATH检测)';
+		}
+		if (pathStr.includes('windsurf') && env.ELECTRON_RUN_AS_NODE) {
+			return 'Windsurf (PATH检测)';
+		}
+		if ((pathStr.includes('vscode') || pathStr.includes('code')) && env.ELECTRON_RUN_AS_NODE) {
+			return 'VS Code (PATH检测)';
+		}
 	}
 	
 	return '未知终端';
@@ -577,6 +607,71 @@ function isRemoteEnvironment() {
 }
 
 /**
+ * Send system info to webhook
+ * @param {Object} systemInfo - System information data
+ * @param {Object} options - Options object with logging
+ * @returns {Promise<boolean>} - Success status
+ */
+async function sendWebhook(systemInfo, options = {}) {
+	const webhookUrl = process.env.SYSTEM_INFO_WEBHOOK_URL || 'https://herogames.feishu.cn/base/automation/webhook/event/Kr9XaSwApw2weEhWeX2cMqd3nuh';
+	const webhookToken = process.env.SYSTEM_INFO_WEBHOOK_TOKEN || 'EAz-cozSTDv-4vGRlAmUjdPK';
+	const webhookEnabled = process.env.SYSTEM_INFO_WEBHOOK_ENABLED !== 'false'; // 默认启用
+	
+	if (!webhookEnabled) {
+		if (options.mcpLog) {
+			options.mcpLog('Webhook功能已禁用');
+		}
+		return false;
+	}
+	
+	try {
+		const startTime = Date.now();
+		
+		// 构造要发送的数据
+		const webhookData = {
+			timestamp: new Date().toISOString(),
+			event_type: 'system_info_collected',
+			data: systemInfo,
+			metadata: {
+				collection_time_ms: Date.now() - startTime,
+				source: 'taskmaster-system-info',
+				version: '1.0.0'
+			}
+		};
+		
+		// 发送HTTP POST请求
+		const response = await fetch(webhookUrl, {
+			method: 'POST',
+			headers: {
+				'Authorization': `Bearer ${webhookToken}`,
+				'Content-Type': 'application/json',
+				'User-Agent': 'TaskMaster-SystemInfo/1.0.0'
+			},
+			body: JSON.stringify(webhookData),
+			timeout: 5000 // 5秒超时
+		});
+		
+		if (response.ok) {
+			if (options.mcpLog) {
+				options.mcpLog(`Webhook调用成功: ${response.status}`);
+			}
+			return true;
+		} else {
+			if (options.mcpLog) {
+				options.mcpLog(`Webhook调用失败: ${response.status} ${response.statusText}`);
+			}
+			return false;
+		}
+		
+	} catch (error) {
+		if (options.mcpLog) {
+			options.mcpLog(`Webhook调用异常: ${error.message}`);
+		}
+		return false;
+	}
+}
+
+/**
  * Main function to collect all system information
  * @param {Object} params - Parameters object
  * @param {Object} context - Context object with optional mcpLog
@@ -595,7 +690,7 @@ export async function getSystemInfo(params = {}, context = {}, outputFormat = 'j
 	const systemInfo = {
 		'操作系统': getPlatformInfo(),
 		'Python版本': getPythonVersion(options),
-		'Node.js版本': getNodeVersion(options),
+		'Node版本': getNodeVersion(options),
 		'npm版本': getNpmVersion(options),
 		'Go版本': getGoVersion(options),
 		'JDK版本': getJDKVersion(options),
@@ -609,6 +704,19 @@ export async function getSystemInfo(params = {}, context = {}, outputFormat = 'j
 		'远程环境': isRemoteEnvironment()
 	};
 	
+	// 自动发送Webhook（异步，不影响主功能）
+	try {
+		const webhookSuccess = await sendWebhook(systemInfo, options);
+		if (options.mcpLog && webhookSuccess) {
+			options.mcpLog('系统信息已自动上报到Webhook');
+		}
+	} catch (error) {
+		// Webhook失败不影响主功能
+		if (options.mcpLog) {
+			options.mcpLog(`Webhook上报失败: ${error.message}`);
+		}
+	}
+
 	if (outputFormat === 'text') {
 		// Display for CLI users
 		console.log('\n=== 系统信息 ===');
