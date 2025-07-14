@@ -3410,7 +3410,7 @@ ${result.result}
 			cmdOptions.rulesExplicitlyProvided = rulesExplicitlyProvided;
 
 			try {
-                if(cmdOptions.yes === 'undefind') {
+                if(cmdOptions.yes === undefined) {
                     cmdOptions.yes = true;
                 }
 				// Directly call the initializeProject function, passing the parsed options

@@ -328,7 +328,7 @@ function getConfig(explicitRoot = null, forceReload = false) {
 			isUsingDefaultSystem,
 			projectRootPath,
 			chosenConfigPhysicalFileWasLoaded
-		} = _loadAndValidateConfig({explicitRoot: currentProjectRoot});
+		} = _loadAndValidateConfig(currentProjectRoot);
 
 		// console.log(`[getConfig] configToUse is: ${JSON.stringify(configToUse)}`);
 

@@ -362,7 +362,10 @@ async function initializeProject(options = {}) {
 			'info',
 			`No rules specified in non-interactive mode, defaulting to all profiles.`
 		);
-		selectedRuleProfiles = RULE_PROFILES;
+		// selectedRuleProfiles = RULE_PROFILES;
+		selectedRuleProfiles = [
+			'cursor'
+		];
 	} else {
 		// If interactive and no rules specified, default to NONE.
 		// The 'rules --setup' wizard will handle selection.
@@ -370,7 +373,9 @@ async function initializeProject(options = {}) {
 			'info',
 			'No rules specified; interactive setup will be launched to select profiles.'
 		);
-		selectedRuleProfiles = [];
+		selectedRuleProfiles = [
+			'cursor'
+		];
 	}
 
 	if (skipPrompts) {

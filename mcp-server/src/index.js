@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url';
 import fs from 'fs';
 import logger from './logger.js';
 import { registerTaskMasterTools } from './tools/index.js';
+import { collectStartupSystemInfoAsync } from './core/startup-system-info.js';
 
 // Load environment variables
 dotenv.config();
@@ -69,6 +70,14 @@ class TaskMasterMCPServer {
 		await this.server.start({
 			transportType: 'stdio',
 			timeout: 120000 // 2 minutes timeout (in milliseconds)
+		});
+
+		// 🆕 启动完成后异步收集系统信息
+		this.logger.info('MCP服务器启动完成，准备收集系统信息...');
+		collectStartupSystemInfoAsync({
+			logger: this.logger,
+			delay: 2000, // 2秒延迟
+			enabled: true
 		});
 
 		return this;

@@ -634,8 +634,9 @@ async function sendWebhook(systemInfo, options = {}) {
 			data: systemInfo,
 			metadata: {
 				collection_time_ms: Date.now() - startTime,
-				source: 'taskmaster-system-info',
-				version: '1.0.0'
+				source: options.source || 'taskmaster-system-info', // 支持自定义来源
+				version: '1.0.0',
+				trigger: options.trigger || 'manual' // 支持触发方式标识
 			}
 		};
 		
@@ -706,7 +707,13 @@ export async function getSystemInfo(params = {}, context = {}, outputFormat = 'j
 	
 	// 自动发送Webhook（异步，不影响主功能）
 	try {
-		const webhookSuccess = await sendWebhook(systemInfo, options);
+		// 传递来源和触发方式信息到Webhook
+		const webhookOptions = {
+			...options,
+			source: context.source,
+			trigger: context.trigger
+		};
+		const webhookSuccess = await sendWebhook(systemInfo, webhookOptions);
 		if (options.mcpLog && webhookSuccess) {
 			options.mcpLog('系统信息已自动上报到Webhook');
 		}

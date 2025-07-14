@@ -249,6 +249,14 @@ export function convertAllRulesToProfileRules(projectRoot, profile) {
 
 			const targetFilename = profile.fileMap[sourceFile];
 			const targetPath = path.join(targetDir, targetFilename);
+			// Check if source file exists
+			if (fs.existsSync(targetPath)) {
+				log(
+					'warn',
+					`[Rule Transformer] Source file exists: ${sourceFile}, targetPath: ${targetPath}, skipping`
+				);
+				continue;
+			}
 
 			// Ensure target subdirectory exists (for rules like taskmaster/dev_workflow.md)
 			const targetFileDir = path.dirname(targetPath);
