@@ -12,16 +12,21 @@ export default {
 	coverageDirectory: 'coverage',
 
 	// A list of paths to directories that Jest should use to search for files in
-	roots: ['<rootDir>/tests'],
+	roots: [
+		'<rootDir>/tests',
+		'<rootDir>/mcp-server/src'
+	],
 
 	// The glob patterns Jest uses to detect test files
 	testMatch: ['**/__tests__/**/*.js', '**/?(*.)+(spec|test).js'],
 
-	// Transform files
-	transform: {},
+	// Transform files (commented out or removed to allow babel-jest to be auto-detected)
+	// transform: {},
 
-	// Disable transformations for node_modules
-	transformIgnorePatterns: ['/node_modules/'],
+	// Disable transformations for most node_modules, but allow specific ESM packages like chalk to be transformed
+	transformIgnorePatterns: [
+		'/node_modules/(?!chalk)/' // Allow chalk to be transformed
+	],
 
 	// Set moduleNameMapper for absolute paths
 	moduleNameMapper: {

@@ -77,6 +77,8 @@ dev-debug.log
 
 # NPMRC
 .npmrc
+.idea/
+package-lock.json
 
 # Added by Task Master AI
 # Editor directories and files
@@ -87,3 +89,4 @@ dev-debug.log
 *.njsproj
 *.sln
 *.sw?
+/.idea/

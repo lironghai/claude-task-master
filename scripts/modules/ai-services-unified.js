@@ -48,8 +48,13 @@ import {
 	AzureProvider,
 	VertexAIProvider,
 	ClaudeCodeProvider,
+    DifyAgentProvider,
 	GeminiCliProvider
 } from '../../src/ai-providers/index.js';
+import path from "path";
+import fs from "fs";
+import {experimental_createMCPClient as createMCPClient} from "../../src/ai-providers/base_index.js";
+import {Experimental_StdioMCPTransport as StdioMCPTransport} from "ai/mcp-stdio";
 
 // Import the provider registry
 import ProviderRegistry from '../../src/provider-registry/index.js';
@@ -67,7 +72,8 @@ const PROVIDERS = {
 	azure: new AzureProvider(),
 	vertex: new VertexAIProvider(),
 	'claude-code': new ClaudeCodeProvider(),
-	'gemini-cli': new GeminiCliProvider()
+	'gemini-cli': new GeminiCliProvider(),
+	difyagent: new DifyAgentProvider()
 };
 
 function _getProvider(providerName) {
@@ -374,6 +380,9 @@ async function _unifiedServiceRunner(serviceType, params) {
 		projectRoot,
 		systemPrompt,
 		prompt,
+		tools,
+		activeTools,
+		historyMessage,
 		schema,
 		objectName,
 		commandName,
@@ -561,6 +570,10 @@ async function _unifiedServiceRunner(serviceType, params) {
 				content: systemPromptWithLanguage.trim()
 			});
 
+			if (historyMessage) {
+				messages.push(...historyMessage);
+			}
+
 			// IN THE FUTURE WHEN DOING CONTEXT IMPROVEMENTS
 			// {
 			//     type: 'text',
@@ -582,15 +595,21 @@ async function _unifiedServiceRunner(serviceType, params) {
 			if (prompt) {
 				messages.push({ role: 'user', content: prompt });
 			} else {
-				throw new Error('User prompt content is missing.');
+				if (!historyMessage) {
+					throw new Error('User prompt content is missing.');
+				}
 			}
 
 			const callParams = {
 				apiKey,
 				modelId,
+				commandName,
+				outputType,
 				maxTokens: roleParams.maxTokens,
 				temperature: roleParams.temperature,
 				messages,
+				tools,
+				activeTools,
 				...(baseURL && { baseURL }),
 				...(serviceType === 'generateObject' && { schema, objectName }),
 				...providerSpecificParams,
@@ -647,6 +666,7 @@ async function _unifiedServiceRunner(serviceType, params) {
 			const tagInfo = _getTagInfo(effectiveProjectRoot);
 
 			return {
+				messages: providerResponse.messages,
 				mainResult: finalMainResult,
 				telemetryData: telemetryData,
 				tagInfo: tagInfo
@@ -728,6 +748,73 @@ async function streamTextService(params) {
 	// The current implementation logs *after* the stream is returned.
 	// We might need to adjust how usage is captured/logged for streams.
 	return _unifiedServiceRunner('streamText', combinedParams);
+}
+
+async function streamTextServiceFin(params) {
+
+	const result = await streamTextService(params);
+	let planFistFullText = await getFullText(result.mainResult.textStream);
+	let finishReason = await result.mainResult.finishReason;
+
+	let aiServiceResponse = result;
+	const history = [{ role: 'user', content: params.prompt }];
+	let retry = 5;
+	while (shouldContinue(finishReason) && retry > 0) {
+		// 更新消息历史
+		const curhistory = await updateMessages(result.mainResult);
+		history.push(...curhistory)
+		aiServiceResponse = await streamTextService({
+			session: params.session, // Pass session from context
+			systemPrompt: params.systemPrompt,
+			// prompt: userPrompt,
+			historyMessage: history,
+			commandName: params.commandName, // Provided by caller (CLI/Direct func)
+			outputType: params.outputType,
+			projectRoot: params.projectRoot,
+			tools: params.tools,
+			activeTools: params.activeTools
+		});
+
+		planFistFullText = await getFullText(aiServiceResponse.mainResult.textStream);
+		finishReason = await aiServiceResponse.mainResult.finishReason;
+		retry--;
+	}
+
+	return aiServiceResponse;
+}
+
+function shouldContinue(finishReason) {
+	// 需要继续的情况
+	const continueReasons = [
+		// 'length',           // 达到最大token限制
+		'tool-calls',       // 工具调用未完成
+		// 'content-filter',   // 内容过滤
+		// 'other'            // 其他原因
+	];
+
+	// 应该停止的情况
+	const stopReasons = [
+		'stop',            // 正常完成
+		'error'            // 错误
+	];
+
+	return continueReasons.includes(finishReason);
+}
+
+async function updateMessages(result, currentMessages) {
+	const messages = [];
+	if  (currentMessages) {
+		messages.push({ role: 'user', content: currentMessages });
+	}
+	// 获取新的消息
+	const response = await result.response;
+	const his = await response.messages;
+	if (his) {
+		messages.push(...his);
+	}
+
+	// 智能合并消息历史
+	return messages;
 }
 
 /**
@@ -823,9 +910,162 @@ async function logAiUsage({
 	}
 }
 
+async function writeToFile(textStream, filePath, options = {}) {
+	const {
+		bufferSize = 64 * 1024,  // 64KB 缓冲区
+		encoding = 'utf8',
+		batchSize = 4096         // 4KB 批次写入
+	} = options;
+	let buffer = '';
+	let bytesWritten = 0;
+
+	const outputDir = path.dirname(filePath);
+	if (!fs.existsSync(outputDir)) {
+		fs.mkdirSync(outputDir, { recursive: true });
+		log.info(`[writeToFile] Created directory: ${outputDir}`);
+	}
+
+	const writeStream = fs.createWriteStream(filePath, {
+		encoding,
+		highWaterMark: bufferSize
+	});
+
+	try {
+		for await (const chunk of textStream) {
+			buffer += chunk;
+
+			// 批量写入以减少系统调用
+			if (buffer.length >= batchSize) {
+				const success = writeStream.write(buffer);
+				bytesWritten += Buffer.byteLength(buffer, encoding);
+				buffer = '';
+
+				// 背压处理
+				if (!success) {
+					await new Promise(resolve => writeStream.once('drain', resolve));
+				}
+			}
+		}
+
+		// 写入剩余数据
+		if (buffer) {
+			writeStream.write(buffer);
+			bytesWritten += Buffer.byteLength(buffer, encoding);
+		}
+
+	} finally {
+		writeStream.end();
+	}
+
+	return bytesWritten;
+}
+
+async function getFullText(textStream, options = {}) {
+	const {
+		encoding = 'utf8',
+		batchSize = 4096         // 4KB 批次写入
+	} = options;
+	let buffer = '';
+	let bytesWritten = 0;
+
+	for await (const chunk of textStream) {
+		buffer += chunk;
+
+		// 批量写入以减少系统调用
+		// if (buffer.length >= batchSize) {
+		// 	bytesWritten += Buffer.byteLength(buffer, encoding);
+		// 	buffer = '';
+		// }
+	}
+
+	// 写入剩余数据
+	if (buffer) {
+		bytesWritten += Buffer.byteLength(buffer, encoding);
+	}
+
+	return { buffer, bytesWritten };
+}
+
+async function initMcpClient() {
+		const terminalClient = await createMCPClient({
+			transport: new StdioMCPTransport({
+				command: 'uvx',
+				args: ['terminal_controller'],
+			}),
+		});
+
+	const filesystemClient = await createMCPClient({
+			transport: new StdioMCPTransport({
+				command: 'cmd',
+				args: [
+					"/c",
+					"npx",
+					"-y",
+					"@modelcontextprotocol/server-filesystem@latest",
+					"D:\\project\\java\\temp-reverse-project"
+				],
+			}),
+		});
+
+	const fetchClient = await createMCPClient({
+			transport: new StdioMCPTransport({
+				command: 'uvx',
+				args: ['mcp-server-fetch'],
+			}),
+		});
+	const thinkingClient = await createMCPClient({
+			transport: new StdioMCPTransport({
+				command: "cmd",
+				args: [
+					"/c",
+					"npx",
+					"-y",
+					"@modelcontextprotocol/server-sequential-thinking@latest"
+				],
+			}),
+		});
+	const context7Client = await createMCPClient({
+			transport: new StdioMCPTransport({
+				command: "cmd",
+				args: [
+					"/c",
+					"npx",
+					"-y",
+					"@upstash/context7-mcp@latest"
+				]
+			}),
+		});
+
+	return {terminalClient,  filesystemClient, fetchClient, thinkingClient, context7Client}
+}
+
+async function getTools(clients) {
+	const toolSets = await Promise.all(
+		Object.values(clients).map(client => client?.tools?.() || {})
+	);
+
+	return { ...toolSets.reduce((acc, tools) => ({ ...acc, ...tools }), {}) };
+}
+async function closeMcpClients(clients) {
+	if (!clients) {
+		return [];
+	}
+
+	const toolSets = await Promise.all(
+		Object.values(clients).map(async client => await client?.close())
+	);
+
+	return toolSets;
+}
 export {
 	generateTextService,
 	streamTextService,
+	streamTextServiceFin,
 	generateObjectService,
-	logAiUsage
+	logAiUsage,
+	writeToFile,
+	getFullText,
+	initMcpClient,
+	getTools,
+	closeMcpClients
 };

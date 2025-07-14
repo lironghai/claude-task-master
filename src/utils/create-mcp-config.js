@@ -1,4 +1,5 @@
 import fs from 'fs';
+import commands from 'child_process';
 import path from 'path';
 import { log } from '../../scripts/modules/utils.js';
 
@@ -43,21 +44,47 @@ export function setupMCPConfiguration(projectRoot, mcpConfigPath) {
 
 	// New MCP config to be added - references the installed package
 	const newMCPServer = {
-		'task-master-ai': {
-			command: 'npx',
-			args: ['-y', '--package=task-master-ai', 'task-master-ai'],
-			env: {
-				ANTHROPIC_API_KEY: 'YOUR_ANTHROPIC_API_KEY_HERE',
-				PERPLEXITY_API_KEY: 'YOUR_PERPLEXITY_API_KEY_HERE',
-				OPENAI_API_KEY: 'YOUR_OPENAI_KEY_HERE',
-				GOOGLE_API_KEY: 'YOUR_GOOGLE_KEY_HERE',
-				XAI_API_KEY: 'YOUR_XAI_KEY_HERE',
-				OPENROUTER_API_KEY: 'YOUR_OPENROUTER_KEY_HERE',
-				MISTRAL_API_KEY: 'YOUR_MISTRAL_KEY_HERE',
-				AZURE_OPENAI_API_KEY: 'YOUR_AZURE_KEY_HERE',
-				OLLAMA_API_KEY: 'YOUR_OLLAMA_API_KEY_HERE'
-			}
-		}
+		// 'task-master-ai': {
+		// 	command: 'npx',
+		// 	args: ['-y', '--package=task-master-ai', 'task-master-ai'],
+		// 	env: {
+		// 		ANTHROPIC_API_KEY: 'YOUR_ANTHROPIC_API_KEY_HERE',
+		// 		PERPLEXITY_API_KEY: 'YOUR_PERPLEXITY_API_KEY_HERE',
+		// 		OPENAI_API_KEY: 'YOUR_OPENAI_KEY_HERE',
+		// 		GOOGLE_API_KEY: 'YOUR_GOOGLE_KEY_HERE',
+		// 		XAI_API_KEY: 'YOUR_XAI_KEY_HERE',
+		// 		OPENROUTER_API_KEY: 'YOUR_OPENROUTER_KEY_HERE',
+		// 		MISTRAL_API_KEY: 'YOUR_MISTRAL_KEY_HERE',
+		// 		AZURE_OPENAI_API_KEY: 'YOUR_AZURE_KEY_HERE',
+		// 		OLLAMA_API_KEY: 'YOUR_OLLAMA_API_KEY_HERE'
+		// 	}
+		// },
+        "mysql-localhost": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "@benborla29/mcp-server-mysql"
+            ],
+            "env": {
+                "MYSQL_HOST": "localhost",
+                "MYSQL_PORT": "3306",
+                "MYSQL_USER": "root",
+                "MYSQL_PASS": "123456",
+                "MYSQL_DB": "xxx",
+                "ALLOW_INSERT_OPERATION": "true",
+                "ALLOW_UPDATE_OPERATION": "true",
+                "ALLOW_DELETE_OPERATION": "true"
+
+            }
+        },
+        "redis-localhost": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "@modelcontextprotocol/server-redis",
+                "redis://localhost:6379"
+            ]
+        }
 	};
 
 	// Create config directory if it doesn't exist
@@ -126,6 +153,7 @@ export function setupMCPConfiguration(projectRoot, mcpConfigPath) {
 		}
 	} else {
 		// If mcp.json doesn't exist, create it
+		this.installMcp();
 		const newMCPConfig = {
 			mcpServers: newMCPServer
 		};
@@ -261,4 +289,25 @@ export function removeTaskMasterMCPConfiguration(projectRoot, mcpConfigPath) {
 	}
 
 	return result;
+}
+
+
+export function installMcp() {
+	const commands = [
+		'npx @benborla29/mcp-server-mysql',
+		'npx @modelcontextprotocol/server-redis'
+	];
+
+	commands.forEach((cmd) => {
+		exec(cmd, (error, stdout, stderr) => {
+			if (error) {
+				log('error', `Command failed: ${cmd} - ${error.message}`);
+				return;
+			}
+			if (stderr) {
+				log('warn', `Command warning: ${cmd} - ${stderr}`);
+			}
+			log('info', `Command success: ${cmd} - ${stdout}`);
+		});
+	});
 }

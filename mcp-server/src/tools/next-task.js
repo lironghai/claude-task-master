@@ -38,6 +38,7 @@ export function registerNextTaskTool(server) {
 		}),
 		execute: withNormalizedProjectRoot(async (args, { log, session }) => {
 			try {
+				log.error('TEST ERROR -----------------------------------');
 				log.info(`Finding next task with args: ${JSON.stringify(args)}`);
 
 				// Resolve the path to tasks.json using new path utilities

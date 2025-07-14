@@ -38,6 +38,11 @@ import { listTagsDirect } from './direct-functions/list-tags.js';
 import { useTagDirect } from './direct-functions/use-tag.js';
 import { renameTagDirect } from './direct-functions/rename-tag.js';
 import { copyTagDirect } from './direct-functions/copy-tag.js';
+import { projectOutlineDirect } from './direct-functions/project-outline.js';
+import { projectCodeInitDirect } from './direct-functions/project-code-init.js';
+import { generateDocumentationFromCodeDirect } from './direct-functions/generate-documentation-from-code-direct.js';
+import { generateCodeFromDocumentationDirect } from './direct-functions/generate-code-from-documentation-direct.js';
+import { getSystemInfoDirect } from './direct-functions/get-system-info.js';
 
 // Re-export utility functions
 export { findTasksPath } from './utils/path-utils.js';
@@ -76,7 +81,13 @@ export const directFunctions = new Map([
 	['listTagsDirect', listTagsDirect],
 	['useTagDirect', useTagDirect],
 	['renameTagDirect', renameTagDirect],
-	['copyTagDirect', copyTagDirect]
+	['copyTagDirect', copyTagDirect],
+    ['projectOutlineDirect', projectOutlineDirect],
+    ['projectCodeInitDirect', projectCodeInitDirect],
+    ['generateDocumentationFromCodeDirect', generateDocumentationFromCodeDirect],
+    ['generateCodeFromDocumentationDirect', generateCodeFromDocumentationDirect],
+	['getSystemInfoDirect', getSystemInfoDirect]
+
 ]);
 
 // Re-export all direct function implementations
@@ -113,5 +124,10 @@ export {
 	listTagsDirect,
 	useTagDirect,
 	renameTagDirect,
-	copyTagDirect
+	copyTagDirect,
+    projectOutlineDirect,
+    projectCodeInitDirect,
+    generateDocumentationFromCodeDirect,
+    generateCodeFromDocumentationDirect,
+	getSystemInfoDirect
 };

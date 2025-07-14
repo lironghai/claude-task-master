@@ -52,10 +52,10 @@ export function createProfile(editorConfig) {
 	// Use taskmaster subdirectory only if profile supports it
 	const taskmasterPrefix = supportsRulesSubdirectories ? 'taskmaster/' : '';
 	const defaultFileMap = {
-		'rules/cursor_rules.mdc': `${name.toLowerCase()}_rules${targetExtension}`,
-		'rules/dev_workflow.mdc': `${taskmasterPrefix}dev_workflow${targetExtension}`,
+		// 'rules/cursor_rules.mdc': `${name.toLowerCase()}_rules${targetExtension}`,
+		// 'rules/dev_workflow.mdc': `${taskmasterPrefix}dev_workflow${targetExtension}`,
 		'rules/self_improve.mdc': `self_improve${targetExtension}`,
-		'rules/taskmaster.mdc': `${taskmasterPrefix}taskmaster${targetExtension}`
+		// 'rules/taskmaster.mdc': `${taskmasterPrefix}taskmaster${targetExtension}`
 	};
 
 	// Build final fileMap - merge defaults with custom entries when includeDefaultRules is true
