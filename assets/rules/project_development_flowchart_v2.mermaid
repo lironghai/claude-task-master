@@ -1,0 +1,72 @@
+flowchart TD
+    A[开始] --> B[初始化Rule配置]
+    B --> C[生成项目大纲]
+    C --> D[生成项目代码文档]
+    
+    %% 并行处理
+    D --> E{项目代码文档完整性自查}
+    E -->|不完整| D
+    E -->|完整| F[根据项目大纲项目初始化]
+    E -->|完整| G[环境准备与配置]
+    
+    F --> H[根据项目代码文档实现项目功能]
+    G --> I[数据库设计与初始化]
+    
+    H --> J{文档与代码相关性自查}
+    J -->|不匹配| K[调整代码或文档]
+    K --> J
+    J -->|匹配| L[单元测试]
+    
+    L --> M{单元测试通过?}
+    M -->|未通过| N[修复代码]
+    N --> H
+    M -->|通过| O[代码审查]
+    
+    O --> P{代码审查通过?}
+    P -->|未通过| Q[修改代码]
+    Q --> H
+    P -->|通过| R[集成测试]
+    
+    I --> R
+    R --> S{集成测试通过?}
+    S -->|未通过| T[修复集成问题]
+    T --> H
+    S -->|通过| U[安全扫描]
+    
+    U --> V{安全检查通过?}
+    V -->|未通过| W[修复安全问题]
+    W --> H
+    V -->|通过| X[创建版本标签]
+    
+    X --> Y[推送项目代码]
+    Y --> Z[服务部署]
+    Z --> AA[部署后监控检查]
+    AA --> BB[项目UAT测试]
+    
+    BB --> CC{UAT测试通过?}
+    CC -->|未通过| DD[问题分析]
+    DD --> EE{问题类型}
+    EE -->|代码问题| H
+    EE -->|部署问题| FF[回滚到上一版本]
+    EE -->|需求问题| C
+    EE -->|环境问题| G
+    
+    FF --> Z
+    CC -->|通过| GG[生产环境监控设置]
+    GG --> HH[项目上线完成]
+    
+    %% 样式设置
+    style A fill:#e1f5fe
+    style HH fill:#c8e6c9
+    style E fill:#fff3e0
+    style J fill:#fff3e0
+    style M fill:#fff3e0
+    style P fill:#fff3e0
+    style S fill:#fff3e0
+    style V fill:#fff3e0
+    style CC fill:#fff3e0
+    style EE fill:#ffebee
+    style O fill:#f3e5f5
+    style U fill:#f3e5f5
+    style AA fill:#f3e5f5
+    style GG fill:#f3e5f5
