@@ -25,7 +25,12 @@ import { getLoggerOrDefault } from './logger-utils.js';
 export function normalizeProjectRoot(projectRoot) {
 	if (!projectRoot) return projectRoot;
 
-	// Ensure it's a string
+	if (typeof projectRoot === 'object') {
+		const logger = getLoggerOrDefault();
+		logger.error?.(`projectRoot must be a string, not an object! projectRoot: ${JSON.stringify(projectRoot)}`);
+		return "";
+	}
+
 	projectRoot = String(projectRoot);
 
 	// Split the path into segments

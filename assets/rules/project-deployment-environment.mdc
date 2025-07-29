@@ -1,0 +1,22 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+
+jenkins:
+job name: Hero-bdc4test
+build param: {"MODLE_NAME": "gateway", "elmt": "origin/dev", "cloud": "kubernetes-huaweicloud-k3", "appenv": "test", "META_DATA_CONF": "{}"}
+
+参数说明：
+MODLE_NAME：（重要）部署模块名称
+elmt：（重要）远程分支名称
+cloud：集群名称，默认kubernetes-huaweicloud-k3，可不传
+appenv：（重要）部署环境名称，test:测试环境；
+META_DATA_CONF：自定义配置，可不传
+
+
+kubernetes：
+namespace：命名空间，测试环境：business-test；
+service: 服务，测试环境：bdc4-gateway-test；
