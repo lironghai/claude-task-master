@@ -3,9 +3,6 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import chalk from 'chalk';
 import { z } from 'zod';
-import { fileURLToPath } from 'url';
-import { log, findProjectRoot, resolveEnvVariable as originalResolveEnvVariable, isEmpty } from './utils.js';
-import { AI_COMMAND_NAMES } from '../../src/constants/commands.js';
 import {
 	LEGACY_CONFIG_FILE,
 	TASKMASTER_DIR
@@ -349,18 +346,12 @@ function getConfig(explicitRoot = null, forceReload = false) {
 	// console.log(`[getConfig] needsLoad is: ${needsLoad}`); // Diagnostic log
 
 	if (needsLoad) {
-		const {
-			configToUse,
-			envFileToTarget,
-			sourceOfConfig, // for logging/debugging if needed
-			isUsingDefaultSystem,
-			projectRootPath,
-			chosenConfigPhysicalFileWasLoaded
-		} = _loadAndValidateConfig(currentProjectRoot);
+		const config = _loadAndValidateConfig(currentProjectRoot);
 
 		// console.log(`[getConfig] configToUse is: ${JSON.stringify(configToUse)}`);
 
 		let loadedEnvFromFile = {};
+		let isUsingDefaultSystem = false;
 		if (isUsingDefaultSystem) {
 			// Load from MASTER_DEFAULT_ENV_TEMPLATE_PATH
 			const { content: parsedMasterEnv, error: masterEnvError } = _tryReadAndParseEnv(MASTER_DEFAULT_ENV_TEMPLATE_PATH);
@@ -370,8 +361,8 @@ function getConfig(explicitRoot = null, forceReload = false) {
 			} else {
 				log('warn', `Master default ENV template (${MASTER_DEFAULT_ENV_TEMPLATE_PATH}) not found or failed to parse (Error: ${masterEnvError || 'not_found'}). Using empty default env for this load.`);
 			}
-		} else if (forceReload || projectRootPath) { // Not using default system, try to load project-specific .env
-			const envPath = path.join(projectRootPath, '.env');
+		} else if (forceReload || currentProjectRoot) { // Not using default system, try to load project-specific .env
+			const envPath = path.join(currentProjectRoot, '.env');
 			const { content: parsedEnvContent, error: envParseError } = _tryReadAndParseEnv(envPath);
 			if (parsedEnvContent) {
 				loadedEnvFromFile = parsedEnvContent;
@@ -392,11 +383,11 @@ function getConfig(explicitRoot = null, forceReload = false) {
 
 		// Update the global state
 		loadedConfigState = {
-			effectiveConfig: configToUse,
+			effectiveConfig: config,
 			effectiveEnv: effectiveEnv,
 			isUsingDefaultSystem: isUsingDefaultSystem,
-			projectRootPath: projectRootPath,
-			configPhysicalFileExists: chosenConfigPhysicalFileWasLoaded // Renamed for clarity
+			projectRootPath: currentProjectRoot,
+			configPhysicalFileExists: true // Renamed for clarity
 		};
 		// Log('debug', `Config loaded. Source: ${sourceOfConfig}, Using defaults: ${isUsingDefaultSystem}, Env target: ${envFileToTarget}`);
 		return loadedConfigState;
@@ -1044,7 +1035,8 @@ function getUserId(explicitRoot = null) {
 	let currentConfig = effectiveConfig;
 	let needsWrite = false;
 
-	if (!currentConfig.global) {
+	if (!currentConfig || !currentConfig.global) {
+		currentConfig = {}; // Ensure global object exists
 		currentConfig.global = {}; // Ensure global object exists
 	}
 	if (!currentConfig.global.userId) {

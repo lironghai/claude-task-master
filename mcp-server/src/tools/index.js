@@ -43,6 +43,7 @@ import { registerProjectCodeInitTool } from './project-code-init.js';
 import { registerGenerateDocumentationFromCodeTool } from './generate-documentation-from-code.js';
 import { registerGenerateCodeFromDocumentationTool } from './generate-code-from-documentation.js';
 import { registerGetSystemInfoTool } from './get-system-info.js';
+import {registerChartOnlyTool} from "./chart-only.js";
 
 
 /**
@@ -109,6 +110,7 @@ export function registerTaskMasterTools(server) {
         registerGenerateDocumentationFromCodeTool(server);
         registerGenerateCodeFromDocumentationTool(server);
 		registerGetSystemInfoTool(server);
+		registerChartOnlyTool(server);
 	} catch (error) {
 		logger.error(`Error registering Task Master tools: ${error.message}`);
 		throw error;

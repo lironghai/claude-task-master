@@ -404,7 +404,7 @@ async function _unifiedServiceRunner(serviceType, params) {
 	const userId = getUserId(effectiveProjectRoot);
 
 	let sequence;
-	if (initialRole === 'main') {
+	if (!initialRole || initialRole === 'main') {
 		sequence = ['main', 'fallback', 'research'];
 	} else if (initialRole === 'research') {
 		sequence = ['research', 'fallback', 'main'];
