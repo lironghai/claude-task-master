@@ -34,6 +34,13 @@ import {
 	validateStrength
 } from './task-manager/scope-adjustment.js';
 
+import { handleGenerateDocumentationFromCodeCommand } from './task-manager/generate-documentation-from-code-command.js';
+import { generateCodeFromDocumentation } from './task-manager/generate-code-from-documentation.js';
+import { genDocFromCodePlan } from './task-manager/gen-doc-plan.js';
+import { handleGenDocFromCodePlanCommand } from './task-manager/gen-doc-from-code-plan-command.js';
+import { handleGenCodeFromClassPlanCommand } from './task-manager/gen-code-from-class-plan-command.js';
+import { handleGenProjectInitCommand } from './task-manager/gen-project-init-dir-command.js';
+
 // Export task manager functions
 export {
 	parsePRD,
@@ -63,5 +70,11 @@ export {
 	performResearch,
 	scopeUpTask,
 	scopeDownTask,
-	validateStrength
+	validateStrength,
+    handleGenerateDocumentationFromCodeCommand,
+    generateCodeFromDocumentation,
+    genDocFromCodePlan,
+    handleGenDocFromCodePlanCommand,
+    handleGenCodeFromClassPlanCommand,
+    handleGenProjectInitCommand,
 };

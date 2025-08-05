@@ -1,0 +1,52 @@
+graph TD
+    subgraph "核心控制层"
+        A[control-command.mdc<br/>元指令与控制]
+        B[cursor_rules.mdc<br/>基础行为准则]
+        C[code-specification.mdc<br/>编码规范]
+    end
+    
+    subgraph "文档生成层"
+        D[project-outline-workflow.mdc<br/>项目大纲]
+        E[project-class-doc-work.mdc<br/>类文档生成]
+        F[document-gen-design.md<br/>功能设计文档]
+        G[document-gen-doc-check.md<br/>文档完整性检查]
+    end
+    
+    subgraph "需求与开发层"
+        H[new-prd-workflow.mdc<br/>PRD需求分析]
+        J[gen-code-from-doc-workflow.mdc<br/>文档生成代码]
+    end
+    
+    subgraph "质量保证层"
+        K[code-refactoring.mdc<br/>代码重构规则]
+        L[code-mr-review.mdc<br/>代码审核标准]
+    end
+    
+    subgraph "部署运维层"
+        M[git_push_devops.mdc<br/>GIT推送与部署]
+        N[project-deployment-environment.mdc<br/>部署环境配置]
+    end
+    
+    subgraph "持续改进"
+        O[self_improve.mdc<br/>规则自我改进]
+    end
+    
+    A --> B
+    A --> C
+    D --> E
+    E --> F
+    E --> G
+    H --> J
+    K --> L
+    J --> M
+    M --> N
+    
+    O -.-> A
+    O -.-> D
+    O -.-> H
+    O -.-> K
+    
+    style A fill:#f9f,stroke:#333,stroke-width:4px
+    style B fill:#bbf,stroke:#333,stroke-width:2px
+    style C fill:#bbf,stroke:#333,stroke-width:2px
+    style O fill:#fbb,stroke:#333,stroke-width:2px 

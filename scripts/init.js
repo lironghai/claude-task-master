@@ -72,18 +72,13 @@ function displayBanner() {
 	if (isSilentMode()) return;
 
 	console.clear();
-	const bannerText = figlet.textSync('Task Master AI', {
+	const bannerText = figlet.textSync('Hero Task Master AI', {
 		font: 'Standard',
 		horizontalLayout: 'default',
 		verticalLayout: 'default'
 	});
 
 	console.log(coolGradient(bannerText));
-
-	// Add creator credit line below the banner
-	console.log(
-		chalk.dim('by ') + chalk.cyan.underline('https://x.com/eyaltoledano')
-	);
 
 	console.log(
 		boxen(chalk.white(`${chalk.bold('Initializing')} your new project`), {
@@ -367,7 +362,10 @@ async function initializeProject(options = {}) {
 			'info',
 			`No rules specified in non-interactive mode, defaulting to all profiles.`
 		);
-		selectedRuleProfiles = RULE_PROFILES;
+		// selectedRuleProfiles = RULE_PROFILES;
+		selectedRuleProfiles = [
+			'cursor'
+		];
 	} else {
 		// If interactive and no rules specified, default to NONE.
 		// The 'rules --setup' wizard will handle selection.
@@ -375,7 +373,9 @@ async function initializeProject(options = {}) {
 			'info',
 			'No rules specified; interactive setup will be launched to select profiles.'
 		);
-		selectedRuleProfiles = [];
+		selectedRuleProfiles = [
+			'cursor'
+		];
 	}
 
 	if (skipPrompts) {
@@ -588,6 +588,7 @@ function createProjectStructure(
 	ensureDirectoryExists(path.join(targetDir, TASKMASTER_DOCS_DIR));
 	ensureDirectoryExists(path.join(targetDir, TASKMASTER_REPORTS_DIR));
 	ensureDirectoryExists(path.join(targetDir, TASKMASTER_TEMPLATES_DIR));
+    ensureDirectoryExists(path.join(targetDir, 'temp'));
 
 	// Create initial state.json file for tag management
 	createInitialStateFile(targetDir);
@@ -652,7 +653,7 @@ function createProjectStructure(
 	}
 
 	// Copy example_prd.txt to NEW location
-	copyTemplateFile('example_prd.txt', path.join(targetDir, EXAMPLE_PRD_FILE));
+	copyTemplateFile('prd_cn.txt', path.join(targetDir, EXAMPLE_PRD_FILE));
 
 	// Initialize git repository if git is available
 	try {

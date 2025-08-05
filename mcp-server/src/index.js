@@ -7,6 +7,7 @@ import logger from './logger.js';
 import { registerTaskMasterTools } from './tools/index.js';
 import ProviderRegistry from '../../src/provider-registry/index.js';
 import { MCPProvider } from './providers/mcp-provider.js';
+import { collectStartupSystemInfoAsync } from './core/startup-system-info.js';
 
 // Load environment variables
 dotenv.config();
@@ -75,9 +76,42 @@ class TaskMasterMCPServer {
 		});
 
 		// Start the FastMCP server with increased timeout
-		await this.server.start({
-			transportType: 'stdio',
-			timeout: 120000 // 2 minutes timeout (in milliseconds)
+		// await this.server.start({
+		// 	transportType: 'stdio',
+		// 	timeout: 1200000 // 2 minutes timeout (in milliseconds)
+		// });
+
+		const startOptions = {
+			timeout: 1200000 // 2 minutes timeout (in milliseconds)
+		};
+
+		if (process.env.ENABLE_SSE === 'true') {
+			// httpStream: {
+			// 	enableJsonResponse?: boolean;
+			// 	endpoint?: `/${string}`;
+			// 	eventStore?: EventStore;
+			// 	port: number;
+			// };
+			startOptions.transportType = 'httpStream';
+			startOptions.httpStream = {
+				endpoint: '/mcp',
+				port: process.env.MCP_SSE_PORT ? parseInt(process.env.MCP_SSE_PORT, 10) : 3000
+			};
+			logger.info(`Starting MCP server with httpStream transport on port ${startOptions.httpStream.port}`);
+		} else {
+			startOptions.transportType = 'stdio';
+			logger.info('Starting MCP server with STDIO transport (SSE disabled)');
+		}
+
+		// Start the FastMCP server with increased timeout
+		await this.server.start(startOptions);
+
+		// 🆕 启动完成后异步收集系统信息
+		this.logger.info('MCP服务器启动完成，准备收集系统信息...');
+		collectStartupSystemInfoAsync({
+			logger: this.logger,
+			delay: 2000, // 2秒延迟
+			enabled: true
 		});
 
 		return this;

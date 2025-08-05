@@ -3,7 +3,6 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import chalk from 'chalk';
 import { z } from 'zod';
-import { AI_COMMAND_NAMES } from '../../src/constants/commands.js';
 import {
 	LEGACY_CONFIG_FILE,
 	TASKMASTER_DIR
@@ -16,25 +15,51 @@ import {
 } from '../../src/constants/providers.js';
 import { findConfigPath } from '../../src/utils/path-utils.js';
 import { findProjectRoot, isEmpty, log, resolveEnvVariable } from './utils.js';
+import dotenv from 'dotenv';
+import { AI_COMMAND_NAMES } from '../../src/constants/commands.js';
 
 // Calculate __dirname in ESM
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Load supported models from JSON file using the calculated __dirname
+
+// Variables to hold paths, to be initialized by _initializeModulePaths
+let MASTER_DEFAULT_CONFIG_TEMPLATE_PATH;
+let MASTER_DEFAULT_ENV_TEMPLATE_PATH;
+let MODEL_MAP_PATH;
+let modulePathsInitialized = false;
+
+function _initializeModulePaths() {
+	if (modulePathsInitialized) return;
+
+	MASTER_DEFAULT_CONFIG_TEMPLATE_PATH = path.resolve(__dirname, '../../.taskmaster/config_default.json');
+	MASTER_DEFAULT_ENV_TEMPLATE_PATH = path.resolve(__dirname, '../../.taskmaster/env_default');
+	MODEL_MAP_PATH = path.resolve(__dirname, '../../src/constants/model_map.json');
+	modulePathsInitialized = true;
+}
+
+// Load supported models from JSON file
 let MODEL_MAP;
 try {
+	MASTER_DEFAULT_CONFIG_TEMPLATE_PATH = path.resolve(__dirname, '../../.taskmaster/config_default.json');
+	MASTER_DEFAULT_ENV_TEMPLATE_PATH = path.resolve(__dirname, '../../.taskmaster/env_default');
+	MODEL_MAP_PATH = path.resolve(__dirname, '../../src/constants/model_map.json');
+
+	const modelFilePath = path.join(__dirname, 'supported-models.json');
+	// console.log(`[config-manager] Attempting to load models from: ${modelFilePath}`); // Diagnostic log
+	// console.log(`[config-manager] __dirname is: ${__dirname}`); // Diagnostic log
+
 	const supportedModelsRaw = fs.readFileSync(
-		path.join(__dirname, 'supported-models.json'),
+		modelFilePath, // Use the constructed path
 		'utf-8'
 	);
 	MODEL_MAP = JSON.parse(supportedModelsRaw);
 } catch (error) {
 	console.error(
 		chalk.red(
-			'FATAL ERROR: Could not load supported-models.json. Please ensure the file exists and is valid JSON.'
-		),
-		error
+			'FATAL ERROR: Could not load supported-models.json. Please ensure the file exists and is valid JSON. ' +
+			error.constructor.name + ': ' + error.message
+		)
 	);
 	MODEL_MAP = {}; // Default to empty map on error to avoid crashing, though functionality will be limited
 	process.exit(1); // Exit if models can't be loaded
@@ -72,7 +97,8 @@ const DEFAULTS = {
 		projectName: 'Task Master',
 		ollamaBaseURL: 'http://localhost:11434/api',
 		bedrockBaseURL: 'https://bedrock.us-east-1.amazonaws.com',
-		responseLanguage: 'English'
+		responseLanguage: 'Chinese',
+		useDefaultConfiguration: true
 	},
 	claudeCode: {}
 };
@@ -80,6 +106,9 @@ const DEFAULTS = {
 // --- Internal Config Loading ---
 let loadedConfig = null;
 let loadedConfigRoot = null; // Track which root loaded the config
+let legacyConfigWarningShown = false; // Added flag to track if warning was shown
+
+let loadedConfigState = null;
 
 // Custom Error for configuration issues
 class ConfigurationError extends Error {
@@ -87,6 +116,58 @@ class ConfigurationError extends Error {
 		super(message);
 		this.name = 'ConfigurationError';
 	}
+}
+
+function _mergeDeep(target, source) {
+    const output = { ...target };
+    if (typeof target === 'object' && target !== null && typeof source === 'object' && source !== null) {
+        Object.keys(source).forEach(key => {
+            if (typeof source[key] === 'object' && source[key] !== null && !Array.isArray(source[key])) {
+                if (!(key in target)) {
+                    Object.assign(output, { [key]: source[key] });
+                } else {
+                    output[key] = _mergeDeep(target[key], source[key]);
+                }
+            } else {
+                Object.assign(output, { [key]: source[key] });
+            }
+        });
+    }
+    return output;
+}
+
+function _tryReadAndParseJson(filePath, fileNameForLog = 'Config') {
+    if (fs.existsSync(filePath)) {
+        try {
+            const rawData = fs.readFileSync(filePath, 'utf-8');
+            if (rawData.trim() === '') {
+                // log('warn', `${fileNameForLog} file at ${filePath} is empty.`);
+                return { content: null, error: 'empty' };
+            }
+            return { content: JSON.parse(rawData), error: null };
+        } catch (error) {
+            // log('error', `Error reading or parsing ${fileNameForLog} file at ${filePath}: ${error.message}`);
+            return { content: null, error: 'parse_error' };
+        }
+    }
+    return { content: null, error: 'not_found' };
+}
+
+function _tryReadAndParseEnv(filePath) {
+    if (fs.existsSync(filePath)) {
+        try {
+            const envFileContent = fs.readFileSync(filePath, 'utf-8');
+            if (envFileContent.trim() === '') {
+                // log('debug', `Environment file ${filePath} is empty.`); // Potentially too noisy
+                return { content: {}, error: null, isEmpty: true };
+            }
+            return { content: dotenv.parse(envFileContent), error: null, isEmpty: false };
+        } catch (error) {
+            // log('warn', `Could not read or parse env file ${filePath}: ${error.message}`);
+            return { content: null, error: 'parse_error', isEmpty: false };
+        }
+    }
+    return { content: null, error: 'not_found', isEmpty: false };
 }
 
 function _loadAndValidateConfig(explicitRoot = null) {
@@ -248,27 +329,71 @@ function _loadAndValidateConfig(explicitRoot = null) {
  * @returns {object} The loaded configuration object.
  */
 function getConfig(explicitRoot = null, forceReload = false) {
-	// Determine if a reload is necessary
-	const needsLoad =
-		!loadedConfig ||
-		forceReload ||
-		(explicitRoot && explicitRoot !== loadedConfigRoot);
 
-	if (needsLoad) {
-		const newConfig = _loadAndValidateConfig(explicitRoot); // _load handles null explicitRoot
-
-		// Only update the global cache if loading was forced or if an explicit root
-		// was provided (meaning we attempted to load a specific project's config).
-		// We avoid caching the initial default load triggered without an explicitRoot.
-		if (forceReload || explicitRoot) {
-			loadedConfig = newConfig;
-			loadedConfigRoot = explicitRoot; // Store the root used for this loaded config
-		}
-		return newConfig; // Return the newly loaded/default config
+	if (loadedConfigState && !explicitRoot) {
+		return loadedConfigState;
 	}
 
-	// If no load was needed, return the cached config
-	return loadedConfig;
+	const currentProjectRoot = explicitRoot || findProjectRoot();
+
+	const needsLoad =
+		!loadedConfigState ||
+		forceReload ||
+		(currentProjectRoot && currentProjectRoot !== loadedConfigState.projectRootPath);
+
+	// console.log(`[getConfig] loadedConfigState: ${loadedConfigState}`); // Diagnostic log
+	// console.log(`[getConfig] currentProjectRoot: ${currentProjectRoot}`); // Diagnostic log
+	// console.log(`[getConfig] needsLoad is: ${needsLoad}`); // Diagnostic log
+
+	if (needsLoad) {
+		const config = _loadAndValidateConfig(currentProjectRoot);
+
+		// console.log(`[getConfig] configToUse is: ${JSON.stringify(configToUse)}`);
+
+		let loadedEnvFromFile = {};
+		let isUsingDefaultSystem = false;
+		if (isUsingDefaultSystem) {
+			// Load from MASTER_DEFAULT_ENV_TEMPLATE_PATH
+			const { content: parsedMasterEnv, error: masterEnvError } = _tryReadAndParseEnv(MASTER_DEFAULT_ENV_TEMPLATE_PATH);
+			if (parsedMasterEnv) {
+				loadedEnvFromFile = parsedMasterEnv;
+				log('debug', `Loaded environment variables from master template: ${MASTER_DEFAULT_ENV_TEMPLATE_PATH}`);
+			} else {
+				log('warn', `Master default ENV template (${MASTER_DEFAULT_ENV_TEMPLATE_PATH}) not found or failed to parse (Error: ${masterEnvError || 'not_found'}). Using empty default env for this load.`);
+			}
+		} else if (forceReload || currentProjectRoot) { // Not using default system, try to load project-specific .env
+			const envPath = path.join(currentProjectRoot, '.env');
+			const { content: parsedEnvContent, error: envParseError } = _tryReadAndParseEnv(envPath);
+			if (parsedEnvContent) {
+				loadedEnvFromFile = parsedEnvContent;
+			} else {
+				// Error already logged by _tryReadAndParseEnv if parse_error
+				// If not_found, it's fine, just means no such env file.
+				log('debug', `Project-specific .env file not found at ${envPath} or failed to parse. Proceeding without it for this load.`);
+			}
+		} else {
+			log('debug', 'No project root and not using default system for ENV; only process.env will be used.');
+		}
+
+		// Merge process.env last so it can override file-based env vars if needed,
+		// though typically file-based vars take precedence if they exist.
+		// dotenv.parse gives precedence to first defined, process.env should be fallback.
+		const effectiveEnv = { ...process.env, ...loadedEnvFromFile };
+
+
+		// Update the global state
+		loadedConfigState = {
+			effectiveConfig: config,
+			effectiveEnv: effectiveEnv,
+			isUsingDefaultSystem: isUsingDefaultSystem,
+			projectRootPath: currentProjectRoot,
+			configPhysicalFileExists: true // Renamed for clarity
+		};
+		// Log('debug', `Config loaded. Source: ${sourceOfConfig}, Using defaults: ${isUsingDefaultSystem}, Env target: ${envFileToTarget}`);
+		return loadedConfigState;
+	}
+
+	return loadedConfigState;
 }
 
 /**
@@ -393,8 +518,8 @@ function getClaudeCodeSettingsForCommand(
 // --- Role-Specific Getters ---
 
 function getModelConfigForRole(role, explicitRoot = null) {
-	const config = getConfig(explicitRoot);
-	const roleConfig = config?.models?.[role];
+	const { effectiveConfig } = getConfig(explicitRoot);
+	const roleConfig = effectiveConfig?.models?.[role];
 	if (!roleConfig) {
 		log(
 			'warn',
@@ -464,12 +589,19 @@ function getFallbackTemperature(explicitRoot = null) {
 // --- Global Settings Getters ---
 
 function getGlobalConfig(explicitRoot = null) {
-	const config = getConfig(explicitRoot);
+	const { effectiveConfig } = getConfig(explicitRoot);
 	// Ensure global defaults are applied if global section is missing
-	return { ...DEFAULTS.global, ...(config?.global || {}) };
+	return { ...DEFAULTS.global, ...(effectiveConfig?.global || {}) };
 }
 
 function getLogLevel(explicitRoot = null) {
+		if (!loadedConfigState) {
+		// If config isn't fully loaded yet (e.g., findProjectRoot called by getConfig's initial stages,
+		// and findProjectRoot or its utilities like log try to get global config),
+		// return the hardcoded defaults to prevent recursion.
+		return DEFAULTS.global.logLevel.toLowerCase();
+	}
+
 	// Directly return value from config
 	return getGlobalConfig(explicitRoot).logLevel.toLowerCase();
 }
@@ -655,8 +787,9 @@ function isApiKeySet(providerName, session = null, projectRoot = null) {
 		groq: 'GROQ_API_KEY',
 		vertex: 'GOOGLE_API_KEY', // Vertex uses the same key as Google
 		'claude-code': 'CLAUDE_CODE_API_KEY', // Not actually used, but included for consistency
-		bedrock: 'AWS_ACCESS_KEY_ID' // Bedrock uses AWS credentials
-		// Add other providers as needed
+		bedrock: 'AWS_ACCESS_KEY_ID', // Bedrock uses AWS credentials
+        difyagent: 'DIFY_AGENT_API_KEY'
+        // Add other providers as needed
 	};
 
 	const providerKey = providerName?.toLowerCase();
@@ -666,9 +799,18 @@ function isApiKeySet(providerName, session = null, projectRoot = null) {
 	}
 
 	const envVarName = keyMap[providerKey];
-	const apiKeyValue = resolveEnvVariable(envVarName, session, projectRoot);
+	let apiKeyValue = null;
 
-	// Check if the key exists, is not empty, and is not a placeholder
+	if (session && session.env && session.env[envVarName]) {
+		// apiKeyValue = session.env[envVarName];
+		apiKeyValue = resolveEnvVariable(envVarName, session, projectRoot);;
+	} else {
+		const { effectiveEnv } = getConfig(projectRoot);
+		if (effectiveEnv && effectiveEnv[envVarName]) {
+			apiKeyValue = effectiveEnv[envVarName];
+		}
+	}
+
 	return (
 		apiKeyValue &&
 		apiKeyValue.trim() !== '' &&
@@ -889,16 +1031,24 @@ function isConfigFilePresent(explicitRoot = null) {
  * @returns {string|null} The user ID or null if not found.
  */
 function getUserId(explicitRoot = null) {
-	const config = getConfig(explicitRoot);
-	if (!config.global) {
-		config.global = {}; // Ensure global object exists
+	const { effectiveConfig, projectRootPath } = getConfig(explicitRoot); // projectRootPath from getConfig's state
+	let currentConfig = effectiveConfig;
+	let needsWrite = false;
+
+	if (!currentConfig || !currentConfig.global) {
+		currentConfig = {}; // Ensure global object exists
+		currentConfig.global = {}; // Ensure global object exists
 	}
-	if (!config.global.userId) {
-		config.global.userId = '1234567890';
-		// Attempt to write the updated config.
-		// It's important that writeConfig correctly resolves the path
-		// using explicitRoot, similar to how getConfig does.
-		const success = writeConfig(config, explicitRoot);
+	if (!currentConfig.global.userId) {
+		currentConfig.global.userId = Date.now().toString(36) + Math.random().toString(36).substring(2); // More unique
+		log('info', `Generated new User ID: ${currentConfig.global.userId}`);
+		needsWrite = true;
+	}
+
+	if (needsWrite) {
+		// Pass the determined projectRootPath from getConfig's state to writeConfig
+		// This ensures writeConfig uses the same root that getConfig used for loading.
+		const success = writeConfig(currentConfig, projectRootPath);
 		if (!success) {
 			// Log an error or handle the failure to write,
 			// though for now, we'll proceed with the in-memory default.
@@ -908,7 +1058,7 @@ function getUserId(explicitRoot = null) {
 			);
 		}
 	}
-	return config.global.userId;
+	return currentConfig.global.userId;
 }
 
 /**
