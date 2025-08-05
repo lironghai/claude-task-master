@@ -51,7 +51,8 @@ import {
     handleGenerateDocumentationFromCodeCommand,
     handleGenDocFromCodePlanCommand,
     handleGenCodeFromClassPlanCommand,
-    handleGenProjectInitCommand
+    handleGenProjectInitCommand,
+	chartOnly
 } from './task-manager.js';
 
 import {
@@ -5427,6 +5428,87 @@ Examples:
                 const result = await handleGenProjectInitCommand(coreArgs, coreContext, 'text');
 
                 spinner.succeed(chalk.green('Code generation process completed!'));
+
+                console.log(chalk.bold('\nProcessing Summary:'));
+                result.results.forEach(res => {
+                    let statusChalk = chalk.yellow;
+                    if (res.status === 'success') statusChalk = chalk.green;
+                    else if (res.status.startsWith('error')) statusChalk = chalk.red;
+                    else if (res.status.startsWith('skipped')) statusChalk = chalk.gray;
+
+                    console.log(`- Document: ${chalk.cyan(res.document)}`);
+                    console.log(`  Status: ${statusChalk(res.status)}`);
+                    if (res.message && res.status !== 'success') {
+                        console.log(`  Message: ${res.message}`);
+                    }
+                });
+
+                // Overall telemetry is displayed by the core function when outputFormat is 'text'
+
+            } catch (error) {
+                spinner.fail(chalk.red('An unexpected error occurred: ' + error.message));
+                if (getDebugFlag( options.projectRoot || findProjectRoot() )) {
+                    console.error(error.stack);
+                }
+                process.exit(1);
+            }finally {
+                spinner.stop();
+            }
+        });
+
+    programInstance
+        .command('chart-only')
+        .description('llm chart.')
+        .option('-p, --project-root <path>', 'The root directory of the project. Defaults to auto-detected project root.')
+        .option('-o, --overwrite', 'Overwrite existing file if they exist.', false)
+        .option('-s --system-prompt', 'system prompt.', false)
+        .option('-u --user-prompt', 'user prompt.', false)
+        .action(async (options) => {
+            const spinner = ora('Processing chart-only...').start();
+            try {
+                const projectRoot = options.projectRoot || findProjectRoot();
+                if (!projectRoot) {
+                    spinner.fail(chalk.red('Error: Could not determine project root. Please specify with --project-root or run from within a Task Master project.'));
+                    process.exit(1);
+                }
+
+                spinner.text = 'chart-only ... This may take a few moments.';
+
+                const coreArgs = {
+                    projectRoot,
+                    overwrite: !!options.overwrite,
+					systemPrompt: options.systemPrompt, // Add the new option here
+					userPrompt: options.userPrompt, // Add the new option here
+                };
+
+                const coreContext = {
+                    session: null,
+                    reportProgress: (progress) => {
+                        if (progress.currentFile && progress.stage) {
+                            spinner.text = `Processed ${progress.processedCount}/${progress.totalCount}: ${progress.currentFile} - ${progress.stage} (${progress.status})`;
+                        } else if (progress.currentFile) {
+                            spinner.text = `Processed ${progress.processedCount}/${progress.totalCount}: ${progress.currentFile} (${progress.status})`;
+                        } else {
+                            spinner.text = `Processed ${progress.processedCount}/${progress.totalCount} files... (${progress.status})`;
+                        }
+                    },
+                    log: {
+                        info: (msg) => console.log(chalk.blue('INFO:'), msg),
+                        warn: (msg) => console.warn(chalk.yellow('WARN:'), msg),
+                        error: (msg, stack) => {
+                            console.error(chalk.red('ERROR:'), msg);
+                            if (stack && getDebugFlag( projectRoot )) {
+                                console.error(stack);
+                            }
+                        }
+                    },
+                    commandNameFromContext: 'chart-only'
+                };
+
+                // outputFormat 'text' will trigger displayAiUsageSummary in the core logic
+                const result = await chartOnly(coreArgs, coreContext, 'text');
+
+                spinner.succeed(chalk.green('chart-only process completed!'));
 
                 console.log(chalk.bold('\nProcessing Summary:'));
                 result.results.forEach(res => {

@@ -40,6 +40,7 @@ import { genDocFromCodePlan } from './task-manager/gen-doc-plan.js';
 import { handleGenDocFromCodePlanCommand } from './task-manager/gen-doc-from-code-plan-command.js';
 import { handleGenCodeFromClassPlanCommand } from './task-manager/gen-code-from-class-plan-command.js';
 import { handleGenProjectInitCommand } from './task-manager/gen-project-init-dir-command.js';
+import { chartOnly } from './task-manager/chart-only.js';
 
 // Export task manager functions
 export {
@@ -77,4 +78,5 @@ export {
     handleGenDocFromCodePlanCommand,
     handleGenCodeFromClassPlanCommand,
     handleGenProjectInitCommand,
+	chartOnly
 };

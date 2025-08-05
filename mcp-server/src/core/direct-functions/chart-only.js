@@ -10,7 +10,7 @@ import { normalizeProjectRoot } from '../../../../src/utils/path-utils.js'; // F
  * @param {boolean} [args.overwrite=false] - Whether to overwrite existing files.
  * @param {string} [args.targetLanguage] - Optional target programming language.
  * @param {string} [args.targetFramework] - Optional target framework.
- * @param {string} [args.projectOutlinePath] - Optional: Path to a project outline document.
+ * @param {string} [args.systemPrompt] - Optional: Path to a project outline document.
  * @param {object} log - The MCP logger instance.
  * @param {object} context - The MCP context.
  * @param {object} context.session - The MCP session object.
@@ -38,7 +38,7 @@ export async function chartOnlyDirect(args, log, context = {}) {
             overwrite: args.overwrite || false,
             targetLanguage: args.targetLanguage,
             targetFramework: args.targetFramework,
-            projectOutlinePath: args.projectOutlinePath, // Pass the new argument
+            systemPrompt: args.systemPrompt, // Pass the new argument
             userPrompt: args.userPrompt, // Pass the new argument
         };
 

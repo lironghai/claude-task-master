@@ -16,12 +16,12 @@ export function registerChartOnlyTool(server) {
             overwrite: z.boolean().optional().default(false).describe("Whether to overwrite existing code files."),
             targetLanguage: z.string().optional().describe("Optional: The target programming language for the generated code (e.g., 'JavaScript', 'Python')."),
             targetFramework: z.string().optional().describe("Optional: The target framework, if applicable (e.g., 'React', 'Express.js')."),
-            projectOutlinePath: z.string().optional().describe("Optional: Path to a project outline document (relative to projectRoot or absolute) to provide broader context for code generation."),
-            userPrompt: z.string().optional().describe("Optional: Path to a project outline document (relative to projectRoot or absolute) to provide broader context for code generation."),
+            systemPrompt: z.string().optional().describe("Optional: System prompt."),
+            userPrompt: z.string().optional().describe("Optional: user prompt."),
         }),
         execute: withNormalizedProjectRoot(async (args, { log, session, reportProgress: reportProgressMcp }) => {
             // args.projectRoot is now normalized and absolute thanks to withNormalizedProjectRoot
-            const { overwrite, targetLanguage, targetFramework, projectRoot, projectOutlinePath, userPrompt } = args;
+            const { overwrite, targetLanguage, targetFramework, projectRoot, systemPrompt, userPrompt } = args;
 
             try {
                 log.info(`[chartOnly] Starting generation. Project: ${projectRoot}. `);
@@ -31,7 +31,7 @@ export function registerChartOnlyTool(server) {
                     overwrite,
                     targetLanguage,
                     targetFramework,
-                    projectOutlinePath,
+                    systemPrompt,
                     userPrompt
                 };
 
