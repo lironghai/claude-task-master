@@ -90,18 +90,13 @@ function displayBanner() {
 	if (isSilentMode()) return;
 
 	// console.clear(); // Removing this to avoid clearing the terminal per command
-	const bannerText = figlet.textSync('Task Master', {
+	const bannerText = figlet.textSync('Hero Task Master', {
 		font: 'Standard',
 		horizontalLayout: 'default',
 		verticalLayout: 'default'
 	});
 
 	console.log(coolGradient(bannerText));
-
-	// Add creator credit line below the banner
-	console.log(
-		chalk.dim('by ') + chalk.cyan.underline('https://x.com/eyaltoledano')
-	);
 
 	// Read version directly from package.json
 	const version = getTaskMasterVersion();

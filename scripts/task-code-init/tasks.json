@@ -1,0 +1,501 @@
+{
+  "tasks": [
+    {
+      "id": 1,
+      "title": "读取项目大纲文档",
+      "description": "从指定位置（docs/project-documentation.md）读取项目大纲文档，了解项目类型、目的、结构和主要功能。",
+      "status": "pending",
+      "dependencies": [],
+      "priority": "high",
+      "details": "使用文件读取API或库函数读取docs/project-documentation.md的内容。解析文档以提取关键信息，如项目类型、技术栈等。",
+      "testStrategy": "验证是否成功读取并解析了文档内容。",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "并验证docs/project-documentation.md文件存在性",
+          "description": "检查docs/project-documentation.md该文件是否存在于指定位置。",
+          "dependencies": [],
+          "details": "使用Node.js的path模块构建文件路径，通过fs模块的existsSync方法验证文件是否存在。如果文件不存在，抛出错误或记录日志。",
+          "status": "pending",
+          "testStrategy": "创建一个临时文件并测试路径解析和存在性检查逻辑。"
+        },
+        {
+          "id": 2,
+          "title": "读取项目大纲docs/project-documentation.md文档内容",
+          "description": "从指定路径docs/project-documentation.md读取项目大纲文档的内容并将其存储为字符串。",
+          "dependencies": [
+            1
+          ],
+          "details": "使用fs模块的readFileSync方法同步读取文件内容，确保以UTF-8编码格式解析。处理可能的文件读取异常。",
+          "status": "pending",
+          "testStrategy": "准备一个包含示例内容的文件，验证读取结果是否与预期一致。"
+        },
+        {
+          "id": 3,
+          "title": "解析文档以提取关键信息",
+          "description": "分析文档内容，提取项目类型、目的、项目功能、结构、项目三方依赖、技术栈等关键信息。",
+          "dependencies": [
+            2
+          ],
+          "details": "根据文档格式（如Markdown），使用正则表达式或解析库（如marked）提取标题和段落中的关键字段。将提取的信息存储在对象中。",
+          "status": "pending",
+          "testStrategy": "提供一个标准化的Markdown文档，验证解析逻辑是否正确提取所有目标字段。"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "初始化项目结构",
+      "description": "根据项目大纲（docs/project-documentation.md）中项目类型和技术栈初始化项目，自动检查并补全标准项目结构，并添加项目大纲中提及的技术栈依赖。",
+      "status": "pending",
+      "dependencies": [
+        1
+      ],
+      "priority": "high",
+      "details": "创建项目目录结构，例如src/main/java, src/test/java等。根据项目技术栈（如Maven或Gradle）生成相应的配置文件（pom.xml或build.gradle），并添加项目大纲中提及的技术栈依赖。",
+      "testStrategy": "检查项目目录结构是否正确，以及配置文件中是否包含正确的依赖项。",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "创建项目基础目录结构",
+          "description": "根据项目类型创建标准的目录结构，例如src/main/java, src/test/java等。",
+          "dependencies": [],
+          "details": "使用脚本或工具（如mkdir命令或IDE功能）创建所需的目录层级。确保目录结构符合项目技术栈的标准约定。",
+          "status": "pending",
+          "testStrategy": "验证目录是否成功创建，检查路径和名称是否正确。"
+        },
+        {
+          "id": 2,
+          "title": "生成构建工具配置文件",
+          "description": "根据项目使用的构建工具（如Maven或Gradle），生成相应的配置文件（pom.xml或build.gradle）。",
+          "dependencies": [
+            1
+          ],
+          "details": "基于模板文件或工具（如Maven archetype或Gradle init）生成初始配置文件，并确保其放置在项目根目录中。",
+          "status": "pending",
+          "testStrategy": "运行构建工具命令（如mvn validate或gradle tasks）以验证配置文件的正确性。"
+        },
+        {
+          "id": 3,
+          "title": "添加基础依赖到配置文件",
+          "description": "向构建工具配置文件中添加项目所需的基础依赖（如JUnit、日志框架等）。",
+          "dependencies": [
+            2
+          ],
+          "details": "根据项目大纲中的要求，在配置文件中声明基础依赖项，并确保版本号符合团队规范。",
+          "status": "pending",
+          "testStrategy": "执行构建命令并验证依赖是否成功下载且无冲突。"
+        },
+        {
+          "id": 4,
+          "title": "集成项目大纲中技术栈特定第三方依赖",
+          "description": "根据项目大纲中提及的技术栈，添加相关的依赖到构建工具配置文件中。",
+          "dependencies": [
+            3
+          ],
+          "details": "分析项目大纲，确定需要的技术栈（如Spring Boot、Hibernate等），并在配置文件中添加对应的依赖声明。",
+          "status": "pending",
+          "testStrategy": "运行项目启动命令或单元测试，验证技术栈依赖是否正常加载。"
+        },
+        {
+          "id": 5,
+          "title": "检查并补全项目结构",
+          "description": "检查项目结构完整性，确保所有必要的文件和目录均已创建，并进行最终验证。",
+          "dependencies": [
+            4
+          ],
+          "details": "编写自动化脚本或手动检查项目结构，包括源代码目录、资源文件夹、测试目录等。补充任何遗漏的部分。",
+          "status": "pending",
+          "testStrategy": "执行完整的构建和测试流程，确保项目能够成功编译和运行。"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "生成项目配置文件",
+      "description": "根据项目大纲（docs/project-documentation.md）中的配置要求生成对应的配置项，并在配置文件中添加注释说明每个配置项的用途。",
+      "status": "pending",
+      "dependencies": [
+        2
+      ],
+      "priority": "medium",
+      "details": "基于项目大纲中的配置需求，在项目的配置文件中添加相应的配置项，并为每个配置项添加详细的注释。",
+      "testStrategy": "确认所有需要的配置项都已正确添加到配置文件中，并且每个配置项都有清晰的注释。",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "解析项目大纲（docs/project-documentation.md）中的配置需求",
+          "description": "从项目大纲文档（docs/project-documentation.md）中提取所有需要的配置项及其详细说明。",
+          "dependencies": [],
+          "details": "读取项目大纲文件 docs/project-documentation.md，识别并列出所有配置项及其用途描述。可以使用正则表达式或自然语言处理工具来自动化提取。",
+          "status": "pending",
+          "testStrategy": "验证提取出的配置项列表是否完整，与项目大纲内容进行对比检查。"
+        },
+        {
+          "id": 2,
+          "title": "生成初始配置文件",
+          "description": "基于项目大纲文件中的配置要求，创建包含所有配置项的初始配置文件。",
+          "dependencies": [
+            1
+          ],
+          "details": "编写脚本或手动创建配置文件，将所有配置项按照项目大纲文件中的配置要求的结构填入默认值。确保每个配置项都有占位符或合理的初始值。",
+          "status": "pending",
+          "testStrategy": "验证生成的配置文件是否符合设计结构，并检查是否存在遗漏的配置项。"
+        },
+        {
+          "id": 4,
+          "title": "为配置项添加注释说明",
+          "description": "在配置文件中为每个配置项添加详细的注释，解释其用途及可能的取值范围。",
+          "dependencies": [
+            3
+          ],
+          "details": "在配置文件中逐项添加注释，注释内容应包括配置项的用途、默认值含义以及任何相关的约束条件。确保注释风格统一。",
+          "status": "pending",
+          "testStrategy": "检查每个配置项是否都有对应的注释，并验证注释内容是否准确且易于理解。"
+        },
+        {
+          "id": 5,
+          "title": "验证并优化配置文件",
+          "description": "对生成的配置文件进行全面测试和优化，确保其可用性和可维护性。",
+          "dependencies": [
+            4
+          ],
+          "details": "运行项目并加载配置文件，验证配置项是否能被正确解析和应用。同时检查文件的可读性和注释的完整性，必要时进行调整优化。",
+          "status": "pending",
+          "testStrategy": "通过单元测试或集成测试验证配置文件的功能性，同时邀请团队成员评审文件的可维护性。"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "读取类文档",
+      "description": "从指定位置 docs/class-doc/目录下的所有.md 读取所有类文档，分析类的功能、结构及依赖关系。",
+      "status": "pending",
+      "dependencies": [
+        1
+      ],
+      "priority": "high",
+      "details": "遍历docs/class-doc/目录下的所有.md文件，读取并解析这些文档以获取类的相关信息，包括类名、方法、字段等。",
+      "testStrategy": "确保所有类文档都被正确读取并解析，没有遗漏任何重要信息。",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "遍历docs/class-doc/目录下的所有.md文件",
+          "description": "扫描指定目录 docs/class-doc/ 并获取所有Markdown(.md)文件的路径列表。",
+          "dependencies": [],
+          "details": " 1. 使用命令列出所有类文档，例如：`powershell -Command \"Get-ChildItem -Recurse -File docs\\class-doc\\*.md | Select-Object -ExpandProperty FullName\" > temp\\temp_class_docs.txt` （确保temp目录存在 mkdir temp）",
+          "status": "pending",
+          "testStrategy": "使用命令列出docs/class-doc/下所有md文档对比 temp\\temp_class_docs.txt 与文件内容，验证 temp_class_docs 是否包含所有命令列出的文件。"
+        },
+        {
+          "id": 2,
+          "title": "逐个读取解析类文档文件内容",
+          "description": "根据上一步生成的文件路径列表 temp\\temp_class_docs.txt，逐一读取每个Markdown类文档文件的内容。",
+          "dependencies": [
+            1
+          ],
+          "details": "1. 根据temp_class_docs.txt列出的文档列表，递归读取文件，并将已读取的文档追加记录到 temp\\temp_read_class_docs.txt。 2. 利用fs.readFile或fs.readFileSync方法读取每个文件的内容，识别类定义部分，提取类名、方法签名、属性字段、依赖关系等声明。",
+          "status": "pending",
+          "testStrategy": "对比 temp\\temp_class_docs.txt 与 temp\\temp_read_class_docs.txt 文件内容，验证 temp_read_class_docs 是否包含 temp_class_docs 中的所有文件。"
+        },
+        {
+          "id": 4,
+          "title": "分析类之间的依赖关系",
+          "description": "基于提取出的类信息，分析类与类之间的引用继承、实现、依赖关系。",
+          "dependencies": [
+            2
+          ],
+          "details": "1. 通过类属性字段类型、方法参数、继承、实现、依赖等信息，确定哪些类被其他类引用，构建依赖关系图（例如组件ASCII结构图）。 \n 2. 将依赖关系图保存到 temp\\temp_class_docs_dependencies.txt \n 3. 必须包含所有类，不能省略",
+          "status": "pending",
+          "testStrategy": "验证 temp\\temp_class_docs_dependencies.txt 文件是否存在，内容是否真实、符合预期。"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "生成代码开发优先级计划",
+      "description": "根据类依赖关系分析的结果temp\\temp_class_docs_dependencies.txt，生成详细的代码开发优先级计划 docs/plan/gen-code.md。",
+      "status": "pending",
+      "dependencies": [
+        4
+      ],
+      "priority": "high",
+      "details": "创建一个表格形式的执行计划，列出每个类及其方法的开发优先级，保存至 docs/plan/gen-code.md。",
+      "testStrategy": "检查生成的执行计划是否完整地反映了类间的依赖关系，并且格式正确。",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "解析类依赖关系数据",
+          "description": "从类依赖关系分析的结果 temp\\temp_class_docs_dependencies.txt 中提取所有类的依赖信息。",
+          "dependencies": [],
+          "details": "读取类依赖关系分析生成的数据文件 temp\\temp_class_docs_dependencies.txt ，解析出每个类的依赖层级。",
+          "status": "pending",
+          "testStrategy": "验证解析后的数据是否与原始输入一致，并检查是否有遗漏的类或方法。"
+        },
+        {
+          "id": 2,
+          "title": "生成执行计划表格",
+          "description": "基于优先级数据和表格结构，生成完整的代码开发优先级计划表格。",
+          "dependencies": [1],
+          "details": "1. 实现一个算法（如拓扑排序）来确定类和方法的执行顺序，确保被依赖、继承和实现的类优先开发，优先级自底向上，优先被依赖的类，然后是当前类，例如：优先级：基础通用类、配置类 → 工具与类型处理类 → 实体、Mapper、类型处理器等数据层 → 核心能力层 → 业务服务层 → 控制器层 \n 2. 将优先级数据填充到表格结构中，将最终的优先级计划写入docs/plan/gen-code.md。 按照优先级排序，文档应包含以下列：\n      | 优先级 | 模块 | 类名 | 方法名（具体） | 状态 (待处理/处理中/已完成/失败-需人工) | 备注 |\n      |---|---|---|---|---|---|",
+          "status": "pending",
+          "testStrategy": "检查生成的表格是否包含所有类和方法，并确认优先级排序无误。"
+        },
+        {
+          "id": 3,
+          "title": "检查优先级计划文档",
+          "description": "对 docs/plan/gen-code.md 进行全面验证。",
+          "dependencies": [2],
+          "details": "1. 检查 docs/plan/gen-code.md 文档是否存在 \n 2. 检查文档内容是否为空 \n 3. 检查文档内容是否符合预期格式 \n 4. 检查文档内容是否包含所有类和方法 ",
+          "status": "pending",
+          "testStrategy": "1. 通过检查文档文件是否存在，结构是否正确，内容是否完整 2. 检查 gen-code.md 优先级计划是否包含 temp\\temp_class_docs.txt 列出的所有类, 计划中是否存在多余的类"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "开始按计划编写类代码（自动分组迭代）",
+      "description": "依据生成的优先级计划 docs/plan/gen-code.md，开始逐步实现各个类及其方法，并同步更新计划完成状态，自动分组迭代，10个类为一组生成代码然后更新计划状态。",
+      "status": "pending",
+      "dependencies": [
+        6
+      ],
+      "priority": "high",
+      "details": "1. 遵循优先级计划中的顺序，逐一实现类代码 \n 2.自动分组迭代，建议10个类一组 \n 3. 每完成一组类或方法后更新状态，并同步更新计划完成状态,只有类中所有方法真正实现后才认为完成 \n 4. 按组迭代子任务1-8，一次迭代只需完整一组类任务 \n 5. 遇到错误或不一致以组为单位汇总提示，不中断组内类代码的生成",
+      "testStrategy": "持续跟踪执行计划的状态更新，确保所有类和方法都按照计划被实现。",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "按照优先级计划顺序读取一组类文档",
+          "description": "从优先级计划按照顺序读取一组类名，在docs/class-doc/目录中找到类名对应的类文档，读取类文档内容解析类的基本结构、属性、依赖、注解、方法等信息。",
+          "dependencies": [],
+          "details": "1. 从优先级计划按照顺序读取一组类名 \n 2. 在docs/class-doc/目录中找到类名对应的类文档 \n 3.读取类文档内容解析类的基本结构、属性、依赖、注解、方法等信息",
+          "status": "pending",
+          "testStrategy": "验证提取的类定义是否与执行计划一致，确保没有遗漏或错误。"
+        },
+        {
+          "id": 2,
+          "title": "实现类的基本结构",
+          "description": "根据解析类的基本结构、属性、依赖、注解、方法等信息，编写该类的基本代码，包括类声明、属性字段、依赖、注解、方法等。",
+          "dependencies": [1],
+          "details": "1. 根据解析类的基本结构、属性、依赖、注解、方法等信息，编写该类的基本代码，包括类声明、属性字段、依赖、注解、方法等 \n 2. 必须严格按照类文档内容生成代码(属性\\方法\\依赖\\依赖注入\\注解)，完全对齐文档 \n 3. 实体类字段命名、注解属性设置必须严格按照文档字段要求,完全对齐文档 \n 4. 生成的代码必须包含注释 \n 5. 若需要依赖第三方库自动添加依赖项",
+          "status": "pending",
+          "testStrategy": "运行静态代码分析工具，确认类结构无语法错误。"
+        },
+        {
+          "id": 3,
+          "title": "解析类文档中方法的伪代码",
+          "description": "仔细阅读并解析类文档中提供方法的伪代码和实现细节，确保理解每个方法的逻辑流程。",
+          "dependencies": [2],
+          "details": "逐行分析伪代码，标记出关键步骤和需要实现的核心逻辑。记录任何不明确的地方并与相关方确认。",
+          "status": "pending",
+          "testStrategy": "反思是否真正理解伪代码功能逻辑。"
+        },
+        {
+          "id": 4,
+          "title": "实现方法的基础控制流",
+          "description": "为方法定义清晰的签名、参数列表以及返回值类型，基于伪代码，完成方法的主要控制流（如条件分支、循环等），暂不涉及复杂业务逻辑。",
+          "dependencies": [3],
+          "details": "1. 根据方法信息，为方法定义清晰的签名、参数列表以及返回值类型。 \n 2. 将伪代码翻译成实际代码，专注于实现方法的基本结构，例如 if-else、for 循环等。避免过早优化或添加额外功能 \n 3. 必须严格按照类文档内容生成代码(方法参数\\返回值类型\\方法注解\\主流程)，完全对齐文档 \n 4. 若需要依赖第三方库自动添加依赖项",
+          "status": "pending",
+          "testStrategy": "运行简单的测试用例，检查控制流是否按预期执行。"
+        },
+        {
+          "id": 5,
+          "title": "填充具体业务逻辑",
+          "description": "在已搭建的控制流基础上，补充完整的业务逻辑以满足需求。",
+          "dependencies": [4],
+          "details": "1. 根据伪代码逐步实现每一步的具体操作，包括数据处理、调用其他模块或服务等。确保所有边界条件均被覆盖 \n 2. 严格按照提供的伪代码/实现逻辑要求实现真实业务功能 \n 3. 方法实现不允许使用伪实现、TODO实现等（重要），必须实现真实业务逻辑 \n 4. 生成的代码必须包含注释 \n 5. 若需要依赖第三方库自动添加依赖项 ",
+          "status": "pending",
+          "testStrategy": "针对各种场景设计全面的单元测试，验证业务逻辑的准确性。"
+        },
+        {
+          "id": 6,
+          "title": "提示遇到错误或不一致",
+          "description": "若在过程中遇到类文档缺失或路径不一致或方法逻辑缺失或方法实现使用伪实现填充的情况，以组为单位汇总并提示用户，尽量不中断组内其他类的生成流程，优先完成组内类代码生成",
+          "dependencies": [5],
+          "details": "1. 记录每个类遇到的所有错误和不一致情况 \n 2. 以组为单位汇总提示用户 ",
+          "status": "pending",
+          "testStrategy": "检查提示内容是否准确反映遇到的问题。"
+        },
+        {
+          "id": 7,
+          "title": "更新优先级计划状态并标记当前类为已完成",
+          "description": "在完成类及所有方法后，更新优先级计划的状态，将当前类标记为已完成。",
+          "dependencies": [5,6],
+          "details": "修改优先级计划文档或数据结构，更新状态字段，记录完成时间和相关备注。",
+          "status": "pending",
+          "testStrategy": "检查要更新的类 1.实际代码类结构是否与类文档要求的结构一致 2.检查每个方法实现逻辑是否为伪实现没有真实实现 3.检查每个方法实现逻辑是否与类文档要求的实现逻辑一致，若只有主流程也视为不一致。"
+        },
+        {
+          "id": 8,
+          "title": "重复下一组流程以实现剩余类及其方法",
+          "description": "基于更新后的执行计划，继续实现下一组类及其方法，直至所有类均完成。",
+          "dependencies": [6,7],
+          "details": "重复子任务8至11的步骤，依次处理执行计划中的其他类，直到计划中所有类都被实现。",
+          "status": "pending",
+          "testStrategy": "进行全面集成测试，验证所有类之间的交互是否符合预期。"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "检查类代码实现逻辑",
+      "description": "严格按照类文档提供类结构与方法的伪代码或实现细节来检查每个方法代码实现的具体业务逻辑。",
+      "status": "pending",
+      "dependencies": [
+        7
+      ],
+      "priority": "high",
+      "details": "对于每一个方法，根据文档中的描述和伪代码进行实现，保证真实业务逻辑的准确性。",
+      "testStrategy": "对每个实现的方法进行单元测试，确保其行为符合预期。",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "对比类的基本结构",
+          "description": "仔细阅读并解析类文档中提供的属性、依赖、注解、方法信息，是否与真实类代码结构对应",
+          "dependencies": [],
+          "details": "1. 对比类代码继承、实现是否与文档一致 2. 对比类代码属性字段数量、字段类型、字段注解、依赖注入 3. 对比类代码注解 4. 对比类代码方法数量、签名、方法参数、类方法返回值、方法注解 ",
+          "status": "pending",
+          "testStrategy": "。"
+        },
+        {
+          "id": 2,
+          "title": "对比方法功能实现",
+          "description": "仔细阅读并解析类文档中提供的方法实现逻辑，是否与真实方法代码实现功能逻辑一致",
+          "dependencies": [1],
+          "details": "1. 检查类文档方法列表中的方法是否在类代码中真实存在 2. 对比方法代码的真实实现逻辑与文档伪代码做深度语义比对 3. 检查方法代码是否实现了真实业务逻辑 4. 检查方法是否存在伪实现、空实现、缺失关键步骤、TODO/FIXME 5. 检查方法功能逻辑是否与类文档方法逻辑一致",
+          "status": "pending",
+          "testStrategy": "运行简单的测试用例，检查控制流是否按预期执行。"
+        },
+        {
+          "id": 3,
+          "title": "修复差异",
+          "description": "以类文档为基准，修复发现的问题。",
+          "dependencies": [1,2],
+          "details": "以类文档为基准，修复发现的问题，缺失的类、字段、方法、注解等信息自动补充，冗余代码、类、方法、注解等信息自动删除，逻辑不一致的代码严格对齐类文档方法实现逻辑并自动修复。",
+          "status": "pending",
+          "testStrategy": "重复步骤1-2，检查本次修复内容。"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "自动编译与初步测试",
+      "description": "完成代码编写后，自动编译项目并运行初步测试以确保代码正确性。",
+      "status": "pending",
+      "dependencies": [
+        8
+      ],
+      "priority": "medium",
+      "details": "使用构建工具（如Maven或Gradle）自动编译整个项目，并运行基本的单元测试用例。",
+      "testStrategy": "确保编译过程无错误，并且所有测试用例都能通过。",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "配置构建工具",
+          "description": "为项目设置合适的构建工具（如Maven或Gradle），并确保其能够正确加载项目依赖。",
+          "dependencies": [],
+          "details": "根据项目需求选择Maven或Gradle，创建或更新构建配置文件（如pom.xml或build.gradle）。验证配置文件语法正确性，并确保所有依赖项已正确定义。",
+          "status": "pending",
+          "testStrategy": "运行构建工具的依赖解析命令（如`mvn dependency:resolve`或`gradle dependencies`）以确认依赖加载无误。"
+        },
+        {
+          "id": 2,
+          "title": "实现自动编译脚本",
+          "description": "编写脚本或配置，使构建工具能够自动编译整个项目代码。",
+          "dependencies": [],
+          "details": "在构建工具中添加编译任务配置，例如Maven的`compile`目标或Gradle的`build`任务。确保脚本可以被CI/CD工具调用（如Jenkins、GitHub Actions）。",
+          "status": "pending",
+          "testStrategy": "手动运行编译命令（如`mvn compile`或`gradle build`），检查是否生成正确的编译输出且无错误。"
+        },
+        {
+          "id": 3,
+          "title": "集成单元测试框架",
+          "description": "将单元测试框架（如JUnit或TestNG）集成到项目中，并配置测试运行环境。",
+          "dependencies": [],
+          "details": "在构建工具中添加测试框架依赖和插件配置。例如，在Maven中添加JUnit依赖并在`pom.xml`中启用`surefire`插件；在Gradle中添加`test`任务配置。",
+          "status": "pending",
+          "testStrategy": "运行一个空的测试用例，确认测试框架能够成功执行并生成报告。"
+        },
+        {
+          "id": 4,
+          "title": "编写初步单元测试用例",
+          "description": "为关键模块编写基本的单元测试用例，以验证核心功能的正确性。",
+          "dependencies": [],
+          "details": "针对项目中的核心类或方法，编写覆盖主要逻辑路径的单元测试。确保测试用例遵循命名规范并使用断言验证结果。",
+          "status": "pending",
+          "testStrategy": "运行所有单元测试（如`mvn test`或`gradle test`），检查测试覆盖率报告并确认所有测试通过。"
+        },
+        {
+          "id": 5,
+          "title": "自动化编译与测试流程",
+          "description": "将编译和测试步骤整合到单一自动化流程中，以便一键完成编译和测试。",
+          "dependencies": [],
+          "details": "在构建工具中定义一个组合任务（如Maven的`verify`或Gradle的`build`），使其依次执行编译和测试。配置CI/CD流水线以定期触发该任务。",
+          "status": "pending",
+          "testStrategy": "通过CI/CD工具或本地命令运行完整流程，验证编译和测试均成功完成，并生成最终报告。"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "title": "文档与代码相关性自查",
+      "description": "对比类文档与实际生成的代码，检查两者之间的一致性和完整性。",
+      "status": "pending",
+      "dependencies": [
+        9
+      ],
+      "priority": "high",
+      "details": "比对类文档与源码，确保所有的类、方法、字段等都完全一致，同时检查是否有未实现的真实业务逻辑。",
+      "testStrategy": "输出自查报告，列出所有发现的问题，并提供修复建议。",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "提取类文档中的结构信息",
+          "description": "从类文档中解析出所有类、方法、字段的定义，形成结构化的数据以供后续比对。",
+          "dependencies": [],
+          "details": "使用正则表达式或自然语言处理工具提取文档中的关键信息，并将其存储为JSON或其他结构化格式。",
+          "status": "pending",
+          "testStrategy": "验证提取结果是否与文档内容一致，例如通过全量对比预定义的测试文档。"
+        },
+        {
+          "id": 2,
+          "title": "提取源代码中的结构信息",
+          "description": "从实际生成的代码中提取所有类、方法、字段的定义，形成结构化的数据以供后续比对。",
+          "dependencies": [],
+          "details": "利用静态代码分析工具（如AST解析器）提取代码中的结构信息，并将其存储为与文档提取结果相同的格式。",
+          "status": "pending",
+          "testStrategy": "验证提取结果是否准确反映了代码的实际结构，例如通过对比已知的代码样例。"
+        },
+        {
+          "id": 3,
+          "title": "比对文档与代码的结构一致性",
+          "description": "将提取出的文档和代码结构进行逐项比对，检查两者是否完全一致。",
+          "dependencies": [],
+          "details": "编写脚本逐一比较文档和代码中的类、方法、字段等元素，标记出缺失、多余或不一致的部分。",
+          "status": "pending",
+          "testStrategy": "使用一组已知一致和不一致的文档-代码对进行测试，确保比对逻辑能够正确发现问题。"
+        },
+        {
+          "id": 4,
+          "title": "检查未实现的业务逻辑",
+          "description": "基于文档描述，检查代码中是否存在未实现的真实业务逻辑。",
+          "dependencies": [],
+          "details": "根据文档中的功能描述，结合代码逻辑，识别可能遗漏的实现部分，重点关注关键业务流程。",
+          "status": "pending",
+          "testStrategy": "通过单元测试或手动验证确认检测到的未实现逻辑是否确实缺失。"
+        },
+        {
+          "id": 5,
+          "title": "生成自查报告并提出改进建议",
+          "description": "汇总比对结果和未实现逻辑检查的结果，生成详细的自查报告，并提出具体的改进建议。",
+          "dependencies": [],
+          "details": "将所有发现的问题分类整理，生成易于理解的报告文档，包括问题描述、位置以及修复建议。",
+          "status": "pending",
+          "testStrategy": "验证报告内容是否全面且准确，可以通过团队评审或与预期结果对比进行确认。"
+        }
+      ]
+    }
+  ]
+}

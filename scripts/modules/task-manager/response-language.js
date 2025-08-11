@@ -51,9 +51,9 @@ function setResponseLanguage(lang, options = {}) {
 	}
 
 	try {
-		const currentConfig = getConfig(projectRoot);
-		currentConfig.global.responseLanguage = lang;
-		const writeResult = writeConfig(currentConfig, projectRoot);
+		const { effectiveConfig: currentCfg } = getConfig(projectRoot);
+		currentCfg.global.responseLanguage = lang;
+		const writeResult = writeConfig(currentCfg, projectRoot);
 
 		if (!writeResult) {
 			return {

@@ -40,6 +40,13 @@ import { renameTagDirect } from './direct-functions/rename-tag.js';
 import { copyTagDirect } from './direct-functions/copy-tag.js';
 import { scopeUpDirect } from './direct-functions/scope-up.js';
 import { scopeDownDirect } from './direct-functions/scope-down.js';
+import { projectOutlineDirect } from './direct-functions/project-outline.js';
+import { projectCodeInitDirect } from './direct-functions/project-code-init.js';
+import { generateDocumentationFromCodeDirect } from './direct-functions/generate-documentation-from-code-direct.js';
+import { generateCodeFromDocumentationDirect } from './direct-functions/generate-code-from-documentation-direct.js';
+import { getSystemInfoDirect } from './direct-functions/get-system-info.js';
+import { chartOnlyDirect } from './direct-functions/chart-only.js';
+
 
 // Re-export utility functions
 export { findTasksPath } from './utils/path-utils.js';
@@ -80,7 +87,13 @@ export const directFunctions = new Map([
 	['renameTagDirect', renameTagDirect],
 	['copyTagDirect', copyTagDirect],
 	['scopeUpDirect', scopeUpDirect],
-	['scopeDownDirect', scopeDownDirect]
+	['scopeDownDirect', scopeDownDirect],
+    ['projectOutlineDirect', projectOutlineDirect],
+    ['projectCodeInitDirect', projectCodeInitDirect],
+    ['generateDocumentationFromCodeDirect', generateDocumentationFromCodeDirect],
+    ['generateCodeFromDocumentationDirect', generateCodeFromDocumentationDirect],
+    ['getSystemInfoDirect', getSystemInfoDirect],
+    ['chartOnlyDirect', chartOnlyDirect],
 ]);
 
 // Re-export all direct function implementations
@@ -119,5 +132,11 @@ export {
 	renameTagDirect,
 	copyTagDirect,
 	scopeUpDirect,
-	scopeDownDirect
+	scopeDownDirect,
+    projectOutlineDirect,
+    projectCodeInitDirect,
+    generateDocumentationFromCodeDirect,
+    generateCodeFromDocumentationDirect,
+    getSystemInfoDirect,
+    chartOnlyDirect
 };
