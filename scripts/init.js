@@ -609,11 +609,11 @@ function createProjectStructure(
 	}
 
 	// Copy .env.example
-	copyTemplateFile(
-		'env.example',
-		path.join(targetDir, ENV_EXAMPLE_FILE),
-		replacements
-	);
+	// copyTemplateFile(
+	// 	'env.example',
+	// 	path.join(targetDir, ENV_EXAMPLE_FILE),
+	// 	replacements
+	// );
 
 	// Copy config.json with project name to NEW location
 	copyTemplateFile(
@@ -652,7 +652,7 @@ function createProjectStructure(
 	}
 
 	// Copy example_prd.txt to NEW location
-	copyTemplateFile('example_prd.txt', path.join(targetDir, EXAMPLE_PRD_FILE));
+	// copyTemplateFile('example_prd.txt', path.join(targetDir, EXAMPLE_PRD_FILE));
 
 	// Initialize git repository if git is available
 	try {
@@ -871,6 +871,10 @@ function createProjectStructure(
 				}
 			)
 		);
+	}
+
+	if (false) {
+
 	}
 
 	// Display next steps in a nice box

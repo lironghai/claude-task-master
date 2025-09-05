@@ -1,21 +1,93 @@
 {
 	"meta": {
-		"generatedAt": "2025-08-02T14:28:59.851Z",
-		"tasksAnalyzed": 1,
-		"totalTasks": 93,
-		"analysisCount": 1,
+		"generatedAt": "2025-09-04T07:45:30.412Z",
+		"tasksAnalyzed": 10,
+		"totalTasks": 10,
+		"analysisCount": 10,
 		"thresholdScore": 5,
 		"projectName": "Taskmaster",
-		"usedResearch": false
+		"usedResearch": true
 	},
 	"complexityAnalysis": [
 		{
-			"taskId": 24,
-			"taskTitle": "Implement AI-Powered Test Generation Command",
+			"taskId": 1,
+			"taskTitle": "项目初始化与环境搭建",
+			"complexityScore": 3,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "基于SpringBoot框架搭建项目基础架构，配置MyBatisPlus和Lombok支持，设置JDK 1.8环境，建立符合规范的项目目录结构，配置Git分支策略和代码开发约束。",
+			"reasoning": "项目初始化是基础性工作，主要涉及框架搭建和环境配置。需要创建标准的SpringBoot项目结构，配置核心依赖如MyBatisPlus和Lombok，设置JDK版本和Git策略。考虑到需要遵循开发规范和配置多个组件，复杂度适中。"
+		},
+		{
+			"taskId": 3,
+			"taskTitle": "元数据展示与搜索功能开发",
+			"complexityScore": 7,
+			"recommendedSubtasks": 8,
+			"expansionPrompt": "设计RESTful API提供元数据查询服务，实现数据库、表、字段层级展示功能，开发前端界面展示详细信息，集成Elasticsearch或数据库全文索引实现搜索功能，优化搜索性能确保1秒内响应，实现分页和筛选功能，优化界面导航体验。",
+			"reasoning": "该任务涉及前后端开发和搜索功能实现，需要设计API接口、开发前端界面、集成搜索技术。考虑到需要支持层级展示、全文搜索、性能优化和用户体验，技术实现较为复杂，需要拆分为多个子任务。"
+		},
+		{
+			"taskId": 8,
+			"taskTitle": "开放API接口开发",
+			"complexityScore": 6,
+			"recommendedSubtasks": 7,
+			"expansionPrompt": "设计RESTful API规范，实现元数据查询、搜索、导出等核心功能接口，实现API版本管理机制确保向后兼容性，集成认证授权机制保障数据安全，实现API文档自动生成和在线测试功能，进行集成测试确保稳定性和兼容性。",
+			"reasoning": "开发开放API需要考虑接口设计、版本管理、安全认证、文档生成等多个方面。需要提供核心功能接口并确保安全性和兼容性，涉及技术点较多，需要合理规划子任务以确保质量和进度。"
+		},
+		{
+			"taskId": 10,
+			"taskTitle": "系统性能优化与高可用部署",
 			"complexityScore": 8,
+			"recommendedSubtasks": 9,
+			"expansionPrompt": "进行系统性能分析和瓶颈优化确保核心接口响应时间不超过2秒，优化数据库连接池和查询性能，设计高可用部署架构采用负载均衡和集群方案，实现服务监控和健康检查机制，配置自动故障转移和恢复机制确保99.9%正常运行时间。",
+			"reasoning": "性能优化和高可用部署是系统级任务，涉及性能分析、数据库优化、架构设计、监控部署等多个复杂技术领域。需要综合考虑响应时间、可用性、故障恢复等要求，技术难度高，实施复杂度大。"
+		},
+		{
+			"taskId": 9,
+			"taskTitle": "系统安全与权限管理",
+			"complexityScore": 7,
+			"recommendedSubtasks": 8,
+			"expansionPrompt": "集成Spring Security实现用户认证和JWT令牌授权机制，实现数据传输加密(HTTPS/TLS)和敏感数据存储加密，设计细粒度权限控制模型支持角色和资源权限管理，添加安全审计日志记录关键操作，实施SQL注入、XSS等安全防护措施。",
+			"reasoning": "安全与权限管理涉及认证授权、数据加密、权限控制、审计日志和漏洞防护等多个安全层面。需要集成安全框架、实现多种加密机制、设计权限模型，技术要求高且关系到系统整体安全性，复杂度较高。"
+		},
+		{
+			"taskId": 7,
+			"taskTitle": "通知系统开发",
+			"complexityScore": 6,
+			"recommendedSubtasks": 7,
+			"expansionPrompt": "设计元数据变更监听机制实时捕获变化事件，集成邮件服务和消息推送服务实现多种通知方式，配置通知模板和用户订阅机制，实现定时任务确保变更后10分钟内发送通知，添加通知发送日志和失败重试机制。",
+			"reasoning": "通知系统需要实现事件监听、多种通知渠道、模板配置、定时任务和异常处理等功能。涉及实时事件处理和多种服务集成，需要考虑通知时效性和可靠性，技术实现有一定复杂度。"
+		},
+		{
+			"taskId": 6,
+			"taskTitle": "历史版本管理功能开发",
+			"complexityScore": 5,
 			"recommendedSubtasks": 6,
-			"expansionPrompt": "Expand task 24 'Implement AI-Powered Test Generation Command' into 6 subtasks, focusing on: 1) Command structure implementation, 2) AI prompt engineering for test generation, 3) Test file generation and output, 4) Framework-specific template implementation, 5) MCP tool integration, and 6) Documentation and help system integration. Include detailed implementation steps, dependencies, and testing approaches for each subtask.",
-			"reasoning": "This task has high complexity due to several challenging aspects: 1) AI integration requiring sophisticated prompt engineering, 2) Test generation across multiple frameworks, 3) File system operations with proper error handling, 4) MCP tool integration, 5) Complex configuration requirements, and 6) Framework-specific template generation. The task already has 5 subtasks but could benefit from reorganization based on the updated implementation details in the info blocks, particularly around framework support and configuration."
+			"expansionPrompt": "设计元数据版本管理表结构记录完整快照，实现版本对比功能可视化展示差异，开发版本回滚接口确保1分钟内完成操作，实现版本清理机制避免数据无限增长，优化版本存储和查询性能。",
+			"reasoning": "历史版本管理需要设计数据结构、实现版本对比和回滚功能。涉及数据存储策略、版本控制算法和性能优化，需要平衡功能完整性和系统性能，复杂度适中。"
+		},
+		{
+			"taskId": 2,
+			"taskTitle": "数据库元数据同步模块开发",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on 数据库元数据同步模块开发.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 4,
+			"taskTitle": "元数据关系图展示功能开发",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on 元数据关系图展示功能开发.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 5,
+			"taskTitle": "元数据导出功能开发",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on 元数据导出功能开发.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
 		}
 	]
 }

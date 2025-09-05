@@ -67,7 +67,7 @@ export class PromptManager {
 			}
 
 			// Select the variant - use specified key or select based on conditions
-			const variant = variantKey
+			const variant = variantKey && template.prompts[variantKey]
 				? { ...template.prompts[variantKey], name: variantKey }
 				: this.selectVariant(template, variables);
 

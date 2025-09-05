@@ -7,6 +7,7 @@ import { generateId } from '@ai-sdk/provider-utils';
 import { convertToClaudeCodeMessages } from './message-converter.js';
 import { extractJson } from './json-extractor.js';
 import { createAPICallError, createAuthenticationError } from './errors.js';
+import {log} from "../../../../scripts/modules/utils.js";
 
 let query;
 let AbortError;
@@ -149,7 +150,7 @@ export class ClaudeCodeLanguageModel {
 			appendSystemPrompt: this.settings.appendSystemPrompt,
 			maxTurns: this.settings.maxTurns,
 			maxThinkingTokens: this.settings.maxThinkingTokens,
-			cwd: this.settings.cwd,
+			cwd: this.settings.projectRoot,
 			executable: this.settings.executable,
 			executableArgs: this.settings.executableArgs,
 			permissionMode: this.settings.permissionMode,
@@ -180,6 +181,7 @@ export class ClaudeCodeLanguageModel {
 			});
 
 			for await (const message of response) {
+				log('debug', JSON.stringify(message));
 				if (message.type === 'assistant') {
 					text += message.message.content
 						.map((c) => (c.type === 'text' ? c.text : ''))
@@ -354,6 +356,7 @@ export class ClaudeCodeLanguageModel {
 					let accumulatedText = '';
 
 					for await (const message of response) {
+						log('debug', JSON.stringify(message));
 						if (message.type === 'assistant') {
 							const text = message.message.content
 								.map((c) => (c.type === 'text' ? c.text : ''))

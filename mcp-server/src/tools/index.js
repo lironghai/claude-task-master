@@ -40,6 +40,7 @@ import { registerResearchTool } from './research.js';
 import { registerRulesTool } from './rules.js';
 import { registerScopeUpTool } from './scope-up.js';
 import { registerScopeDownTool } from './scope-down.js';
+import { registerClaudeCodeCommandTool } from './claude-code-command.js';
 
 /**
  * Register all Task Master tools with the MCP server
@@ -100,6 +101,7 @@ export function registerTaskMasterTools(server) {
 
 		// Group 8: Research Features
 		registerResearchTool(server);
+		registerClaudeCodeCommandTool(server);
 	} catch (error) {
 		logger.error(`Error registering Task Master tools: ${error.message}`);
 		throw error;

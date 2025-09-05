@@ -43,36 +43,35 @@ try {
 // Default configuration values (used if config file is missing or incomplete)
 const DEFAULTS = {
 	models: {
-		main: {
-			provider: 'anthropic',
-			modelId: 'claude-3-7-sonnet-20250219',
-			maxTokens: 64000,
-			temperature: 0.2
+		"main": {
+			"provider": "claude-code",
+			"modelId": "sonnet",
+			"maxTokens": 64000,
+			"temperature": 0.2
 		},
-		research: {
-			provider: 'perplexity',
-			modelId: 'sonar-pro',
-			maxTokens: 8700,
-			temperature: 0.1
+		"research": {
+			"provider": "claude-code",
+			"modelId": "sonnet",
+			"maxTokens": 64000,
+			"temperature": 0.1
 		},
-		fallback: {
-			// No default fallback provider/model initially
-			provider: 'anthropic',
-			modelId: 'claude-3-5-sonnet',
-			maxTokens: 8192, // Default parameters if fallback IS configured
-			temperature: 0.2
+		"fallback": {
+			"provider": "claude-code",
+			"modelId": "sonnet",
+			"maxTokens": 64000,
+			"temperature": 0.2
 		}
 	},
 	global: {
-		logLevel: 'info',
-		debug: false,
+		logLevel: 'debug',
+		debug: true,
 		defaultNumTasks: 10,
 		defaultSubtasks: 5,
 		defaultPriority: 'medium',
 		projectName: 'Task Master',
 		ollamaBaseURL: 'http://localhost:11434/api',
 		bedrockBaseURL: 'https://bedrock.us-east-1.amazonaws.com',
-		responseLanguage: 'English'
+		responseLanguage: '中文'
 	},
 	claudeCode: {}
 };

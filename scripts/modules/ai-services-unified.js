@@ -54,6 +54,9 @@ import {
 
 // Import the provider registry
 import ProviderRegistry from '../../src/provider-registry/index.js';
+import fs from 'fs';
+import path from 'path';
+
 
 // Create provider instances
 const PROVIDERS = {
@@ -160,8 +163,8 @@ function _readAvailableTags(projectRoot) {
 	const DEFAULT_TAGS = ['master'];
 
 	try {
-		const path = require('path');
-		const fs = require('fs');
+		// const path = require('path');
+		// const fs = require('fs');
 		const tasksPath = path.join(
 			projectRoot,
 			'.taskmaster',
@@ -645,7 +648,8 @@ async function _unifiedServiceRunner(serviceType, params) {
 				...((serviceType === 'generateObject' ||
 					serviceType === 'streamObject') && { schema, objectName }),
 				...providerSpecificParams,
-				...restApiParams
+				...restApiParams,
+				projectRoot: effectiveProjectRoot
 			};
 
 			providerResponse = await _attemptProviderCallWithRetries(

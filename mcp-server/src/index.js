@@ -7,6 +7,7 @@ import logger from './logger.js';
 import { registerTaskMasterTools } from './tools/index.js';
 import ProviderRegistry from '../../src/provider-registry/index.js';
 import { MCPProvider } from './providers/mcp-provider.js';
+import { program } from "commander";
 
 // Load environment variables
 dotenv.config();
@@ -23,10 +24,16 @@ class TaskMasterMCPServer {
 		// Get version from package.json using synchronous fs
 		const packagePath = path.join(__dirname, '../../package.json');
 		const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+		program
+			.version(packageJson.version)
+			.option("--port <port>", "Start HTTP Streamable server on this port")
+			.parse(process.argv);
 
+		const args = program.opts();
 		this.options = {
 			name: 'Task Master MCP Server',
-			version: packageJson.version
+			version: packageJson.version,
+			port: +args.port
 		};
 
 		this.server = new FastMCP(this.options);
@@ -75,10 +82,23 @@ class TaskMasterMCPServer {
 		});
 
 		// Start the FastMCP server with increased timeout
-		await this.server.start({
-			transportType: 'stdio',
-			timeout: 120000 // 2 minutes timeout (in milliseconds)
-		});
+		if (this.options.port) {
+			await this.server.start({
+				transportType: 'httpStream',
+				httpStream: {
+					endpoint: '/mcp',
+					port: this.options.port
+				},
+				timeout: 600000 // 2 minutes timeout (in milliseconds)
+			});
+
+		}else {
+			await this.server.start({
+				transportType: 'stdio',
+				timeout: 600000 // 2 minutes timeout (in milliseconds)
+			});
+
+		}
 
 		return this;
 	}

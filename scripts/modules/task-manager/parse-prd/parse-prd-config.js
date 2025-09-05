@@ -105,6 +105,7 @@ export class LoggingConfig {
 	report(message, level = 'info') {
 		if (this.logFn && typeof this.logFn[level] === 'function') {
 			this.logFn[level](message);
+			log(level, message);
 		} else if (!isSilentMode() && this.outputFormat === 'text') {
 			log(level, message);
 		}

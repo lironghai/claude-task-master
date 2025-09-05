@@ -37,6 +37,7 @@ export class ClaudeCodeProvider extends BaseAIProvider {
 	 * @param {object} params - Parameters for client initialization
 	 * @param {string} [params.commandName] - Name of the command invoking the service
 	 * @param {string} [params.baseURL] - Optional custom API endpoint (not used by Claude Code)
+	 * @param {string} [params.projectRoot] -
 	 * @returns {Function} Claude Code client function
 	 * @throws {Error} If initialization fails
 	 */
@@ -44,8 +45,10 @@ export class ClaudeCodeProvider extends BaseAIProvider {
 		try {
 			// Claude Code doesn't use API keys or base URLs
 			// Just return the provider factory
+			let claudeCodeSettingsForCommand = getClaudeCodeSettingsForCommand(params?.commandName);
+			claudeCodeSettingsForCommand.projectRoot = params?.projectRoot;
 			return createClaudeCode({
-				defaultSettings: getClaudeCodeSettingsForCommand(params?.commandName)
+				defaultSettings: claudeCodeSettingsForCommand
 			});
 		} catch (error) {
 			this.handleError('client initialization', error);

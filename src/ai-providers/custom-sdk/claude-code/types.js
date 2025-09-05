@@ -12,6 +12,7 @@
  * @property {number} [maxTurns] - Maximum number of turns for the conversation
  * @property {number} [maxThinkingTokens] - Maximum thinking tokens for the model
  * @property {string} [cwd] - Working directory for CLI operations
+ * @property {string} [projectRoot] - Working directory for CLI operations
  * @property {'bun'|'deno'|'node'} [executable='node'] - JavaScript runtime to use
  * @property {string[]} [executableArgs] - Additional arguments for the JavaScript runtime
  * @property {'default'|'acceptEdits'|'bypassPermissions'|'plan'} [permissionMode='default'] - Permission mode for tool usage
