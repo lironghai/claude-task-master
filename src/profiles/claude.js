@@ -277,7 +277,7 @@ export const claudeProfile = createProfile({
 	mcpConfigName: '.mcp.json', // Place MCP config in project root
 	includeDefaultRules: false,
 	fileMap: {
-		'AGENTS.md': '.taskmaster/CLAUDE.md'
+		'TaskManager.md': '.taskmaster/CLAUDE.md'
 	},
 	onAdd: onAddRulesProfile,
 	onRemove: onRemoveRulesProfile,

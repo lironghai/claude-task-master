@@ -83,13 +83,16 @@ export class ClaudeCodeProvider extends BaseAIProvider {
 	 * Creates a Claude Code client instance
 	 * @param {object} params - Client parameters
 	 * @param {string} [params.commandName] - Command name for settings lookup
+	 * @param {string} [params.baseURL] - Optional custom API endpoint (not used by Claude Code)
+	 * @param {string} [params.projectRoot] -
 	 * @returns {Function} Claude Code provider function
 	 * @throws {Error} If Claude Code CLI is not available or client creation fails
 	 */
 	getClient(params = {}) {
 		try {
 			const settings =
-				getClaudeCodeSettingsForCommand(params.commandName) || {};
+				getClaudeCodeSettingsForCommand(params.commandName,params?.projectRoot) || {};
+			settings.projectRoot = params?.projectRoot;
 
 			return createClaudeCode({
 				defaultSettings: settings

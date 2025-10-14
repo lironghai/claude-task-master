@@ -1092,5 +1092,64 @@
 			"max_tokens": 65536,
 			"supported": true
 		}
+	],
+	"qwen": [
+		{
+			"id": "qwen-max",
+			"swe_score": 0,
+			"cost_per_1m_tokens": {
+				"input": 1.6,
+				"output": 6.4
+			},
+			"allowed_roles": ["main", "fallback"],
+			"max_tokens": 32768,
+			"supported": true
+		},
+		{
+			"id": "qwen-turbo",
+			"swe_score": 0,
+			"cost_per_1m_tokens": {
+				"input": 0.05,
+				"output": 0.2
+			},
+			"allowed_roles": ["main", "fallback"],
+			"max_tokens": 32768,
+			"supported": true
+		},
+		{
+			"id": "qwen-plus",
+			"swe_score": 0,
+			"cost_per_1m_tokens": {
+				"input": 0.8,
+				"output": 2.4
+			},
+			"allowed_roles": ["main", "fallback"],
+			"max_tokens": 32768,
+			"supported": true
+		},
+		{
+			"id": "qwen3-235b-a22b",
+			"swe_score": 0,
+			"cost_per_1m_tokens": {
+				"input": 0.14,
+				"output": 2
+			},
+			"allowed_roles": ["main", "fallback"],
+			"max_tokens": 24000,
+			"supported": true
+		}
+	],
+	"qwen-cli": [
+		{
+			"id": "qwen-coder-plus",
+			"swe_score": 0,
+			"cost_per_1m_tokens": {
+				"input": 1.6,
+				"output": 6.4
+			},
+			"allowed_roles": ["main", "fallback"],
+			"max_tokens": 32768,
+			"supported": true
+		}
 	]
 }
