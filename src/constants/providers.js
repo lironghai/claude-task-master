@@ -11,7 +11,8 @@ export const VALIDATED_PROVIDERS = [
 	'perplexity',
 	'xai',
 	'groq',
-	'mistral'
+	'mistral',
+	'qwen'
 ];
 
 // Custom providers object for easy named access

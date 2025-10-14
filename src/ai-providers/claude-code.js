@@ -45,7 +45,7 @@ export class ClaudeCodeProvider extends BaseAIProvider {
 		try {
 			// Claude Code doesn't use API keys or base URLs
 			// Just return the provider factory
-			let claudeCodeSettingsForCommand = getClaudeCodeSettingsForCommand(params?.commandName);
+			let claudeCodeSettingsForCommand = getClaudeCodeSettingsForCommand(params?.commandName,params?.projectRoot);
 			claudeCodeSettingsForCommand.projectRoot = params?.projectRoot;
 			return createClaudeCode({
 				defaultSettings: claudeCodeSettingsForCommand

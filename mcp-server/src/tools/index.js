@@ -41,6 +41,9 @@ import { registerRulesTool } from './rules.js';
 import { registerScopeUpTool } from './scope-up.js';
 import { registerScopeDownTool } from './scope-down.js';
 import { registerClaudeCodeCommandTool } from './claude-code-command.js';
+import { registerIsInitializedTool } from './is-initialized.js';
+import { registerParsePRDTextTool } from './parse-prd-text.js';
+import { writePRDTextTool } from './write-prd-text.js';
 
 /**
  * Register all Task Master tools with the MCP server
@@ -55,6 +58,7 @@ export function registerTaskMasterTools(server) {
 		registerModelsTool(server);
 		registerRulesTool(server);
 		registerParsePRDTool(server);
+		registerParsePRDTextTool(server);
 
 		// Group 2: Task Analysis & Expansion
 		registerAnalyzeProjectComplexityTool(server);
@@ -101,7 +105,9 @@ export function registerTaskMasterTools(server) {
 
 		// Group 8: Research Features
 		registerResearchTool(server);
-		registerClaudeCodeCommandTool(server);
+		// registerClaudeCodeCommandTool(server);
+		registerIsInitializedTool(server);
+		writePRDTextTool(server);
 	} catch (error) {
 		logger.error(`Error registering Task Master tools: ${error.message}`);
 		throw error;

@@ -68,6 +68,10 @@
 | openrouter  | mistralai/mistral-small-3.1-24b-instruct       | —         | 0.1        | 0.3         |
 | openrouter  | mistralai/devstral-small                       | —         | 0.1        | 0.3         |
 | openrouter  | mistralai/mistral-nemo                         | —         | 0.03       | 0.07        |
+| qwen        | qwen-max                                       | —         | 1.6        | 6.4         |
+| qwen        | qwen-turbo                                     | —         | 0.05       | 0.2         |
+| qwen        | qwen-plus                                      | —         | 0.8        | 2.4         |
+| qwen        | qwen3-235b-a22b                                | —         | 0.14       | 2           |
 | ollama      | gpt-oss:latest                                 | 0.607     | 0          | 0           |
 | ollama      | gpt-oss:20b                                    | 0.607     | 0          | 0           |
 | ollama      | gpt-oss:120b                                   | 0.624     | 0          | 0           |
@@ -121,6 +125,9 @@
 | bedrock     | us.anthropic.claude-opus-4-20250514-v1:0     | 0.725     | 15         | 75          |
 | bedrock     | us.anthropic.claude-sonnet-4-20250514-v1:0   | 0.727     | 3          | 15          |
 | bedrock     | us.deepseek.r1-v1:0                          | —         | 1.35       | 5.4         |
+| qwen        | qwen-max                                     | —         | 1.6        | 6.4         |
+| qwen        | qwen-plus                                    | —         | 0.8        | 2.4         |
+| qwen        | qwen3-235b-a22b                              | —         | 0.14       | 2           |
 
 ## Fallback Models
 
@@ -198,6 +205,10 @@
 | bedrock     | us.anthropic.claude-3-5-haiku-20241022-v1:0    | 0.4       | 0.8        | 4           |
 | bedrock     | us.anthropic.claude-opus-4-20250514-v1:0       | 0.725     | 15         | 75          |
 | bedrock     | us.anthropic.claude-sonnet-4-20250514-v1:0     | 0.727     | 3          | 15          |
+| qwen        | qwen-max                                       | —         | 1.6        | 6.4         |
+| qwen        | qwen-turbo                                     | —         | 0.05       | 0.2         |
+| qwen        | qwen-plus                                      | —         | 0.8        | 2.4         |
+| qwen        | qwen3-235b-a22b                                | —         | 0.14       | 2           |
 
 ## Unsupported Models
 

@@ -1,5 +1,14 @@
 # task-master-ai
 
+## 0.25.2
+
+### Minor Changes
+
+- Added Qwen CLI provider integration for accessing Qwen models through OpenRouter
+  - New Qwen provider supporting qwen-max, qwen-turbo, qwen-plus, and qwen3-235b-a22b models
+  - Models available across main, research, and fallback roles
+  - Integrated with existing OpenRouter infrastructure for seamless Qwen model access
+
 ## 0.25.1
 
 ### Patch Changes

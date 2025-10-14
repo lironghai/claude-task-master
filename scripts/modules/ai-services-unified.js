@@ -48,6 +48,7 @@ import {
 	OpenAIProvider,
 	OpenRouterAIProvider,
 	PerplexityAIProvider,
+	QwenAIProvider,
 	VertexAIProvider,
 	XAIProvider
 } from '../../src/ai-providers/index.js';
@@ -72,7 +73,8 @@ const PROVIDERS = {
 	azure: new AzureProvider(),
 	vertex: new VertexAIProvider(),
 	'claude-code': new ClaudeCodeProvider(),
-	'gemini-cli': new GeminiCliProvider()
+	'gemini-cli': new GeminiCliProvider(),
+	'qwen-cli': new QwenAIProvider()
 };
 
 function _getProvider(providerName) {

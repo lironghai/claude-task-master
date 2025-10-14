@@ -8,22 +8,23 @@ import { convertToClaudeCodeMessages } from './message-converter.js';
 import { extractJson } from './json-extractor.js';
 import { createAPICallError, createAuthenticationError } from './errors.js';
 import {log} from "../../../../scripts/modules/utils.js";
+import {query} from "./process.js";
 
-let query;
+// let query;
 let AbortError;
 
 async function loadClaudeCodeModule() {
-	if (!query || !AbortError) {
-		try {
-			const mod = await import('@anthropic-ai/claude-code');
-			query = mod.query;
-			AbortError = mod.AbortError;
-		} catch (err) {
-			throw new Error(
-				"Claude Code SDK is not installed. Please install '@anthropic-ai/claude-code' to use the claude-code provider."
-			);
-		}
-	}
+	// if (!query || !AbortError) {
+	// 	try {
+	// 		const mod = await import('@musistudio/claude-code-router');
+	// 		query = query;
+	// 		AbortError = mod.AbortError;
+	// 	} catch (err) {
+	// 		throw new Error(
+	// 			"Claude Code SDK is not installed. Please install '@anthropic-ai/claude-code' to use the claude-code provider."
+	// 		);
+	// 	}
+	// }
 }
 
 /**
@@ -141,16 +142,9 @@ export class ClaudeCodeLanguageModel {
 			);
 		}
 
-		const env = { ...process.env };
-		if (this.settings.ANTHROPIC_AUTH_TOKEN && this.settings.ANTHROPIC_BASE_URL) {
-			env.ANTHROPIC_BASE_URL = this.settings.ANTHROPIC_BASE_URL;
-			env.ANTHROPIC_AUTH_TOKEN = this.settings.ANTHROPIC_AUTH_TOKEN;
-		}
-
 		const queryOptions = {
 			model: this.getModel(),
 			abortController,
-			env,
 			resume: this.sessionId,
 			pathToClaudeCodeExecutable: this.settings.pathToClaudeCodeExecutable,
 			customSystemPrompt: this.settings.customSystemPrompt,
@@ -324,16 +318,9 @@ export class ClaudeCodeLanguageModel {
 			);
 		}
 
-		const env = { ...process.env };
-		if (this.settings.ANTHROPIC_AUTH_TOKEN && this.settings.ANTHROPIC_BASE_URL) {
-			env.ANTHROPIC_BASE_URL = this.settings.ANTHROPIC_BASE_URL;
-			env.ANTHROPIC_AUTH_TOKEN = this.settings.ANTHROPIC_AUTH_TOKEN;
-		}
-
 		const queryOptions = {
 			model: this.getModel(),
 			abortController,
-			env,
 			resume: this.sessionId,
 			pathToClaudeCodeExecutable: this.settings.pathToClaudeCodeExecutable,
 			customSystemPrompt: this.settings.customSystemPrompt,

@@ -28,6 +28,7 @@ import moveTask from './task-manager/move-task.js';
 import { migrateProject } from './task-manager/migrate.js';
 import { performResearch } from './task-manager/research.js';
 import { readComplexityReport } from './utils.js';
+import testCmd from './task-manager/test-cmd.js';
 import {
 	scopeUpTask,
 	scopeDownTask,
@@ -63,5 +64,6 @@ export {
 	performResearch,
 	scopeUpTask,
 	scopeDownTask,
-	validateStrength
+	validateStrength,
+	testCmd
 };

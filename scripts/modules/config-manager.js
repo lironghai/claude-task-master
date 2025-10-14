@@ -1,11 +1,12 @@
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import chalk from 'chalk';
 import { z } from 'zod';
 import { AI_COMMAND_NAMES } from '../../src/constants/commands.js';
 import {
-	LEGACY_CONFIG_FILE,
+	LEGACY_CONFIG_FILE, TASKMASTER_CONFIG_FILE,
 	TASKMASTER_DIR
 } from '../../src/constants/paths.js';
 import {
@@ -123,6 +124,15 @@ function _loadAndValidateConfig(explicitRoot = null) {
 		// Only try to find config if we have project markers
 		// This prevents the repeated warnings during init
 		configPath = findConfigPath(null, { projectRoot: rootToUse });
+	}else {
+		// No project markers found, use current working directory as fallback
+		// This prevents infinite loops during initialization
+		const homedir = os.homedir();
+		const hasUserMarkers =
+			fs.existsSync(path.join(homedir, TASKMASTER_CONFIG_FILE));
+		if (hasUserMarkers) {
+			configPath = findConfigPath(null, { projectRoot: homedir });
+		}
 	}
 
 	if (configPath) {
@@ -328,6 +338,8 @@ function validateClaudeCodeSettings(settings) {
 			.optional(),
 		allowedTools: z.array(z.string()).optional(),
 		disallowedTools: z.array(z.string()).optional(),
+		ANTHROPIC_AUTH_TOKEN: z.string().optional(),
+		ANTHROPIC_BASE_URL: z.string().optional(),
 		mcpServers: z
 			.record(
 				z.string(),
@@ -655,6 +667,10 @@ function isApiKeySet(providerName, session = null, projectRoot = null) {
 
 	// Claude Code doesn't require an API key
 	if (providerName?.toLowerCase() === 'claude-code') {
+		return true; // No API key needed
+	}
+	// Claude Code doesn't require an API key
+	if (providerName?.toLowerCase() === 'qwen') {
 		return true; // No API key needed
 	}
 

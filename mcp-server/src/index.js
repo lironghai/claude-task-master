@@ -89,13 +89,13 @@ class TaskMasterMCPServer {
 					endpoint: '/mcp',
 					port: this.options.port
 				},
-				timeout: 600000 // 2 minutes timeout (in milliseconds)
+				timeout: 6000000 // 2 minutes timeout (in milliseconds)
 			});
 
 		}else {
 			await this.server.start({
 				transportType: 'stdio',
-				timeout: 600000 // 2 minutes timeout (in milliseconds)
+				timeout: 6000000 // 2 minutes timeout (in milliseconds)
 			});
 
 		}
