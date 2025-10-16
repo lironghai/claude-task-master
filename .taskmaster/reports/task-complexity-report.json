@@ -1,21 +1,93 @@
 {
 	"meta": {
-		"generatedAt": "2025-08-02T14:28:59.851Z",
-		"tasksAnalyzed": 1,
-		"totalTasks": 93,
-		"analysisCount": 1,
+		"generatedAt": "2025-09-25T11:51:24.551Z",
+		"tasksAnalyzed": 10,
+		"totalTasks": 10,
+		"analysisCount": 10,
 		"thresholdScore": 5,
 		"projectName": "Taskmaster",
-		"usedResearch": false
+		"usedResearch": true
 	},
 	"complexityAnalysis": [
 		{
-			"taskId": 24,
-			"taskTitle": "Implement AI-Powered Test Generation Command",
+			"taskId": 1,
+			"taskTitle": "升级SpringBoot项目依赖并集成MyBatisPlus",
+			"complexityScore": 6,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "基于现有SpringBoot项目，分步骤升级依赖并集成MyBatisPlus和SpringDoc，确保版本兼容性和配置正确性",
+			"reasoning": "需要修改pom.xml配置文件，升级SpringBoot版本并添加MyBatisPlus和SpringDoc依赖。同时需要配置MyBatisPlus分页插件和SQL日志，以及SpringDoc的OpenAPI文档配置。涉及多个配置项的调整和兼容性测试。"
+		},
+		{
+			"taskId": 2,
+			"taskTitle": "实现统一开发规范文档系统",
+			"complexityScore": 5,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "基于现有后端开发规范.md文件，构建完整的开发规范文档管理系统，包括REST API接口和版本管理功能",
+			"reasoning": "需要创建控制器提供REST API接口，实现文档版本管理功能，支持按类型查询规范。还需集成SpringDoc生成接口文档，确保与.md文件内容同步。涉及文件读取、API开发和文档同步机制。"
+		},
+		{
+			"taskId": 3,
+			"taskTitle": "实现GIT分支管理策略校验工具",
+			"complexityScore": 7,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "开发GIT分支命名和提交信息规范校验工具，实现regex匹配和CI/CD集成校验功能",
+			"reasoning": "需要实现分支命名规范校验(regex匹配feature/*和bugfix/*前缀)和提交信息格式校验(验证feat/fix/test/docs/refactor/chore前缀)。还需集成Git钩子或提供API接口用于CI/CD流程中的自动校验，并记录不符合规范的信息。涉及正则表达式、Git集成和日志记录。"
+		},
+		{
+			"taskId": 4,
+			"taskTitle": "构建单元测试约束执行框架",
 			"complexityScore": 8,
-			"recommendedSubtasks": 6,
-			"expansionPrompt": "Expand task 24 'Implement AI-Powered Test Generation Command' into 6 subtasks, focusing on: 1) Command structure implementation, 2) AI prompt engineering for test generation, 3) Test file generation and output, 4) Framework-specific template implementation, 5) MCP tool integration, and 6) Documentation and help system integration. Include detailed implementation steps, dependencies, and testing approaches for each subtask.",
-			"reasoning": "This task has high complexity due to several challenging aspects: 1) AI integration requiring sophisticated prompt engineering, 2) Test generation across multiple frameworks, 3) File system operations with proper error handling, 4) MCP tool integration, 5) Complex configuration requirements, and 6) Framework-specific template generation. The task already has 5 subtasks but could benefit from reorganization based on the updated implementation details in the info blocks, particularly around framework support and configuration."
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "实现单元测试约束检查机制，开发测试约束校验服务和覆盖率检查工具",
+			"reasoning": "需要开发测试约束校验服务，实现禁止项检查、测试覆盖率检查、测试环境配置一致性检查和测试数据验证工具。涉及多种检查规则的实现和集成，复杂度较高。"
+		},
+		{
+			"taskId": 5,
+			"taskTitle": "实现用户管理核心功能",
+			"complexityScore": 4,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "开发用户模型和用户管理API，基于MyBatisPlus实现用户DAO层和服务层",
+			"reasoning": "依赖任务1完成，需要创建用户实体类，基于MyBatisPlus实现DAO层CRUD操作，开发服务层业务逻辑，并使用SpringDoc生成API文档。属于标准的CRUD功能开发。"
+		},
+		{
+			"taskId": 6,
+			"taskTitle": "开发任务管理功能模块",
+			"complexityScore": 5,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "实现任务模型和任务管理API，基于MyBatisPlus开发任务DAO和服务层，支持TaskMaster系统集成",
+			"reasoning": "依赖任务1和2完成，需要创建任务实体类，基于MyBatisPlus实现DAO层，开发服务层任务状态管理和优先级排序，并集成SpringDoc生成API文档。还需支持与TaskMaster系统的集成。"
+		},
+		{
+			"taskId": 7,
+			"taskTitle": "集成分支管理功能API",
+			"complexityScore": 5,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "实现分支管理模型和API接口，基于MyBatisPlus开发分支DAO和服务层，确保与GIT校验工具数据一致性",
+			"reasoning": "依赖任务1和3完成，需要创建分支管理实体类，基于MyBatisPlus实现DAO层，开发服务层分支创建、查询、关联任务等功能，并使用SpringDoc生成API文档。还需确保与GIT分支管理策略校验工具的数据一致性。"
+		},
+		{
+			"taskId": 8,
+			"taskTitle": "实现自动化代码检查工具集成",
+			"complexityScore": 7,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "集成代码质量检查工具，实现检查结果分析服务和通知机制，创建质量仪表板API",
+			"reasoning": "依赖任务2和4完成，需要集成CheckStyle或SpotBugs等代码检查工具，配置检查规则，实现结果分析服务、通知机制和代码质量仪表板API。涉及多个工具集成和复杂的数据处理。"
+		},
+		{
+			"taskId": 9,
+			"taskTitle": "配置CI/CD流程集成",
+			"complexityScore": 8,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "配置Jenkins或GitHub Actions工作流，集成各项检查和测试工具，实现自动化部署策略",
+			"reasoning": "依赖任务3、4、8完成，需要配置CI/CD工作流，集成GIT分支管理策略校验、自动化测试执行环境、代码质量检查工具，实现构建失败通知和不同环境的自动化部署策略。涉及复杂的流程配置和集成。"
+		},
+		{
+			"taskId": 10,
+			"taskTitle": "开发代码质量监控面板",
+			"complexityScore": 7,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "实现代码质量数据收集服务和监控面板，开发数据导出和报告生成功能",
+			"reasoning": "依赖任务8和9完成，需要开发数据收集服务整合各检查工具数据源，实现质量指标计算分析功能，创建监控面板前端页面，开发数据导出和报告生成功能。涉及前后端开发和复杂的数据处理。"
 		}
 	]
 }

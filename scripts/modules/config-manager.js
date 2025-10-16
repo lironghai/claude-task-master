@@ -1,11 +1,12 @@
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import chalk from 'chalk';
 import { z } from 'zod';
 import { AI_COMMAND_NAMES } from '../../src/constants/commands.js';
 import {
-	LEGACY_CONFIG_FILE,
+	LEGACY_CONFIG_FILE, TASKMASTER_CONFIG_FILE,
 	TASKMASTER_DIR
 } from '../../src/constants/paths.js';
 import {
@@ -25,36 +26,35 @@ const __dirname = path.dirname(__filename);
 // Default configuration values (used if config file is missing or incomplete)
 const DEFAULTS = {
 	models: {
-		main: {
-			provider: 'anthropic',
-			modelId: 'claude-sonnet-4-20250514',
-			maxTokens: 64000,
-			temperature: 0.2
+		"main": {
+			"provider": "claude-code",
+			"modelId": "sonnet",
+			"maxTokens": 64000,
+			"temperature": 0.2
 		},
-		research: {
-			provider: 'perplexity',
-			modelId: 'sonar',
-			maxTokens: 8700,
-			temperature: 0.1
+		"research": {
+			"provider": "claude-code",
+			"modelId": "sonnet",
+			"maxTokens": 64000,
+			"temperature": 0.1
 		},
-		fallback: {
-			// No default fallback provider/model initially
-			provider: 'anthropic',
-			modelId: 'claude-3-7-sonnet-20250219',
-			maxTokens: 120000, // Default parameters if fallback IS configured
-			temperature: 0.2
+		"fallback": {
+			"provider": "claude-code",
+			"modelId": "sonnet",
+			"maxTokens": 120000,
+			"temperature": 0.2
 		}
 	},
 	global: {
-		logLevel: 'info',
-		debug: false,
+		logLevel: 'debug',
+		debug: true,
 		defaultNumTasks: 10,
 		defaultSubtasks: 5,
 		defaultPriority: 'medium',
 		projectName: 'Task Master',
 		ollamaBaseURL: 'http://localhost:11434/api',
 		bedrockBaseURL: 'https://bedrock.us-east-1.amazonaws.com',
-		responseLanguage: 'English',
+		responseLanguage: '中文',
 		enableCodebaseAnalysis: true
 	},
 	claudeCode: {},
@@ -113,6 +113,15 @@ function _loadAndValidateConfig(explicitRoot = null) {
 		// Only try to find config if we have project markers
 		// This prevents the repeated warnings during init
 		configPath = findConfigPath(null, { projectRoot: rootToUse });
+	}else {
+		// No project markers found, use current working directory as fallback
+		// This prevents infinite loops during initialization
+		const homedir = os.homedir();
+		const hasUserMarkers =
+			fs.existsSync(path.join(homedir, TASKMASTER_CONFIG_FILE));
+		if (hasUserMarkers) {
+			configPath = findConfigPath(null, { projectRoot: homedir });
+		}
 	}
 
 	if (configPath) {
@@ -325,6 +334,8 @@ function validateClaudeCodeSettings(settings) {
 			.optional(),
 		allowedTools: z.array(z.string()).optional(),
 		disallowedTools: z.array(z.string()).optional(),
+		ANTHROPIC_AUTH_TOKEN: z.string().optional(),
+		ANTHROPIC_BASE_URL: z.string().optional(),
 		mcpServers: z
 			.record(
 				z.string(),
@@ -805,6 +816,10 @@ function isApiKeySet(providerName, session = null, projectRoot = null) {
 
 	// Claude Code doesn't require an API key
 	if (providerName?.toLowerCase() === 'claude-code') {
+		return true; // No API key needed
+	}
+	// Claude Code doesn't require an API key
+	if (providerName?.toLowerCase() === 'qwen') {
 		return true; // No API key needed
 	}
 
