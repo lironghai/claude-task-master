@@ -124,7 +124,9 @@ function _loadAndValidateConfig(explicitRoot = null) {
 		// Only try to find config if we have project markers
 		// This prevents the repeated warnings during init
 		configPath = findConfigPath(null, { projectRoot: rootToUse });
-	}else {
+	}
+
+	if (!configPath){
 		// No project markers found, use current working directory as fallback
 		// This prevents infinite loops during initialization
 		const homedir = os.homedir();
