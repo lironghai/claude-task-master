@@ -44,7 +44,7 @@ import {
 	CodexCliProvider,
 	GeminiCliProvider,
 	GoogleAIProvider,
-	GrokCliProvider,
+	// GrokCliProvider,
 	GroqProvider,
 	OllamaAIProvider,
 	OpenAIProvider,
@@ -77,7 +77,7 @@ const PROVIDERS = {
 	'claude-code': new ClaudeCodeProvider(),
 	'codex-cli': new CodexCliProvider(),
 	'gemini-cli': new GeminiCliProvider(),
-	'grok-cli': new GrokCliProvider(),
+	// 'grok-cli': new GrokCliProvider(),
 	'qwen-cli': new QwenAIProvider()
 };
 

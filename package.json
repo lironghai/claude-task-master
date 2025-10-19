@@ -9,9 +9,14 @@
 		"task-master-mcp": "dist/mcp-server.js",
 		"task-master-ai": "dist/mcp-server.js"
 	},
-	"workspaces": ["apps/*", "packages/*", "."],
+	"workspaces": [
+		"apps/*",
+		"packages/*",
+		"."
+	],
 	"scripts": {
-		"build": "npm run build:build-config && cross-env NODE_ENV=production tsdown",
+		"build": "npm run build:build-config && cross-env NODE_ENV=development tsdown",
+		"build:production": "npm run build:build-config && cross-env NODE_ENV=production tsdown",
 		"dev": "tsdown --watch",
 		"turbo:dev": "turbo dev",
 		"turbo:build": "turbo build",
@@ -26,13 +31,19 @@
 		"test:ci": "node --experimental-vm-modules node_modules/.bin/jest --coverage --ci",
 		"test:e2e": "./tests/e2e/run_e2e.sh",
 		"test:e2e-report": "./tests/e2e/run_e2e.sh --analyze-log",
-		"postpack": "chmod +x dist/task-master.js dist/mcp-server.js",
+		"postpack": "",
 		"prepare": "",
 		"changeset": "changeset",
 		"release": "changeset publish",
 		"publish-packages": "turbo run build lint test && changeset version && changeset publish",
-		"inspector": "npx @modelcontextprotocol/inspector node mcp-server/server.js",
-		"mcp-server": "node mcp-server/server.js --port 3002",
+		"inspector": "npx @modelcontextprotocol/inspector node dist/mcp-server.js",
+		"mcp-server": "node dist/mcp-server.js",
+		"mcp-server-http": "node dist/mcp-server.js --port 3002",
+		"mcp-server-http-source": "tsx mcp-server/server.js --port 3002",
+		"mcp-server-http-source2": "node mcp-server/server.js --port 3002",
+		"mcp-server-http-debug": "tsx --inspect=9229 dist/mcp-server.js --port 3002",
+		"mcp-server-http-debug-idea": "node dist/mcp-server.js --debug",
+		"create-dist": "node scripts/create-dist-package.bat",
 		"format-check": "biome format .",
 		"format": "biome format . --write",
 		"deps:check": "manypkg check || echo 'Note: Workspace package version warnings are expected for internal @tm/* packages'",
@@ -71,9 +82,8 @@
 		"@streamparser/json": "^0.0.22",
 		"@supabase/supabase-js": "^2.57.4",
 		"ai": "^5.0.51",
-		"ai-sdk-provider-claude-code": "^1.1.4",
+		"ai-sdk-provider-claude-code": "^1.2.0",
 		"ai-sdk-provider-codex-cli": "^0.3.0",
-		"ai-sdk-provider-gemini-cli": "^1.1.1",
 		"ajv": "^8.17.1",
 		"ajv-formats": "^3.0.1",
 		"boxen": "^8.0.1",
@@ -100,28 +110,21 @@
 		"marked-terminal": "^7.3.0",
 		"ollama-ai-provider-v2": "^1.3.1",
 		"ora": "^8.2.0",
+		"task-master-ai": "^0.29.0",
 		"uuid": "^11.1.0",
 		"zod": "^4.1.11"
 	},
 	"optionalDependencies": {
 		"@anthropic-ai/claude-code": "^1.0.88",
-		"@qwen-code/qwen-code": "^0.0.11",
-		"@musistudio/claude-code-router": "^1.0.49",
 		"@biomejs/cli-linux-x64": "^1.9.4",
+		"@musistudio/claude-code-router": "^1.0.49",
+		"@qwen-code/qwen-code": "^0.0.11",
 		"ai-sdk-provider-gemini-cli": "^0.1.1"
 	},
 	"engines": {
 		"node": ">=18.0.0"
 	},
 	"packageManager": "npm@10.9.2",
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/eyaltoledano/claude-task-master.git"
-	},
-	"homepage": "https://github.com/eyaltoledano/claude-task-master#readme",
-	"bugs": {
-		"url": "https://github.com/eyaltoledano/claude-task-master/issues"
-	},
 	"files": [
 		"dist/**",
 		"README-task-master.md",

@@ -10,6 +10,7 @@
  * - No manual API key configuration required
  */
 
+// import { createClaudeCode } from './custom-sdk/claude-code/index.js';
 import { createClaudeCode } from 'ai-sdk-provider-claude-code';
 import { BaseAIProvider } from './base-provider.js';
 import { getClaudeCodeSettingsForCommand } from '../../scripts/modules/config-manager.js';
@@ -92,15 +93,23 @@ export class ClaudeCodeProvider extends BaseAIProvider {
 		try {
 			const settings =
 				getClaudeCodeSettingsForCommand(params.commandName,params?.projectRoot) || {};
-			settings.projectRoot = params?.projectRoot;
+			settings.cwd = params?.projectRoot;
 
+			log(
+				'warn',
+				`Claude settings: ${JSON.stringify(settings)}`
+			);
 			if (settings.ANTHROPIC_AUTH_TOKEN && settings.ANTHROPIC_BASE_URL) {
-				const env = { ...process.env };
+				const env = {};
 				env.ANTHROPIC_BASE_URL = settings.ANTHROPIC_BASE_URL;
 				env.ANTHROPIC_AUTH_TOKEN = settings.ANTHROPIC_AUTH_TOKEN;
 
 				settings.env = {...env, ...settings.env};
 			}
+
+			// 删除这两个属性，因为它们已经被复制到 env 对象中
+			delete settings.ANTHROPIC_BASE_URL;
+			delete settings.ANTHROPIC_AUTH_TOKEN;
 
 			return createClaudeCode({
 				defaultSettings: settings

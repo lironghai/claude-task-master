@@ -22,12 +22,11 @@ const __dirname = path.dirname(__filename);
  */
 class TaskMasterMCPServer {
 	constructor() {
-		// Get version from package.json using synchronous fs
-		const packagePath = path.join(__dirname, '../../package.json');
-		const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+		// Parse command line arguments
 		program
 			.version(packageJson.version)
 			.option("--port <port>", "Start HTTP Streamable server on this port")
+			.option("--debug", "Enable debug mode for IntelliJ IDEA")
 			.parse(process.argv);
 
 		const args = program.opts();
@@ -47,6 +46,12 @@ class TaskMasterMCPServer {
 
 		// Setup logging
 		this.logger = logger;
+
+		// Debug mode for IntelliJ IDEA
+		this.debugMode = args.debug || false;
+		if (this.debugMode) {
+			this.logger.info('Starting in debug mode for IntelliJ IDEA');
+		}
 	}
 
 	/**
@@ -88,6 +93,7 @@ class TaskMasterMCPServer {
 				transportType: 'httpStream',
 				httpStream: {
 					endpoint: '/mcp',
+					host: "0.0.0.0",
 					port: this.options.port
 				},
 				timeout: 6000000 // 2 minutes timeout (in milliseconds)
