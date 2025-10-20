@@ -1,0 +1,184 @@
+# ============================================
+# Task Master AI - Docker Compose 配置
+# ============================================
+#
+# 使用方法:
+# ----------------------------------------------
+# 1. 启动服务:
+#    docker-compose up -d
+#
+# 2. 查看日志:
+#    docker-compose logs -f
+#
+# 3. 停止服务:
+#    docker-compose down
+#
+# 4. 运行 CLI 命令:
+#    docker-compose run --rm task-master list
+#    docker-compose run --rm task-master next
+#    docker-compose run --rm task-master show 1
+#
+# 5. 交互式 Shell:
+#    docker-compose run --rm task-master cli
+#
+# ============================================
+
+version: '3.8'
+
+services:
+  # MCP Server (HTTP 模式)
+  task-master-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: task-master-ai:latest
+    container_name: task-master-mcp-server
+    restart: unless-stopped
+    
+    # 端口映射
+    ports:
+      - "3002:3002"  # MCP Server HTTP 端口
+    
+    # 环境变量 - 从 .env 文件加载或在此配置
+    environment:
+      # Node.js 配置
+      - NODE_ENV=production
+      - TASKMASTER_LOG_LEVEL=info
+      
+      # AI Provider API Keys
+      # 至少需要配置一个 AI 提供商的 API Key
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - PERPLEXITY_API_KEY=${PERPLEXITY_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
+      - MISTRAL_API_KEY=${MISTRAL_API_KEY:-}
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      - XAI_API_KEY=${XAI_API_KEY:-}
+      - AZURE_OPENAI_API_KEY=${AZURE_OPENAI_API_KEY:-}
+      - AZURE_OPENAI_ENDPOINT=${AZURE_OPENAI_ENDPOINT:-}
+      - OLLAMA_API_KEY=${OLLAMA_API_KEY:-}
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://host.docker.internal:11434/api}
+    
+    # 卷挂载
+    volumes:
+      # 必须: 项目工作目录
+      - ./:/workspace
+      
+      # 可选: 全局配置目录
+      # - ~/.taskmaster:/root/.taskmaster
+      
+      # 可选: Cursor MCP 配置
+      # - ~/.cursor:/root/.cursor
+      
+      # 可选: 如果使用本地 Ollama
+      # - ~/.ollama:/root/.ollama
+    
+    # 网络配置
+    networks:
+      - task-master-network
+    
+    # 命令: 启动 HTTP 模式的 MCP Server
+    command: mcp-server-http
+    
+    # 健康检查
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3002/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # CLI 工具服务（按需运行）
+  task-master:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: task-master-ai:latest
+    container_name: task-master-cli
+    
+    # 环境变量
+    environment:
+      - NODE_ENV=production
+      - TASKMASTER_LOG_LEVEL=info
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - PERPLEXITY_API_KEY=${PERPLEXITY_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
+      - MISTRAL_API_KEY=${MISTRAL_API_KEY:-}
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      - XAI_API_KEY=${XAI_API_KEY:-}
+      - AZURE_OPENAI_API_KEY=${AZURE_OPENAI_API_KEY:-}
+      - AZURE_OPENAI_ENDPOINT=${AZURE_OPENAI_ENDPOINT:-}
+      - OLLAMA_API_KEY=${OLLAMA_API_KEY:-}
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://host.docker.internal:11434/api}
+    
+    # 卷挂载
+    volumes:
+      - ./:/workspace
+    
+    # 网络配置
+    networks:
+      - task-master-network
+    
+    # 默认命令: 显示帮助
+    command: ["--help"]
+    
+    # 这个服务不自动启动
+    profiles:
+      - cli
+
+  # Ollama 服务（可选）
+  # 如果需要本地运行 Ollama AI 模型，取消下面的注释
+  # ollama:
+  #   image: ollama/ollama:latest
+  #   container_name: ollama
+  #   restart: unless-stopped
+  #   ports:
+  #     - "11434:11434"
+  #   volumes:
+  #     - ollama-data:/root/.ollama
+  #   networks:
+  #     - task-master-network
+
+# 网络定义
+networks:
+  task-master-network:
+    driver: bridge
+
+# 卷定义
+volumes:
+  # 如果使用本地 Ollama，需要持久化模型数据
+  # ollama-data:
+  #   driver: local
+  
+  # 可选: Task Master 全局配置
+  # taskmaster-config:
+  #   driver: local
+
+# ============================================
+# 使用场景示例
+# ============================================
+#
+# 场景 1: 开发环境 - 使用 MCP Server
+# ------------------------------------------
+# 1. 复制 .env.example 到 .env 并配置 API keys
+# 2. 启动服务: docker-compose up -d
+# 3. 在 Cursor/Windsurf 中配置 MCP 连接到 http://localhost:3002
+#
+# 场景 2: CI/CD 环境 - 使用 CLI
+# ------------------------------------------
+# docker-compose run --rm task-master list
+# docker-compose run --rm task-master parse-prd scripts/prd.txt
+# docker-compose run --rm task-master generate
+#
+# 场景 3: 本地 AI 模型
+# ------------------------------------------
+# 1. 取消注释 ollama 服务
+# 2. 启动: docker-compose up -d
+# 3. 下载模型: docker-compose exec ollama ollama pull llama2
+# 4. 配置 Task Master 使用 Ollama 模型
+#
+# ============================================
+

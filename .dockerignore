@@ -1,0 +1,122 @@
+# ============================================
+# Docker 构建忽略文件（极简版）
+# ============================================
+# 设计：宿主机构建，Docker 安装依赖并运行
+# 复制：package.json, dist, assets, mcp-server
+# 注意：不复制 node_modules（在容器内安装，避免 workspace 符号链接问题）
+# ============================================
+
+# node_modules（在容器内重新安装）
+node_modules/
+**/node_modules/
+
+# ========== 忽略子项目（除了构建依赖） ==========
+apps/
+
+
+# ========== 构建产物（在容器内生成） ==========
+dist/
+
+# ========== 需要源代码（在容器内构建） ==========
+# src/        - 需要
+# bin/        - 需要
+# scripts/    - 需要
+# tsconfig.json - 需要
+# tsdown.config.ts - 需要
+
+# ========== 构建工具配置 ==========
+.turbo/
+turbo.json
+biome.json
+jest.config.js
+jest.resolver.cjs
+
+# ========== 测试文件 ==========
+tests/
+coverage/
+**/*.test.js
+**/*.test.ts
+**/*.spec.js
+**/*.spec.ts
+test-*.js
+*.test.mjs
+test-*.txt
+
+# ========== 开发工具 ==========
+.vscode/
+.idea/
+.cursor/
+*.code-workspace
+.vs/
+
+# ========== Git ==========
+.git/
+.gitignore
+.gitattributes
+.github/
+.changeset/
+
+# ========== 环境文件 ==========
+.env
+.env.*
+
+# ========== 文档（不需要） ==========
+docs/
+*.md
+CONTRIBUTING.md
+DEPLOYMENT.md
+DISTRIBUTION-SUMMARY.md
+llms-install.md
+CLAUDE*.md
+DOCKER*.md
+README*.md
+LICENSE
+CHANGELOG.md
+
+# ========== 临时文件 ==========
+temp/
+tmp/
+export/
+context/
+*.tmp
+*.log
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+output.json
+mcp-test.js
+
+# ========== 图片 ==========
+images/
+*.png
+*.jpg
+*.svg
+
+# ========== 其他大文件 ==========
+*.tgz
+test-install/
+
+# ========== 配置文件（不需要） ==========
+.prettierrc
+.eslintrc*
+.editorconfig
+.gitlab-ci.yml
+azure-pipelines.yml
+mcp.json
+
+# ========== Docker 相关 ==========
+docker-*.sh
+docker-*.bat
+Dockerfile.*
+
+# ============================================
+# 需要复制的文件（不要添加到忽略列表）：
+# ✅ package.json, package-lock.json
+# ✅ node_modules/ (生产依赖)
+# ✅ dist/ (构建产物)
+# ✅ assets/ (静态资源)
+# ✅ mcp-server/ (MCP 服务器代码)
+# ============================================
+
