@@ -44,6 +44,8 @@ import { registerClaudeCodeCommandTool } from './claude-code-command.js';
 import { registerIsInitializedTool } from './is-initialized.js';
 import { registerParsePRDTextTool } from './parse-prd-text.js';
 import { writePRDTextTool } from './write-prd-text.js';
+import { registerProjectListTool } from './project-list.js';
+import { registerProjectCloneTool } from './project-clone.js';
 
 /**
  * Register all Task Master tools with the MCP server
@@ -108,6 +110,9 @@ export function registerTaskMasterTools(server) {
 		// registerClaudeCodeCommandTool(server);
 		registerIsInitializedTool(server);
 		writePRDTextTool(server);
+
+		registerProjectListTool(server);
+		registerProjectCloneTool(server);
 	} catch (error) {
 		logger.error(`Error registering Task Master tools: ${error.message}`);
 		throw error;

@@ -338,6 +338,7 @@ function validateClaudeCodeSettings(settings) {
 		disallowedTools: z.array(z.string()).optional(),
 		ANTHROPIC_AUTH_TOKEN: z.string().optional(),
 		ANTHROPIC_BASE_URL: z.string().optional(),
+		verbose: z.boolean().optional().default(false),
 		mcpServers: z
 			.record(
 				z.string(),

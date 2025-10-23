@@ -99,6 +99,13 @@ export class ClaudeCodeProvider extends BaseAIProvider {
 				'warn',
 				`Claude settings: ${JSON.stringify(settings)}`
 			);
+
+			settings.logger = {
+				debug: (msg) => log('debug', `Claude msg: ${msg}`),
+				info: (msg) => log('info', `Claude msg: ${msg}`),
+				warn: (msg) => log('warn', `Claude msg: ${msg}`),
+				error: (msg) => log('error', `Claude msg: ${msg}`),
+			};
 			if (settings.ANTHROPIC_AUTH_TOKEN && settings.ANTHROPIC_BASE_URL) {
 				const env = {};
 				env.ANTHROPIC_BASE_URL = settings.ANTHROPIC_BASE_URL;
