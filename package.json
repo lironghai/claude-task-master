@@ -7,7 +7,8 @@
 	"bin": {
 		"task-master": "dist/task-master.js",
 		"task-master-mcp": "dist/mcp-server.js",
-		"task-master-ai": "dist/mcp-server.js"
+		"task-master-ai": "dist/mcp-server.js",
+		"task-master-mcp-source": "mcp-server/server.js --port 3002"
 	},
 	"workspaces": [
 		"apps/*",
