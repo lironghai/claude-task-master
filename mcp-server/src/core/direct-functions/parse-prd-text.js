@@ -56,10 +56,11 @@ export async function parsePRDTextDirect(args, log, context = {}) {
 	// Resolve input path using path utilities
 	const currentDate = new Date().toISOString().split('T')[0];
 	let fileName = prdFileName;
+	const uuid = randomUUID();
 	if (!fileName) {
-		fileName = randomUUID() + '_prd.md';
+		fileName = uuid + '_prd.md';
 	}
-	let inputPath = '.taskmaster/docs/' + currentDate + '/' + fileName;
+	let inputPath = '.taskmaster/docs/' + currentDate + '/' + uuid + '/' + fileName;
 
 	const filePath = projectRoot + "/" + inputPath;
 	const inputDir = path.dirname(filePath);
