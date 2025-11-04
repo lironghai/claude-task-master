@@ -41,6 +41,7 @@ export default defineConfig(
 		ignoreWatch: ['node_modules', 'dist', 'tests', 'apps/extension'],
 		// Bundle only our workspace packages, keep npm dependencies external
 		noExternal: [/^@tm\//],
-		env: getBuildTimeEnvs()
+		env: getBuildTimeEnvs(),
+		sourcemap: true
 	})
 );
