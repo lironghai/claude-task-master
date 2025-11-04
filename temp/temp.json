@@ -1,0 +1,200 @@
+--output-format stream-json --verbose --max-turns 50 --model sonnet --permission-mode bypassPermissions --print --
+'You are an AI assistant helping to update a subtask. You will be provided with the subtask's existing details, context about its parent and sibling tasks, and a user request string.
+
+Your Goal: Based *only* on the user's request and all the provided context (including existing details if relevant to the request), GENERATE the new text content that should be added to the subtask's details.
+Focus *only* on generating the substance of the update.
+
+Output Requirements:
+1. Return *only* the newly generated text content as a plain string. Do NOT return a JSON object or any other structured data.
+2. Your string response should NOT include any of the subtask's original details, unless the user's request explicitly asks to rephrase, summarize, or directly modify existing text.
+3. Do NOT include any timestamps, XML-like tags, markdown, or any other special formatting in your string response.
+4. Ensure the generated text is concise yet complete for the update based on the user request. Avoid conversational fillers or explanations about what you are doing (e.g., do not start with "Okay, here's the update...").
+
+Always respond in 中文.
+
+Human: Task Context:
+
+Parent Task: {
+"id": 1,
+"title": "项目初始化与环境搭建"
+}
+Next Subtask: {
+"id": "1.2",
+"title": "配置MyBatisPlus和数据库连接",
+"status": "pending"
+}
+Current Subtask Details (for context only):
+使用Spring Initializr创建项目，选择JDK 8版本，添加SpringBoot Web、MyBatisPlus、Lombok等必要依赖。按照规范创建标准目录结构：src/main/java用于Java源码，src/main/resources用于配置文件，src/test/java用于测试代码。配置pom.xml文件确保依赖版本兼容性。
+<info added on 2025-09-04T09:41:14.161Z>
+使用Spring Initializr创建项目，选择JDK 8版本，添加SpringBoot Web、MyBatisPlus、Lombok等必要依赖。按照规范创建标准目录结构：src/main/java用于Java源码，src/main/resources用于配置文件，src/test/java用于测试代码。配置pom.xml文件确保依赖版本兼容性，推荐使用SpringBoot 2.7.x LTS版本以确保稳定性和安全性。
+</info added on 2025-09-04T09:41:14.161Z>
+<info added on 2025-09-04T09:54:29.603Z>
+根据rule/后端开发规范.md要求，使用SpringBoot框架创建项目基础结构，配置JDK 1.8环境，建立标准Maven项目目录结构。推荐使用SpringBoot 2.7.x LTS版本以确保稳定性和安全性，添加SpringBoot Web、MyBatisPlus、Lombok等必要依赖。按照规范创建标准目录结构：src/main/java用于Java源码，src/main/resources用于配置文件，src/test/java用于测试代码。配置pom.xml文件确保依赖版本兼容性，特别是MyBatisPlus 3.5.x版本与SpringBoot 2.7.x的兼容性。启用Lombok注解以简化模型对象的getter/setter方法，配置IDE确保Lombok注解处理器正常工作。
+</info added on 2025-09-04T09:54:29.603Z>
+<info added on 2025-09-04T09:56:08.061Z>
+根据rule/后端开发规范.md要求，使用SpringBoot框架创建项目基础结构，配置JDK 1.8环境，建立标准Maven项目目录结构。推荐使用SpringBoot 2.7.x LTS版本以确保稳定性和安全性，添加SpringBoot Web、MyBatisPlus、Lombok等必要依赖。按照规范创建标准目录结构：src/main/java用于Java源码，src/main/resources用于配置文件，src/test/java用于测试代码。配置pom.xml文件确保依赖版本兼容性，特别是MyBatisPlus 3.5.x版本与SpringBoot 2.7.x的兼容性。启用Lombok注解以简化模型对象的getter/setter方法，配置IDE确保Lombok注解处理器正常工作。
+</info added on 2025-09-04T09:56:08.061Z>
+<info added on 2025-09-04T10:02:51.812Z>
+根据rule/后端开发规范.md要求，使用SpringBoot框架创建项目基础结构，配置JDK 1.8环境，建立标准Maven项目目录结构。推荐使用SpringBoot 2.7.x LTS版本以确保稳定性和安全性，添加SpringBoot Web、MyBatisPlus、Lombok等必要依赖。按照规范创建标准目录结构：src/main/java用于Java源码，src/main/resources用于配置文件，src/test/java用于测试代码。配置pom.xml文件确保依赖版本兼容性，特别是MyBatisPlus 3.5.x版本与SpringBoot 2.7.x的兼容性。启用Lombok注解以简化模型对象的getter/setter方法，配置IDE确保Lombok注解处理器正常工作。
+</info added on 2025-09-04T10:02:51.812Z>
+
+User Request: "帮我实现任务创建SpringBoot项目基础结构。注意事项:根据rule/后端开发规范.md要求，使用SpringBoot框架创建项目基础结构，配置JDK 1.8环境，建立标准Maven项目目录结构。"
+
+Based on the User Request and all the Task Context (including current subtask details provided above), what is the new information or text that should be appended to this subtask's details? Return ONLY this new text as a plain string.
+
+
+# Additional Project Context
+
+## Task Context
+
+**Subtask 1.1: 创建SpringBoot项目基础结构**
+Parent Task: 项目初始化与环境搭建
+Description: 根据rule/后端开发规范.md要求，使用SpringBoot框架创建项目基础结构，配置JDK 1.8环境，建立标准Maven项目目录结构。 [Updated: 2025/9/4] [Updated: 2025/9/4] [Updated: 2025/9/4] [Updated: 2025/9/4]
+Status: pending
+Implementation Details: 使用Spring Initializr创建项目，选择JDK 8版本，添加SpringBoot Web、MyBatisPlus、Lombok等必要依赖。按照规范创建标准目录结构：src/main/java用于Java源码，src/main/resources用于配置文件，src/test/java用于测试代码。配置pom.xml文件确保依赖版本兼容性。
+<info added on 2025-09-04T09:41:14.161Z>
+使用Spring Initializr创建项目，选择JDK 8版本，添加SpringBoot Web、MyBatisPlus、Lombok等必要依赖。按照规范创建标准目录结构：src/main/java用于Java源码，src/main/resources用于配置文件，src/test/java用于测试代码。配置pom.xml文件确保依赖版本兼容性，推荐使用SpringBoot 2.7.x LTS版本以确保稳定性和安全性。
+</info added on 2025-09-04T09:41:14.161Z>
+<info added on 2025-09-...
+
+---
+
+**Task 6: 历史版本管理功能开发**
+Description: 开发历史版本管理功能，记录元数据的历史版本，支持版本回滚操作。
+Status: pending
+Priority: medium
+Dependencies: 2
+Implementation Details: 设计元数据版本管理表结构，记录每次同步的完整元数据快照。实现版本对比功能，可视化展示不同版本间的差异。开发版本回滚接口，确保回滚操作在1分钟内完成。实现版本清理机制，避免历史数据无限增长。
+Test Strategy: 验证历史版本记录的完整性和准确性，测试版本对比功能的正确性，验证版本回滚操作是否满足1分钟内完成的要求，测试版本清理机制的有效性。
+Subtasks: 5 subtasks defined
+
+---
+
+**Task 1: 项目初始化与环境搭建**
+Description: 初始化元数据管理平台项目，配置SpringBoot框架和MyBatisPlus，设置JDK 1.8环境，配置Lombok注解支持，建立符合规范的项目结构。
+Status: pending
+Priority: high
+Implementation Details: 根据rule/后端开发规范.md要求，使用SpringBoot框架和MyBatisPlus搭建项目基础架构。配置JDK 1.8环境，启用Lombok注解以简化模型对象的getter/setter方法。创建符合Git分支策略的项目结构，配置main/master分支保护机制。设置统一的代码开发约束，确保后续开发遵循规范。
+Test Strategy: 验证项目能否正常启动，检查SpringBoot和MyBatisPlus配置是否正确加载，验证Lombok注解是否生效，确保项目结构符合开发规范要求。
+Subtasks: 7 subtasks defined
+
+---
+
+**Task 7: 通知系统开发**
+Description: 开发通知系统，当元数据发生变化时，通过邮件或消息通知相关用户，确保通知在10分钟内发送。
+Status: pending
+Priority: medium
+Dependencies: 2
+Implementation Details: 设计元数据变更监听机制，实时捕获元数据变化事件。集成邮件服务和消息推送服务，实现多种通知方式。配置通知模板和用户订阅机制。实现通知发送的定时任务，确保变更后10分钟内发送通知。添加通知发送日志和失败重试机制。
+Test Strategy: 测试元数据变更监听机制的准确性，验证邮件和消息通知功能的正确性，测试通知发送是否满足10分钟内要求，验证通知模板和用户订阅机制的有效性，测试通知失败重试机制。
+
+---
+
+**Task 4: 元数据关系图展示功能开发**
+Description: 开发关系图展示功能，提供表和字段之间的关系图，帮助用户理解数据结构。
+Status: pending
+Priority: medium
+Dependencies: 3
+Implementation Details: 分析数据库元数据中的外键关系和约束信息，构建表间关系模型。集成可视化图表库(如D3.js、ECharts)实现关系图的图形化展示。支持关系图的缩放、拖拽、节点详情查看等交互操作。优化大型关系图的渲染性能，提供关系图导出功能。
+Test Strategy: 验证关系图展示的准确性，测试图形化展示的交互功能，验证大型关系图的渲染性能，测试关系图导出功能的正确性，确保用户能通过关系图理解数据结构。
+
+---
+
+**Task 2: 数据库元数据同步模块开发**
+Description: 开发元数据同步功能，实现定期从数据库服务器同步元数据到平台，确保同步过程中不影响数据库正常运行。
+Status: pending
+Priority: high
+Dependencies: 1
+Implementation Details: 基于JDBC或数据库特定驱动实现元数据采集功能，支持主流数据库(MySQL、PostgreSQL、Oracle等)。设计定时任务机制，确保元数据同步间隔不超过1小时。实现数据校验机制防止同步过程中的数据丢失或不一致。采用增量同步策略减少对数据库性能的影响。
+Test Strategy: 模拟不同数据库环境测试元数据同步功能，验证定时任务执行的准确性，测试同步过程中数据库性能影响，验证数据校验机制的有效性，确保同步数据的完整性和一致性。
+Subtasks: 5 subtasks defined'
+
+
+
+code --output-format stream-json --verbose --max-turns 50 --model sonnet --permission-mode bypassPermissions --print -- You are an AI assistant specialized in analyzing Product Requirements Documents (PRDs) and generating a structured, logically ordered, dependency-aware and sequenced list of development tasks in JSON format.
+
+Analyze the provided PRD content and generate approximately 10 top-level development tasks. If the complexity or the level of detail of the PRD is high, generate more tasks relative to the complexity of the PRD
+Each task should represent a logical unit of work needed to implement the requirements and focus on the most direct and effective way to implement the requirements without unnecessary complexity or overengineering. Include pseudo-code, implementation details, and test strategy for each task. Find the most up to date information to implement each task.
+Assign sequential IDs starting from 1. Infer title, description, details, and test strategy for each task based *only* on the PRD content.
+Set status to 'pending', dependencies to an empty array [], and priority to 'medium' initially for all tasks.
+Respond ONLY with a valid JSON object containing a single key "tasks", where the value is an array of task objects adhering to the provided Zod schema. Do not include any explanation or markdown formatting.
+
+Each task should follow this JSON structure:
+{
+"id": number,
+"title": string,
+"description": string,
+"status": "pending",
+"dependencies": number[] (IDs of tasks this depends on),
+"priority": "high" | "medium" | "low",
+"details": string (implementation details),
+"testStrategy": string (validation approach)
+}
+
+Guidelines:
+1. Unless complexity warrants otherwise, create exactly 10 tasks, numbered sequentially starting from 1
+2. Each task should be atomic and focused on a single responsibility following the most up to date best practices and standards
+3. Order tasks logically - consider dependencies and implementation sequence
+4. Early tasks should focus on setup, core functionality first, then advanced features
+5. Include clear validation/testing approach for each task
+6. Set appropriate dependency IDs (a task can only depend on tasks with lower IDs, potentially including existing tasks with IDs less than 1 if applicable)
+7. Assign priority (high/medium/low) based on criticality and dependency order
+8. Include detailed implementation guidance in the "details" field
+9. If the PRD contains specific requirements for libraries, database schemas, frameworks, tech stacks, or any other implementation details, STRICTLY ADHERE to these requirements in your task breakdown and do not discard them under any circumstance
+10. If the project includes requirements for databases, frameworks, technology stacks, or any other specifications, please strictly adhere to these requirements in task decomposition and never discard them under any circumstances
+11. Focus on filling in any gaps left by the PRD or areas that aren't fully specified, while preserving all explicit requirements
+12. Always aim to provide the most direct path to implementation, avoiding over-engineering or roundabout approaches
+
+Always respond in 中文.
+
+Human: ## IMPORTANT: Codebase Analysis Required
+
+You have access to powerful codebase analysis tools. Before generating tasks:
+
+1. Use the Glob tool to explore the project structure (e.g., "**/*.js", "**/*.json", "**/README.md")
+2. Use the Grep tool to search for existing implementations, patterns, and technologies
+3. Use the Read tool to examine key files like pom.xml/package.json, README.md, and main entry points
+4. Analyze the current state of implementation to understand what already exists
+
+Based on your analysis:
+- Identify what components/features are already implemented
+- Understand the technology stack, frameworks, and patterns in use
+- Generate tasks that build upon the existing codebase rather than duplicating work
+- Ensure tasks align with the project's current architecture and conventions
+
+Project Root: D:\project\yx\temp-prd
+
+Here's the Product Requirements Document (PRD) to break down into approximately 10 tasks, starting IDs from 1:
+
+D:\project\yx\temp-prd\prd\DF V1.4.7 【需求文档】【事件分析】结果增加“计算时过滤空指标”的数据逻辑和功能配置.docx
+
+
+Return your response in this format:
+{
+"tasks": [
+{
+"id": 1,
+"title": "Setup Project Repository",
+"description": "...",
+...
+},
+...
+],
+"metadata": {
+"projectName": "PRD Implementation",
+"totalTasks": 10,
+"sourceFile": "D:\project\yx\temp-prd\prd\DF V1.4.7 【需求文档】【事件分析】结果增加“计算时过滤空指标”的数据逻辑和功能配置.docx",
+"generatedAt": "YYYY-MM-DD"
+}
+}
+
+CRITICAL INSTRUCTION: You MUST respond with ONLY valid JSON. Follow these rules EXACTLY:
+1. Start your response with an opening brace {
+2. End your response with a closing brace }
+3. Do NOT include any text before the opening brace
+4. Do NOT include any text after the closing brace
+5. Do NOT use markdown code blocks or backticks
+6. Do NOT include explanations or commentary
+7. The ENTIRE response must be valid JSON that can be parsed with JSON.parse()
+
+Begin your response with { and end with }

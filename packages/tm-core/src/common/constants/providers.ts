@@ -13,7 +13,8 @@ export const VALIDATED_PROVIDERS = [
 	'perplexity',
 	'xai',
 	'groq',
-	'mistral'
+	'mistral',
+	'qwen'
 ] as const;
 
 export type ValidatedProvider = (typeof VALIDATED_PROVIDERS)[number];

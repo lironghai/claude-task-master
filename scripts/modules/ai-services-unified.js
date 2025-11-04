@@ -42,7 +42,7 @@ import {
 	CodexCliProvider,
 	GeminiCliProvider,
 	GoogleAIProvider,
-	GrokCliProvider,
+	// GrokCliProvider,
 	GroqProvider,
 	LMStudioProvider,
 	OllamaAIProvider,
@@ -50,6 +50,7 @@ import {
 	OpenAIProvider,
 	OpenRouterAIProvider,
 	PerplexityAIProvider,
+	QwenAIProvider,
 	VertexAIProvider,
 	XAIProvider,
 	ZAIProvider,
@@ -58,6 +59,9 @@ import {
 
 // Import the provider registry
 import ProviderRegistry from '../../src/provider-registry/index.js';
+import fs from 'fs';
+import path from 'path';
+
 
 // Create provider instances
 const PROVIDERS = {
@@ -84,7 +88,8 @@ const PROVIDERS = {
 	'claude-code': new ClaudeCodeProvider(),
 	'codex-cli': new CodexCliProvider(),
 	'gemini-cli': new GeminiCliProvider(),
-	'grok-cli': new GrokCliProvider()
+	// 'grok-cli': new GrokCliProvider(),
+	'qwen-cli': new QwenAIProvider()
 };
 
 function _getProvider(providerName) {
@@ -199,8 +204,8 @@ function _readAvailableTags(projectRoot) {
 	const DEFAULT_TAGS = ['master'];
 
 	try {
-		const path = require('path');
-		const fs = require('fs');
+		// const path = require('path');
+		// const fs = require('fs');
 		const tasksPath = path.join(
 			projectRoot,
 			'.taskmaster',
@@ -668,7 +673,8 @@ async function _unifiedServiceRunner(serviceType, params) {
 				...((serviceType === 'generateObject' ||
 					serviceType === 'streamObject') && { schema, objectName }),
 				...providerSpecificParams,
-				...restApiParams
+				...restApiParams,
+				projectRoot: effectiveProjectRoot
 			};
 
 			providerResponse = await _attemptProviderCallWithRetries(

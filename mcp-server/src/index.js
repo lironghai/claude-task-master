@@ -11,6 +11,7 @@ import {
 import ProviderRegistry from '../../src/provider-registry/index.js';
 import { MCPProvider } from './providers/mcp-provider.js';
 import packageJson from '../../package.json' with { type: 'json' };
+import { program } from "commander";
 
 dotenv.config();
 
@@ -23,9 +24,18 @@ const __dirname = path.dirname(__filename);
  */
 class TaskMasterMCPServer {
 	constructor() {
+		// Parse command line arguments
+		program
+			.version(packageJson.version)
+			.option("--port <port>", "Start HTTP Streamable server on this port")
+			.option("--debug", "Enable debug mode for IntelliJ IDEA")
+			.parse(process.argv);
+
+		const args = program.opts();
 		this.options = {
 			name: 'Task Master MCP Server',
-			version: packageJson.version
+			version: packageJson.version,
+			port: +args.port
 		};
 
 		this.server = new FastMCP(this.options);
@@ -36,6 +46,12 @@ class TaskMasterMCPServer {
 		this.stop = this.stop.bind(this);
 
 		this.logger = logger;
+
+		// Debug mode for IntelliJ IDEA
+		this.debugMode = args.debug || false;
+		if (this.debugMode) {
+			this.logger.info('Starting in debug mode for IntelliJ IDEA');
+		}
 	}
 
 	/**
@@ -98,10 +114,24 @@ class TaskMasterMCPServer {
 		});
 
 		// Start the FastMCP server with increased timeout
-		await this.server.start({
-			transportType: 'stdio',
-			timeout: 120000 // 2 minutes timeout (in milliseconds)
-		});
+		if (this.options.port) {
+			await this.server.start({
+				transportType: 'httpStream',
+				httpStream: {
+					endpoint: '/mcp',
+					host: "0.0.0.0",
+					port: this.options.port
+				},
+				timeout: 6000000 // 2 minutes timeout (in milliseconds)
+			});
+
+		}else {
+			await this.server.start({
+				transportType: 'stdio',
+				timeout: 6000000 // 2 minutes timeout (in milliseconds)
+			});
+
+		}
 
 		return this;
 	}

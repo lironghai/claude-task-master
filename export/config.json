@@ -1,0 +1,30 @@
+{
+  "models": {
+    "main": {
+      "provider": "claude-code",
+      "modelId": "sonnet",
+      "maxTokens": 64000,
+      "temperature": 0.7
+    }
+  },
+  "global": {
+    "logLevel": "debug",
+    "debug": true,
+    "defaultNumTasks": 10,
+    "defaultSubtasks": 5,
+    "defaultPriority": "medium",
+    "projectName": "Taskmaster",
+    "ollamaBaseURL": "",
+    "bedrockBaseURL": "https://bedrock.us-east-1.amazonaws.com",
+    "responseLanguage": "中文",
+    "defaultTag": "master",
+    "azureOpenaiBaseURL": "",
+    "userId": "1234567890"
+  },
+  "claudeCode": {
+    "ANTHROPIC_AUTH_TOKEN": "sk-01dbc93f87014e0496d01a684e6db166",
+    "ANTHROPIC_BASE_URL": "https://dashscope.aliyuncs.com/api/v2/apps/claude-code-proxy",
+    "maxTurns": 50,
+    "permissionMode": "bypassPermissions"
+  }
+}

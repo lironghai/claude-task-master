@@ -172,7 +172,7 @@ async function getTaskManager() {
  * Enable silent logging mode
  */
 function enableSilentMode() {
-	silentMode = true;
+	silentMode = false;
 }
 
 /**

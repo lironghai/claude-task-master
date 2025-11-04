@@ -37,6 +37,12 @@ import { registerResearchTool } from './research.js';
 import { registerRulesTool } from './rules.js';
 import { registerScopeUpTool } from './scope-up.js';
 import { registerScopeDownTool } from './scope-down.js';
+import { registerClaudeCodeCommandTool } from './claude-code-command.js';
+import { registerIsInitializedTool } from './is-initialized.js';
+import { registerParsePRDTextTool } from './parse-prd-text.js';
+import { writePRDTextTool } from './write-prd-text.js';
+import { registerProjectListTool } from './project-list.js';
+import { registerProjectCloneTool } from './project-clone.js';
 
 // Import TypeScript tools from apps/mcp
 import {
@@ -100,7 +106,12 @@ export const toolRegistry = {
 	autopilot_complete: registerAutopilotCompleteTool,
 	autopilot_commit: registerAutopilotCommitTool,
 	autopilot_finalize: registerAutopilotFinalizeTool,
-	autopilot_abort: registerAutopilotAbortTool
+	autopilot_abort: registerAutopilotAbortTool,
+	is_initialized: registerIsInitializedTool,
+	parse_prd_test: registerParsePRDTextTool,
+	write_prd_text: writePRDTextTool,
+	project_list: registerProjectListTool,
+	project_clone: registerProjectCloneTool
 };
 
 /**
@@ -130,7 +141,11 @@ export const standardTools = [
 	'remove_task',
 	'generate',
 	'add_task',
-	'complexity_report'
+	'complexity_report',
+	'is_initialized',
+	'write_prd_text',
+	'project_list',
+	'project_clone'
 ];
 
 /**
