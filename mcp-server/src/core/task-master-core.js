@@ -39,6 +39,7 @@ import { renameTagDirect } from './direct-functions/rename-tag.js';
 import { copyTagDirect } from './direct-functions/copy-tag.js';
 import { scopeUpDirect } from './direct-functions/scope-up.js';
 import { scopeDownDirect } from './direct-functions/scope-down.js';
+import { claudeCodeCommanderDirect } from './direct-functions/claude-code-cmonnader.js';
 
 // Re-export utility functions
 export { findTasksPath } from './utils/path-utils.js';
@@ -78,7 +79,8 @@ export const directFunctions = new Map([
 	['renameTagDirect', renameTagDirect],
 	['copyTagDirect', copyTagDirect],
 	['scopeUpDirect', scopeUpDirect],
-	['scopeDownDirect', scopeDownDirect]
+	['scopeDownDirect', scopeDownDirect],
+	['claudeCodeCommanderDirect', claudeCodeCommanderDirect]
 ]);
 
 // Re-export all direct function implementations
@@ -116,5 +118,6 @@ export {
 	renameTagDirect,
 	copyTagDirect,
 	scopeUpDirect,
-	scopeDownDirect
+	scopeDownDirect,
+	claudeCodeCommanderDirect
 };

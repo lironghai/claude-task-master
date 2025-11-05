@@ -10,6 +10,7 @@
  * - No manual API key configuration required
  */
 
+// import { createClaudeCode } from './custom-sdk/claude-code/index.js';
 import { createClaudeCode } from 'ai-sdk-provider-claude-code';
 import { BaseAIProvider } from './base-provider.js';
 import {
@@ -96,13 +97,39 @@ export class ClaudeCodeProvider extends BaseAIProvider {
 	 * Creates a Claude Code client instance
 	 * @param {object} params - Client parameters
 	 * @param {string} [params.commandName] - Command name for settings lookup
+	 * @param {string} [params.baseURL] - Optional custom API endpoint (not used by Claude Code)
+	 * @param {string} [params.projectRoot] -
 	 * @returns {Function} Claude Code provider function
 	 * @throws {Error} If Claude Code CLI is not available or client creation fails
 	 */
 	getClient(params = {}) {
 		try {
 			const settings =
-				getClaudeCodeSettingsForCommand(params.commandName) || {};
+				getClaudeCodeSettingsForCommand(params.commandName,params?.projectRoot) || {};
+			settings.cwd = params?.projectRoot;
+
+			log(
+				'warn',
+				`Claude settings: ${JSON.stringify(settings)}`
+			);
+
+			settings.logger = {
+				debug: (msg) => log('debug', `Claude msg: ${msg}`),
+				info: (msg) => log('info', `Claude msg: ${msg}`),
+				warn: (msg) => log('warn', `Claude msg: ${msg}`),
+				error: (msg) => log('error', `Claude msg: ${msg}`),
+			};
+			if (settings.ANTHROPIC_AUTH_TOKEN && settings.ANTHROPIC_BASE_URL) {
+				const env = {};
+				env.ANTHROPIC_BASE_URL = settings.ANTHROPIC_BASE_URL;
+				env.ANTHROPIC_AUTH_TOKEN = settings.ANTHROPIC_AUTH_TOKEN;
+
+				settings.env = {...env, ...settings.env};
+			}
+
+			// 删除这两个属性，因为它们已经被复制到 env 对象中
+			delete settings.ANTHROPIC_BASE_URL;
+			delete settings.ANTHROPIC_AUTH_TOKEN;
 
 			return createClaudeCode({
 				defaultSettings: settings

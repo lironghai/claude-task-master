@@ -37,10 +37,23 @@ export default defineConfig(
 			'mcp-server': 'mcp-server/server.js'
 		},
 		outDir: 'dist',
-		copy: ['assets'],
+		copy: ['assets', 'mcp-server'],
 		ignoreWatch: ['node_modules', 'dist', 'tests', 'apps/extension'],
 		// Bundle only our workspace packages, keep npm dependencies external
 		noExternal: [/^@tm\//],
-		env: getBuildTimeEnvs()
+		env: getBuildTimeEnvs(),
+		// Enable source maps for debugging
+		sourcemap: true,
+		// Ensure external modules are kept external
+		// Include native modules and optional dependencies that shouldn't be bundled
+		external: [
+			'dotenv',
+			'fastmcp',
+			'keytar',
+			'@anthropic-ai/claude-code',
+			'@musistudio/claude-code-router',
+			'@qwen-code/qwen-code',
+			'ai-sdk-provider-gemini-cli'
+		]
 	})
 );

@@ -137,6 +137,7 @@ import {
 	generateProfileRemovalSummary,
 	categorizeRemovalResults
 } from '../../src/utils/profiles.js';
+import testCmd from "./task-manager/test-cmd.js";
 
 /**
  * Configure and register CLI commands
@@ -4381,6 +4382,33 @@ Examples:
 					copyOptions,
 					context,
 					'text'
+				);
+			} catch (error) {
+				console.error(chalk.red(`Error copying tag: ${error.message}`));
+				process.exit(1);
+			}
+		})
+		.on('error', function (err) {
+			console.error(chalk.red(`Error: ${err.message}`));
+			process.exit(1);
+		});
+	// copy-tag command
+	programInstance
+		.command('test-cmd')
+		.description('Copy an existing tag to create a new tag with the same tasks')
+		.option(
+			'-f, --file <file>',
+			'Path to the tasks file',
+			TASKMASTER_TASKS_FILE
+		)
+		.option('-d, --description <text>', 'Optional description for the new tag')
+		.action(async (sourceName, targetName, options) => {
+			try {
+				// Initialize TaskMaster
+
+				await testCmd(
+					sourceName,
+					targetName
 				);
 			} catch (error) {
 				console.error(chalk.red(`Error copying tag: ${error.message}`));

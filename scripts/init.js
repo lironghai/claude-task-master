@@ -589,11 +589,11 @@ function createProjectStructure(
 	}
 
 	// Copy .env.example
-	copyTemplateFile(
-		'env.example',
-		path.join(targetDir, ENV_EXAMPLE_FILE),
-		replacements
-	);
+	// copyTemplateFile(
+	// 	'env.example',
+	// 	path.join(targetDir, ENV_EXAMPLE_FILE),
+	// 	replacements
+	// );
 
 	// Copy config.json with project name to NEW location
 	copyTemplateFile(
@@ -851,6 +851,10 @@ function createProjectStructure(
 				}
 			)
 		);
+	}
+
+	if (false) {
+
 	}
 
 	// Display next steps in a nice box
