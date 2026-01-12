@@ -43,6 +43,7 @@ import { registerParsePRDTextTool } from './parse-prd-text.js';
 import { writePRDTextTool } from './write-prd-text.js';
 import { registerProjectListTool } from './project-list.js';
 import { registerProjectCloneTool } from './project-clone.js';
+import { registerAiInteractiveProxyTool } from './ai-interactive-proxy.js';
 
 // Import TypeScript tools from apps/mcp
 import {
@@ -99,6 +100,7 @@ export const toolRegistry = {
 	rename_tag: registerRenameTagTool,
 	copy_tag: registerCopyTagTool,
 	research: registerResearchTool,
+	ai_interactive_proxy: registerAiInteractiveProxyTool,
 	autopilot_start: registerAutopilotStartTool,
 	autopilot_resume: registerAutopilotResumeTool,
 	autopilot_next: registerAutopilotNextTool,

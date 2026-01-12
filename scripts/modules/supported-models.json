@@ -163,6 +163,63 @@
 			"supported": true
 		}
 	],
+	"cursor-cli": [
+		{
+			"id": "cursor-default",
+			"name": "Cursor Default",
+			"swe_score": null,
+			"cost_per_1m_tokens": {
+				"input": 0,
+				"output": 0
+			},
+			"allowed_roles": ["main", "fallback", "research"],
+			"supported": true
+		},
+		{
+			"id": "gpt-4o",
+			"name": "GPT-4o",
+			"swe_score": null,
+			"cost_per_1m_tokens": {
+				"input": 0,
+				"output": 0
+			},
+			"allowed_roles": ["main", "fallback", "research"],
+			"supported": true
+		},
+		{
+			"id": "claude-3.5-sonnet",
+			"name": "Claude 3.5 Sonnet",
+			"swe_score": null,
+			"cost_per_1m_tokens": {
+				"input": 0,
+				"output": 0
+			},
+			"allowed_roles": ["main", "fallback", "research"],
+			"supported": true
+		},
+		{
+			"id": "gpt-3.5-turbo",
+			"name": "GPT-3.5 Turbo",
+			"swe_score": null,
+			"cost_per_1m_tokens": {
+				"input": 0,
+				"output": 0
+			},
+			"allowed_roles": ["main", "fallback"],
+			"supported": true
+		},
+		{
+			"id": "gpt-4",
+			"name": "GPT-4",
+			"swe_score": null,
+			"cost_per_1m_tokens": {
+				"input": 0,
+				"output": 0
+			},
+			"allowed_roles": ["main", "fallback", "research"],
+			"supported": true
+		}
+	],
 	"grok-cli": [
 		{
 			"id": "grok-4-latest",

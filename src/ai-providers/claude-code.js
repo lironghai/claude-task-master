@@ -128,8 +128,8 @@ export class ClaudeCodeProvider extends BaseAIProvider {
 			}
 
 			// 删除这两个属性，因为它们已经被复制到 env 对象中
-			delete settings.ANTHROPIC_BASE_URL;
-			delete settings.ANTHROPIC_AUTH_TOKEN;
+			// delete settings.ANTHROPIC_BASE_URL;
+			// delete settings.ANTHROPIC_AUTH_TOKEN;
 
 			return createClaudeCode({
 				defaultSettings: settings

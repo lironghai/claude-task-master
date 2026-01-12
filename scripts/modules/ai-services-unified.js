@@ -40,6 +40,7 @@ import {
 	BedrockAIProvider,
 	ClaudeCodeProvider,
 	CodexCliProvider,
+	CursorCliProvider,
 	GeminiCliProvider,
 	GoogleAIProvider,
 	// GrokCliProvider,
@@ -87,6 +88,7 @@ const PROVIDERS = {
 	vertex: new VertexAIProvider(),
 	'claude-code': new ClaudeCodeProvider(),
 	'codex-cli': new CodexCliProvider(),
+	'cursor-cli': new CursorCliProvider(),
 	'gemini-cli': new GeminiCliProvider(),
 	// 'grok-cli': new GrokCliProvider(),
 	'qwen-cli': new QwenAIProvider()
@@ -631,36 +633,48 @@ async function _unifiedServiceRunner(serviceType, params) {
 				);
 			}
 
-			const messages = [];
-			const responseLanguage = getResponseLanguage(effectiveProjectRoot);
-			const systemPromptWithLanguage = `${systemPrompt} \n\n Always respond in ${responseLanguage}.`;
-			messages.push({
-				role: 'system',
-				content: systemPromptWithLanguage.trim()
-			});
+			// Support both full message history and traditional systemPrompt + prompt
+			let messages = [];
 
-			// IN THE FUTURE WHEN DOING CONTEXT IMPROVEMENTS
-			// {
-			//     type: 'text',
-			//     text: 'Large cached context here like a tasks json',
-			//     providerOptions: {
-			//       anthropic: { cacheControl: { type: 'ephemeral' } }
-			//     }
-			//   }
-
-			// Example
-			// if (params.context) { // context is a json string of a tasks object or some other stu
-			//     messages.push({
-			//         type: 'text',
-			//         text: params.context,
-			//         providerOptions: { anthropic: { cacheControl: { type: 'ephemeral' } } }
-			//     });
-			// }
-
-			if (prompt) {
-				messages.push({ role: 'user', content: prompt });
+			if (params.messages && Array.isArray(params.messages) && params.messages.length > 0) {
+				// Use provided message history (for conversational AI)
+				messages = [...params.messages];
+				log('debug', `Using provided message history with ${messages.length} messages`);
 			} else {
-				throw new Error('User prompt content is missing.');
+				// Traditional mode: build messages from systemPrompt and prompt
+				const responseLanguage = getResponseLanguage(effectiveProjectRoot);
+				const systemPromptWithLanguage = systemPrompt
+					? `${systemPrompt} \n\n Always respond in ${responseLanguage}.`
+					: `Always respond in ${responseLanguage}.`;
+
+				messages.push({
+					role: 'system',
+					content: systemPromptWithLanguage.trim()
+				});
+
+				// IN THE FUTURE WHEN DOING CONTEXT IMPROVEMENTS
+				// {
+				//     type: 'text',
+				//     text: 'Large cached context here like a tasks json',
+				//     providerOptions: {
+				//       anthropic: { cacheControl: { type: 'ephemeral' } }
+				//     }
+				//   }
+
+				// Example
+				// if (params.context) { // context is a json string of a tasks object or some other stu
+				//     messages.push({
+				//         type: 'text',
+				//         text: params.context,
+				//         providerOptions: { anthropic: { cacheControl: { type: 'ephemeral' } } }
+				//     });
+				// }
+
+				if (prompt) {
+					messages.push({ role: 'user', content: prompt });
+				} else {
+					throw new Error('User prompt content is missing.');
+				}
 			}
 
 			const callParams = {

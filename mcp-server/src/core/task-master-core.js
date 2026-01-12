@@ -40,6 +40,7 @@ import { copyTagDirect } from './direct-functions/copy-tag.js';
 import { scopeUpDirect } from './direct-functions/scope-up.js';
 import { scopeDownDirect } from './direct-functions/scope-down.js';
 import { claudeCodeCommanderDirect } from './direct-functions/claude-code-cmonnader.js';
+import { aiInteractiveProxyDirect } from './direct-functions/ai-interactive-proxy.js';
 
 // Re-export utility functions
 export { findTasksPath } from './utils/path-utils.js';
@@ -80,7 +81,8 @@ export const directFunctions = new Map([
 	['copyTagDirect', copyTagDirect],
 	['scopeUpDirect', scopeUpDirect],
 	['scopeDownDirect', scopeDownDirect],
-	['claudeCodeCommanderDirect', claudeCodeCommanderDirect]
+	['claudeCodeCommanderDirect', claudeCodeCommanderDirect],
+	['aiInteractiveProxyDirect', aiInteractiveProxyDirect]
 ]);
 
 // Re-export all direct function implementations
@@ -119,5 +121,6 @@ export {
 	copyTagDirect,
 	scopeUpDirect,
 	scopeDownDirect,
-	claudeCodeCommanderDirect
+	claudeCodeCommanderDirect,
+	aiInteractiveProxyDirect
 };

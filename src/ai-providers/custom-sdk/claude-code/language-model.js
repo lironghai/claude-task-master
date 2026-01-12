@@ -59,6 +59,11 @@ export class ClaudeCodeLanguageModel {
 		this.modelId = options.id;
 		this.settings = options.settings ?? {};
 
+		// Support resuming existing sessions
+		if (options.sessionId) {
+			this.sessionId = options.sessionId;
+		}
+
 		// Validate model ID format
 		if (
 			!this.modelId ||

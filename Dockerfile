@@ -22,7 +22,7 @@
 #   - 使用国内 npm 镜像（npmmirror.com）加速依赖下载
 # ============================================
 
-FROM node:22
+FROM node:24.2.0-slim
 
 # 安装运行时工具（Debian 系统）
 RUN apt-get update && apt-get install -y \
@@ -40,7 +40,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # 配置 npm（使用淘宝镜像加速，解决网络问题）
-RUN npm config set registry https://registry.npmmirror.com/
+#RUN npm config set registry https://registry.npmmirror.com/
 
 # 安装所有依赖（包括开发依赖，用于构建）
 RUN npm install

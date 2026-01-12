@@ -824,7 +824,8 @@ function isApiKeySet(providerName, session = null, projectRoot = null) {
 		CUSTOM_PROVIDERS.MCP,
 		CUSTOM_PROVIDERS.GEMINI_CLI,
 		CUSTOM_PROVIDERS.GROK_CLI,
-		CUSTOM_PROVIDERS.CODEX_CLI
+		CUSTOM_PROVIDERS.CODEX_CLI,
+		'cursor-cli'
 	];
 
 	if (providersWithoutApiKeys.includes(providerName?.toLowerCase())) {
@@ -957,6 +958,8 @@ function getMcpApiKeyStatus(providerName, projectRoot = null) {
 				return true; // No key needed
 			case 'codex-cli':
 				return true; // OAuth/subscription via Codex CLI
+			case 'cursor-cli':
+				return true; // Authentication via cursor-agent CLI
 			case 'mistral':
 				apiKeyToCheck = mcpEnv.MISTRAL_API_KEY;
 				placeholderValue = 'YOUR_MISTRAL_API_KEY_HERE';
